@@ -36,12 +36,14 @@ dependencies = [
 [project.optional-dependencies]
 # The 04 gateway, the one route every model call takes, frontier and self-hosted alike, so
 # that cost per page has one ledger. A git tag because it is not on PyPI and because the
-# ledger schema is part of this project's results; v1.2.0 is the current release and the one
-# whose ChatRequest passes vendor-shaped content blocks (the page images) through untouched.
+# ledger schema and the price list are part of this project's results. v1.4.0 is the release
+# whose price file (2026-10-16) has GPT-6.1 Sol, the OpenAI arm, which v1.2.0 and v1.3.0
+# would have left uncosted; its ChatRequest passes vendor-shaped content blocks (the page
+# images) through untouched, as every 1.x does.
 # An extra so that the grader, the degradation pipeline and the tests install without git
 # access.
 gateway = [
-  "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.2.0",
+  "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.4.0",
 ]
 
 [dependency-groups]

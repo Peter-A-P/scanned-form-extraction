@@ -1,6 +1,6 @@
 # The gateway configuration every model call in this project goes through (04's boundary).
-# Routes are added with docs/models.md, when arm A's model identifiers are chosen from the
-# price file of the day. Keys are read from the environment, never from a file here.
+# Routes are the models in docs/models.md, chosen 2026-10-16 from the gateway's price file of
+# that date. Keys are read from the environment, never from a file here.
 version: 1
 prices: builtin
 caps: caps.yaml
@@ -19,6 +19,22 @@ providers:
     base_url: https://generativelanguage.googleapis.com
     api_key_env: GOOGLE_API_KEY
     api_version: v1beta
+routes:
+  quality:
+    provider: anthropic
+    model: claude-sonnet-5-5
+  anchor:
+    provider: anthropic
+    model: claude-haiku-5-5
+  ceiling:
+    provider: anthropic
+    model: claude-fable-5-1
+  openai:
+    provider: openai
+    model: gpt-6.1-sol
+  google:
+    provider: google
+    model: gemini-3.8-flash
 ledger:
   path: data/ledger.sqlite
 # The development cache holds public data only, which is all this project sends; it stays
