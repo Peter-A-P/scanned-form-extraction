@@ -1,6 +1,6 @@
 # Working notes for Claude Code
 
-This repository is Forms That Read Themselves (working title), package `legible`: measuring
+This repository is Forms That Read Themselves, package `legible`: measuring
 how well a frontier vision model, a fine-tuned small vision model, OCR with rules and OCR text
 with a language model read scanned forms, on three public corpora with known answers, and what
 each costs a thousand pages. The plan is in [PLAN.md](PLAN.md); the diagrams in

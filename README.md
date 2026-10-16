@@ -1,12 +1,12 @@
 # Forms That Read Themselves
 
 Every organisation that still receives paper has a backlog of forms and someone typing them in.
-This project measures, on thousands of public forms with known answers, the ways a machine can
-do the typing instead: a frontier vision model reading the scan, a small open model fine-tuned
-to read it, the classic OCR pipeline with rules, and OCR text handed to a language model. Same
-pages, same fields, same grader. It reports what each gets right, what it costs a thousand
-pages, what happens when the form is one the model has never seen or the scan is bad, and how
-many fields a person still has to check.
+This project puts vision-language models to work on that backlog and measures them on more than
+9,000 public pages with known answers: a frontier multimodal model reading the scan, a 2B and a 4B
+open vision model fine-tuned to read it, and the classic OCR pipelines beside them. Same pages, same
+fields, one grader. It reports every field read right or wrong with confidence intervals, what each
+approach costs per thousand pages, how it holds up on a form design it has never seen and on a bad
+scan, and the number a director wants: at 99 percent accuracy, how many fields still need a person.
 
 ## Result
 
