@@ -1,0 +1,13 @@
+# Spend caps this project's gateway enforces before any call leaves, mirroring legible's line
+# in 04's config/caps.yaml (approved by Peter 2026-10-16): US$90 a month, the top of the
+# plan's CA$60 to 120 API line; US$25 a run, which holds the largest run (the Anthropic
+# quality model over every test set, about US$18) with room for retries; US$40 a day, which
+# bounds a retry loop. Raise them here and in 04 together, deliberately, in a commit; never
+# bypass a cap in code.
+version: 1
+portfolio_monthly_usd: 650
+projects:
+  legible:
+    monthly_usd: 90
+    per_run_usd: 25
+    daily_usd: 40

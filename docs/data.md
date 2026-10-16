@@ -1,8 +1,13 @@
 # Data: licences, sources and layouts
 
 Every licence below is quoted from its primary source, read on **2026-10-16**, before anything
-was fetched. Nothing has been fetched yet. Counts and checksums are filled in by the loaders
-on the first fetch; until then the counts here are the ones the sources state.
+was fetched. VRDU and CORD were fetched the same day, after this file was written, and every
+file verified against the checksums committed in `legible/data/checksums/`. NIST SD2 has not
+been fetched.
+
+Fetched and rendered files live under the data root (`LEGIBLE_DATA`, default `./data`), never
+in the repository; the page manifests in `manifests/` are committed, one line per page with its
+sha256 and the renderer's version, and the split summaries beside them.
 
 ## Summary
 
@@ -81,7 +86,33 @@ train sizes 10, 50, 100 and 200. FARA names its levels `lv1-single_*`, `lv2-mixe
 `lv3-unk_*`; DeepForm names them `kno_template`, `mixed_template` and `unk_template`. **The
 DeepForm unseen-template test set shrinks as the train size grows** (for `SD_0`: 294, 237, 215
 and 159 documents at train 10, 50, 100 and 200), so the train size chosen fixes the headline
-test set. Which one is the headline is recorded in PLAN.md section 3 once decided.
+test set.
+
+**Decided 2026-10-16: the headline is train size 200, at all three seeds.** For FARA that is
+nine unseen-template files (three held-out templates at three seeds) and three mixed-template
+files; for DeepForm three of each. Each arm reads every document in the union of those test
+sets once, and each file's number is graded from those reads (`manifests/*-splits.json`
+records the union's page count, which is what a full arm costs). The fine-tune trains once
+per seed on that seed's train set, so the three seeds carry training variance as the plan
+asks.
+
+Two things the files show that the plan did not say:
+
+- **FARA's unseen-template files draw dev from the held-out template too**: in
+  `FARA-lv3-unk_Amendment-...-SD_0`, train is 127 Short-Form and 73 Dissemination Report
+  forms, and both valid and test are Amendments. Thresholds tuned on that dev set have seen
+  the held-out template's layout, though not its test pages. The review rate on FARA's
+  unseen split says so beside the number.
+- **Templates are checkable for FARA and not for DeepForm.** FARA's file names end with the
+  template (`..._Amendment.pdf`), and the build checks that no unseen-template file shares a
+  template between train and held-out documents. DeepForm publishes no template label, so
+  its unseen claim rests on the benchmark's construction.
+
+Documents are multi-page: FARA 1 to 3 pages (most 2), DeepForm 1 to 12. Every arm reads a
+document's pages together and is graded per document.
+
+**Invented values** are told from misreads with the page text: for VRDU, the `ocr.text` the
+benchmark ships.
 
 ## CORD v2
 
@@ -105,7 +136,13 @@ full hashes are read from the Hub's tree API at that commit and pinned in the lo
 tree: top-level `menu`, `void_menu`, `sub_total` and `total` (the README calls the
 superclass `subtotal`; the key is `sub_total`). Thirty field classes, the README rows not
 struck through. Sub-menu fields appear to sit under `menu[i].sub` in v2, and `menu` is a dict
-rather than a list when there is one item; both are confirmed on the first fetch. The
+rather than a list when there is one item; both confirmed on the test shard on 2026-10-16.
+A few `sub_total` and `total` fields are lists (two tax lines, two cash tenders): the first is
+the truth and the rest alternatives (`legible/data/cord.py`). Prices are printed as 60.000,
+60,000, 60000.00, Rp.60.000 and @60,000 for the same amount, so CORD's numbers use the "auto"
+decimal mark (`legible/grade.py`). `valid_line` holds only annotated words, not the whole
+receipt, so CORD's invented-versus-blank-filled split waits for the Tesseract text of each
+receipt; until then a filled blank box on a receipt counts as blank filled. The
 README notes that store, payment and other information were removed "due to Indonesian legal
 issues".
 

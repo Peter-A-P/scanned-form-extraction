@@ -1,0 +1,27 @@
+# The gateway configuration every model call in this project goes through (04's boundary).
+# Routes are added with docs/models.md, when arm A's model identifiers are chosen from the
+# price file of the day. Keys are read from the environment, never from a file here.
+version: 1
+prices: builtin
+caps: caps.yaml
+providers:
+  anthropic:
+    kind: anthropic
+    base_url: https://api.anthropic.com
+    api_key_env: ANTHROPIC_API_KEY
+  openai:
+    kind: openai_compat
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    max_tokens_field: max_completion_tokens
+  google:
+    kind: google
+    base_url: https://generativelanguage.googleapis.com
+    api_key_env: GOOGLE_API_KEY
+    api_version: v1beta
+ledger:
+  path: data/ledger.sqlite
+# The development cache holds public data only, which is all this project sends; it stays
+# off for measured runs, which are never served from a cache.
+cache:
+  enabled: false

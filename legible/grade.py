@@ -32,7 +32,7 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict
 from scipy.optimize import linear_sum_assignment
 
-from legible.schema import CorpusSchema, FieldKind, FieldSpec, GroupSpec, Item, Record
+from legible.schema import CorpusSchema, FieldKind, FieldSpec, GroupSpec, Item, Record, SchemaDrift
 from legible.stats import Interval, UnpairedItems, mean_ci, paired_ratio_delta_ci, ratio_ci
 
 
@@ -187,13 +187,36 @@ def edit_distance(a: str, b: str) -> int:
 _CURRENCY = re.compile(r"(?i)\b(?:rp|idr|usd|us|cad|ca)\b|[$\u20ac\u00a3\u00a5]")
 
 
+_NUMERIC_CORE = re.compile(r"(-?)(\d[\d.,]*\d|\d)")
+
+
+def _parse_auto(value: str) -> float | None:
+    """A receipt's number, as printed among other marks: `Rp.99.999`, `@12,000`, `2x`,
+    `(Qty=2.00)`. The first run of digits and separators is the number. A last separator
+    followed by one or two digits is the decimal mark; every other separator groups
+    thousands, so 60.000 and 60,000 are sixty thousand and 2.00 is two."""
+    m = _NUMERIC_CORE.search(_clean(value))
+    if m is None:
+        return None
+    sign, core = m.groups()
+    tail = re.search(r"[.,](\d{1,2})$", core)
+    if tail:
+        whole = re.sub(r"[.,]", "", core[: tail.start()])
+        number = float(f"{whole or 0}.{tail.group(1)}")
+    else:
+        number = float(re.sub(r"[.,]", "", core))
+    return -number if sign else number
+
+
 def parse_number(value: str, decimal_mark: str | None) -> float | None:
     """A printed amount as a number, or None when it is not one.
 
     `decimal_mark` None means amounts are whole units and every '.' or ',' separates
-    thousands: CORD prints 45.000 and 45,000 for the same forty-five thousand rupiah.
+    thousands; "auto" reads a receipt's mixed conventions (see _parse_auto).
     Parentheses and a trailing minus are negative, as accounts print them.
     """
+    if decimal_mark == "auto":
+        return _parse_auto(value)
     s = _CURRENCY.sub("", _clean(value)).strip()
     negative = False
     if s.startswith("(") and s.endswith(")"):
@@ -390,15 +413,17 @@ def _classify(
     ok: bool,
     own_key: str,
     ctx: _Context,
+    alternatives: Sequence[str] = (),
 ) -> Outcome | None:
-    """None for a correct abstention, otherwise the outcome."""
+    """None for a correct abstention, otherwise the outcome. `alternatives` are further
+    truth candidates: VRDU records each place a value is printed, and matching any counts."""
     if not ok:
         return Outcome.MALFORMED
     if truth is None and predicted is None:
         return None
     if predicted is None:
         return Outcome.MISSING
-    if truth is not None and values_match(spec, predicted, truth):
+    if truth is not None and any(values_match(spec, predicted, c) for c in (truth, *alternatives)):
         return Outcome.CORRECT
     if truth is not None and not _holds_type(spec, predicted) and _holds_type(spec, truth):
         return Outcome.MALFORMED
@@ -453,14 +478,23 @@ def grade_document(
     *,
     page_text: str | None = None,
     confidences: Mapping[str, float] | None = None,
+    alternatives: Mapping[str, Sequence[str]] | None = None,
 ) -> DocGrade:
     """Grade one document's output against its truth.
 
     `output` is the arm's raw text, an already parsed object, or None when the call failed.
     `page_text` is the page's own text from the corpus annotation, used only to tell a
-    blank box filled from the page from one filled with a value the page does not carry. `confidences` are keyed by field path, with group
-    fields as `group[j].field` where j is the item's position in the prediction.
+    blank box filled from the page from one filled with a value the page does not carry.
+    `confidences` are keyed by field path, with group fields as `group[j].field` where j is
+    the item's position in the prediction. `alternatives` are further truth candidates for
+    scalar fields, by name.
     """
+    alts = alternatives or {}
+    unknown_alts = set(alts) - {f.name for f in schema.scalars}
+    if unknown_alts:
+        raise SchemaDrift(
+            f"alternatives for {doc_id} name non-scalar fields {sorted(unknown_alts)}"
+        )
     schema.check_record(truth, what=f"truth for {doc_id}")
     parsed = (
         parse_output(output)
@@ -509,7 +543,8 @@ def grade_document(
             tv = truth.get(f.name)
             t = tv if isinstance(tv, str) and tv.strip() else None
             p, ok = _as_text(parsed.get(f.name))
-            record(f.name, None, _classify(f, p, t, ok, f.name, ctx), t, p, f.name)
+            outcome = _classify(f, p, t, ok, f.name, ctx, alts.get(f.name, ()))
+            record(f.name, None, outcome, t, p, f.name)
             continue
 
         raw_truth = truth.get(f.name)

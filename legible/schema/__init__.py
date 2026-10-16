@@ -64,8 +64,9 @@ class FieldSpec(BaseModel):
     #: For DATE: read 03/04/2021 as 3 April rather than 4 March. US forms print month first.
     day_first: bool = False
     #: For PRICE and NUMBER: the decimal mark the corpus prints, or None when amounts are
-    #: whole units and every '.' or ',' is a thousands separator (Indonesian receipts).
-    decimal_mark: Literal[".", ","] | None = "."
+    #: whole units and every '.' or ',' is a thousands separator, or "auto" for a corpus
+    #: that prints both (CORD: 60.000 and 60,000 are sixty thousand, 2.00 is two).
+    decimal_mark: Literal[".", ",", "auto"] | None = "."
 
 
 class GroupSpec(BaseModel):

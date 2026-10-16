@@ -18,7 +18,9 @@ dist/
 build/
 *.egg-info/
 
-# Data (loaders fetch and verify; nothing raw is committed)
+# Data (loaders fetch and verify; nothing raw is committed). The data root is ./data unless
+# LEGIBLE_DATA moves it; the page manifests and split summaries are in manifests/, committed.
+data/
 data/raw/
 data/pages/
 data/degraded/

@@ -21,6 +21,12 @@ dependencies = [
   # read in a different order is not scored wrong. linear_sum_assignment has been stable
   # across the 1.x line; 2 is not out and would be allowed to move it.
   "scipy>=1.14,<2",
+  # PDF to 300 dpi pages. The renderer's output is what every arm reads, so its version is
+  # recorded in each page manifest; pinned to 1.x, the line 07's scanned track renders with.
+  "pymupdf>=1.26,<2",
+  # The CORD parquet shards. pyarrow takes a major every few months and has removed APIs in
+  # them, so the range is the one major installed and tested (26).
+  "pyarrow>=26,<27",
   # Configuration and the docs' front matter.
   "pyyaml>=6,<7",
   # Command line. 0.x is the only line typer has; pinned below 1.
@@ -40,6 +46,9 @@ gateway = [
 
 [dependency-groups]
 dev = [
+  # The arms are tested against a stub gateway but typed against the real one, so mypy
+  # --strict needs the package present.
+  "legible[gateway]",
   "pytest>=9,<10",
   "mypy>=1,<2",
   "ruff>=0.13,<1",
@@ -89,6 +98,13 @@ files = ["legible", "tests"]
 strict = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
+
+# PyMuPDF and pyarrow ship annotations that are incomplete rather than absent; their modules
+# are held as Any, which keeps strict mode on this project's own code.
+[[tool.mypy.overrides]]
+module = ["pymupdf", "pymupdf.*", "pyarrow", "pyarrow.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
