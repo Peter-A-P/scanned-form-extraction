@@ -1,0 +1,66 @@
+# The 03 gate's eval spec for deepform, mixed: one suite per field, one
+# outcome per document, a three-point margin (legible/gate.py). Written by
+# `legible gate specs` from the schema; do not edit.
+version: 1
+name: legible-deepform-mixed
+delta_points: 3.0
+alpha: 0.05
+resamples: 2000
+seed: 0
+suites:
+- key: advertiser
+  source:
+    kind: outcomes_file
+    block: advertiser
+- key: agency
+  source:
+    kind: outcomes_file
+    block: agency
+- key: contract_num
+  source:
+    kind: outcomes_file
+    block: contract_num
+- key: flight_from
+  source:
+    kind: outcomes_file
+    block: flight_from
+- key: flight_to
+  source:
+    kind: outcomes_file
+    block: flight_to
+- key: gross_amount
+  source:
+    kind: outcomes_file
+    block: gross_amount
+- key: product
+  source:
+    kind: outcomes_file
+    block: product
+- key: property
+  source:
+    kind: outcomes_file
+    block: property
+- key: tv_address
+  source:
+    kind: outcomes_file
+    block: tv_address
+- key: line_item-channel
+  source:
+    kind: outcomes_file
+    block: line_item-channel
+- key: line_item-program_desc
+  source:
+    kind: outcomes_file
+    block: line_item-program_desc
+- key: line_item-program_start_date
+  source:
+    kind: outcomes_file
+    block: line_item-program_start_date
+- key: line_item-program_end_date
+  source:
+    kind: outcomes_file
+    block: line_item-program_end_date
+- key: line_item-sub_amount
+  source:
+    kind: outcomes_file
+    block: line_item-sub_amount

@@ -1,0 +1,130 @@
+# The 03 gate's eval spec for cord, test: one suite per field, one
+# outcome per document, a three-point margin (legible/gate.py). Written by
+# `legible gate specs` from the schema; do not edit.
+version: 1
+name: legible-cord-test
+delta_points: 3.0
+alpha: 0.05
+resamples: 2000
+seed: 0
+suites:
+- key: menu-nm
+  source:
+    kind: outcomes_file
+    block: menu-nm
+- key: menu-num
+  source:
+    kind: outcomes_file
+    block: menu-num
+- key: menu-unitprice
+  source:
+    kind: outcomes_file
+    block: menu-unitprice
+- key: menu-cnt
+  source:
+    kind: outcomes_file
+    block: menu-cnt
+- key: menu-discountprice
+  source:
+    kind: outcomes_file
+    block: menu-discountprice
+- key: menu-price
+  source:
+    kind: outcomes_file
+    block: menu-price
+- key: menu-itemsubtotal
+  source:
+    kind: outcomes_file
+    block: menu-itemsubtotal
+- key: menu-vatyn
+  source:
+    kind: outcomes_file
+    block: menu-vatyn
+- key: menu-etc
+  source:
+    kind: outcomes_file
+    block: menu-etc
+- key: sub_item-nm
+  source:
+    kind: outcomes_file
+    block: sub_item-nm
+- key: sub_item-unitprice
+  source:
+    kind: outcomes_file
+    block: sub_item-unitprice
+- key: sub_item-cnt
+  source:
+    kind: outcomes_file
+    block: sub_item-cnt
+- key: sub_item-price
+  source:
+    kind: outcomes_file
+    block: sub_item-price
+- key: sub_item-etc
+  source:
+    kind: outcomes_file
+    block: sub_item-etc
+- key: void_menu-nm
+  source:
+    kind: outcomes_file
+    block: void_menu-nm
+- key: void_menu-price
+  source:
+    kind: outcomes_file
+    block: void_menu-price
+- key: subtotal_price
+  source:
+    kind: outcomes_file
+    block: subtotal_price
+- key: discount_price
+  source:
+    kind: outcomes_file
+    block: discount_price
+- key: service_price
+  source:
+    kind: outcomes_file
+    block: service_price
+- key: othersvc_price
+  source:
+    kind: outcomes_file
+    block: othersvc_price
+- key: tax_price
+  source:
+    kind: outcomes_file
+    block: tax_price
+- key: subtotal_etc
+  source:
+    kind: outcomes_file
+    block: subtotal_etc
+- key: total_price
+  source:
+    kind: outcomes_file
+    block: total_price
+- key: total_etc
+  source:
+    kind: outcomes_file
+    block: total_etc
+- key: cashprice
+  source:
+    kind: outcomes_file
+    block: cashprice
+- key: changeprice
+  source:
+    kind: outcomes_file
+    block: changeprice
+- key: creditcardprice
+  source:
+    kind: outcomes_file
+    block: creditcardprice
+- key: emoneyprice
+  source:
+    kind: outcomes_file
+    block: emoneyprice
+- key: menutype_cnt
+  source:
+    kind: outcomes_file
+    block: menutype_cnt
+- key: menuqty_cnt
+  source:
+    kind: outcomes_file
+    block: menuqty_cnt

@@ -215,5 +215,43 @@ def data_audit_report(
     typer.echo(text)
 
 
+gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")
+app.add_typer(gate_app, name="gate")
+
+#: The comparisons the gate decides: each VRDU corpus on its unseen-template headline and on
+#: the mixed-template gap, and CORD on its test set.
+GATE_LEVELS: dict[str, tuple[str, ...]] = {
+    "fara": ("unseen", "mixed"),
+    "deepform": ("unseen", "mixed"),
+    "cord": ("test",),
+}
+
+
+@gate_app.command("specs")
+def gate_specs(
+    out: Path = typer.Option(Path("gate-runs/specs"), help="Where to write them."),
+) -> None:
+    """Write the gate's eval spec for every corpus and level. Committed; they change only
+    when a schema does."""
+    import yaml
+
+    from legible.gate import spec, spec_name
+    from legible.schema.corpora import SCHEMAS
+
+    out.mkdir(parents=True, exist_ok=True)
+    for corpus, levels in GATE_LEVELS.items():
+        for level in levels:
+            schema = SCHEMAS[corpus]
+            name = spec_name(schema, level)
+            body = yaml.safe_dump(spec(schema, name=name), sort_keys=False)
+            header = (
+                f"# The 03 gate's eval spec for {corpus}, {level}: one suite per field, one\n"
+                "# outcome per document, a three-point margin (legible/gate.py). Written by\n"
+                "# `legible gate specs` from the schema; do not edit.\n"
+            )
+            (out / f"{name}.yaml").write_text(header + body, encoding="utf-8", newline="\n")
+            typer.echo(f"{name}: {len(spec(schema, name=name)['suites'])} suites")
+
+
 def main() -> None:
     app()

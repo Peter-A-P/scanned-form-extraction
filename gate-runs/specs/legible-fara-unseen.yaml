@@ -1,0 +1,34 @@
+# The 03 gate's eval spec for fara, unseen: one suite per field, one
+# outcome per document, a three-point margin (legible/gate.py). Written by
+# `legible gate specs` from the schema; do not edit.
+version: 1
+name: legible-fara-unseen
+delta_points: 3.0
+alpha: 0.05
+resamples: 2000
+seed: 0
+suites:
+- key: file_date
+  source:
+    kind: outcomes_file
+    block: file_date
+- key: foreign_principle_name
+  source:
+    kind: outcomes_file
+    block: foreign_principle_name
+- key: registrant_name
+  source:
+    kind: outcomes_file
+    block: registrant_name
+- key: registration_num
+  source:
+    kind: outcomes_file
+    block: registration_num
+- key: signer_name
+  source:
+    kind: outcomes_file
+    block: signer_name
+- key: signer_title
+  source:
+    kind: outcomes_file
+    block: signer_title
