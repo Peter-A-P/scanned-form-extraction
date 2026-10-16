@@ -33,6 +33,7 @@ from legible.schema import CorpusSchema, Item, Record, SchemaDrift
 from legible.schema.corpora import DEEPFORM, FARA
 
 VrduCorpus = Literal["fara", "deepform"]
+Box = tuple[int, float, float, float, float]
 DIRECTORY: dict[VrduCorpus, str] = {"fara": "registration-form", "deepform": "ad-buy-form"}
 SCHEMA: dict[VrduCorpus, CorpusSchema] = {"fara": FARA, "deepform": DEEPFORM}
 FARA_TEMPLATES = ("Amendment", "Dissemination_Report", "Short-Form")
@@ -57,6 +58,9 @@ class VrduDoc(BaseModel):
     truth: Record
     alternatives: dict[str, list[str]]
     text: str
+    #: Where each truth value is printed: (page, x1, y1, x2, y2), normalised to the page, keyed
+    #: by field name or `group[i].field`. Used to show a label to the hand audit.
+    boxes: dict[str, Box] = {}
 
 
 class VrduSplit(BaseModel):
@@ -133,6 +137,11 @@ def _text(entity: list[Any]) -> str:
     return str(entity[0]).strip()
 
 
+def _box(entity: list[Any]) -> Box:
+    page, x1, y1, x2, y2 = entity[1]
+    return (int(page), float(x1), float(y1), float(x2), float(y2))
+
+
 def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
     """One `dataset.jsonl` line as truth. Refuses a field the schema does not name."""
     schema = SCHEMA[corpus]
@@ -141,6 +150,7 @@ def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
     truth: Record = {}
     alternatives: dict[str, list[str]] = {}
     items: list[Item] = []
+    boxes: dict[str, Box] = {}
     for name, candidates in record["annotations"]:
         if isinstance(name, list):
             if group is None:
@@ -152,6 +162,7 @@ def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
             item: Item = dict.fromkeys((g.name for g in group.fields), None)
             for sub, entity in zip(name, candidate, strict=True):
                 item[sub] = _text(entity)
+                boxes[f"{group.name}[{len(items)}].{sub}"] = _box(entity)
             items.append(item)
             continue
         if name not in scalars:
@@ -159,6 +170,7 @@ def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
         texts = list(dict.fromkeys(t for t in (_text(c) for c in candidates) if t))
         if texts:
             truth[name] = texts[0]
+            boxes[name] = _box(next(c for c in candidates if _text(c)))
             if len(texts) > 1:
                 alternatives[name] = texts[1:]
     if group is not None:
@@ -171,6 +183,7 @@ def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
         truth=truth,
         alternatives=alternatives,
         text=record["ocr"]["text"],
+        boxes=boxes,
     )
 
 

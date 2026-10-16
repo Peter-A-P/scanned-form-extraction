@@ -1,0 +1,2402 @@
+[
+ {
+  "corpus": "fara",
+  "doc_id": "19821101_Aruba Tourism Authority_Amendment_Amendment.pdf",
+  "key": "file_date",
+  "box": [
+   0,
+   0.13636364,
+   0.85967213,
+   0.50649351,
+   0.87475407
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20140224_Ketchum Inc. NY_Kontesi, Amalia_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.17454545,
+   0.66728109,
+   0.36848485,
+   0.70783412
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20090424_Raben Group, LLC_Huffman, Katharine_Short-Form.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.068043746,
+   0.72820991,
+   0.22114216,
+   0.74601686
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19950330_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.53705955,
+   0.42870545,
+   0.90886998,
+   0.46247655
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19631101_Tourism Australia_Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.39869636,
+   0.37578356,
+   0.77675176,
+   0.39129001
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20080206_Hecht, Latham, Spencer _ Associates, Inc._Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.03888214,
+   0.32427368,
+   0.25516403,
+   0.34582943
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20170606_Sonoran Policy Group, LLC_Stryk, Robert Daniel_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.10948905,
+   0.68071163,
+   0.23357664,
+   0.7022472
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19931201_Hill and Knowlton Strategies, LLC_Dissemination Report_Dissemination Report.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.70473874,
+   0.32802248,
+   0.76549208,
+   0.34582943
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20170125_Sonoran Policy Group, LLC_Jolly, Stuart_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.11219512,
+   0.70522386,
+   0.25487804,
+   0.72761196
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20150416_Daschle Group, LLC_Daschle, Nathan_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.49936143,
+   0.40137389,
+   0.5466156,
+   0.42100099
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19960116_JETRO, Houston_Dissemination Report_Dissemination Report.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.52410257,
+   0.46001583,
+   0.77435899,
+   0.47822645
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20160226_Fleishman-Hillard, Inc._Amendment_Amendment.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.48854962,
+   0.41609421,
+   0.52544528,
+   0.43572131
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19931101_Scottish Enterprise_Dissemination Report_Dissemination Report.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.059538275,
+   0.28209934,
+   0.21020657,
+   0.30459231
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20170902_Greenfield Law, LLC_Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.10619469,
+   0.4249264,
+   0.27939317,
+   0.44553483
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19931001_Quebec Government Office_Dissemination Report_Dissemination Report.pdf",
+  "key": "signer_name",
+  "box": [
+   1,
+   0.22235723,
+   0.28397375,
+   0.36452004,
+   0.30459231
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20160727_Gallagher Group, LLC_Gallagher, James P._Short-Form.pdf",
+  "key": "signer_name",
+  "box": [
+   1,
+   0.54634148,
+   0.68262911,
+   0.69146341,
+   0.70516431
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19941220_JETRO, Houston_Dissemination Report_Dissemination Report.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.18615384,
+   0.33095804,
+   0.34615386,
+   0.34916866
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19950530_Malaysian Industrial Development Authority_Dissemination Report_Dissemination Report.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.70716888,
+   0.32645404,
+   0.7618469,
+   0.34709194
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20180703_BerlinRosen Ltd._Blenner, Michael_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.50061351,
+   0.40509915,
+   0.57300615,
+   0.43059489
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20100309_Akin, Gump, Strauss, Hauer _ Feld, LLP_Cowman, Jordan Wade_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.089914948,
+   0.67600375,
+   0.36330497,
+   0.72175539
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20001221_CMGRP, Inc._Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.10814095,
+   0.33926898,
+   0.31348723,
+   0.36644799
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19920301_JETRO, Atlanta_Dissemination Report_Dissemination Report.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.037667073,
+   0.27605635,
+   0.18833536,
+   0.29765257
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20151130_Sidley Austin, LLP_Amendment_Amendment.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.49102563,
+   0.41020608,
+   0.53589743,
+   0.42983317
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19920301_JETRO, Houston_Dissemination Report_Dissemination Report.pdf",
+  "key": "signer_name",
+  "box": [
+   1,
+   0.23067011,
+   0.26792827,
+   0.4007732,
+   0.28087649
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19760301_Italian Government Tourist Board, New York_Amendment_Amendment.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.72569257,
+   0.16925107,
+   0.76045626,
+   0.18277796
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930801_Hill and Knowlton Strategies, LLC_Dissemination Report_Dissemination Report.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.10863987,
+   0.33355328,
+   0.33960649,
+   0.34872979
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20111114_MSLGROUP Americas, Inc._Squitieri, Tom_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.13730255,
+   0.66451615,
+   0.30255163,
+   0.70506912
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20180221_Ballard Partners_Wexler, Robert_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.50799507,
+   0.40698773,
+   0.56826568,
+   0.42209631
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20111114_MSLGROUP Americas, Inc._Flint, Erica_Short-Form.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.13273196,
+   0.74386656,
+   0.18685567,
+   0.75662416
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20071219_BGR Government Affairs, LLC_Amendment_Amendment.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.45918366,
+   0.30684501,
+   0.4979592,
+   0.33202204
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930801_Far East Trade Services, Inc._Dissemination Report_Dissemination Report.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.054517135,
+   0.20868744,
+   0.20716511,
+   0.22568461
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930901_JETRO, Chicago_Dissemination Report_Dissemination Report.pdf",
+  "key": "signer_title",
+  "box": [
+   1,
+   0.23282443,
+   0.29833171,
+   0.53180659,
+   0.30912659
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930301_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf",
+  "key": "signer_name",
+  "box": [
+   1,
+   0.21506684,
+   0.28075117,
+   0.38515547,
+   0.29652029
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19830501_Hong Kong Trade Development Council, Inc._Amendment_Amendment.pdf",
+  "key": "signer_name",
+  "box": [
+   0,
+   0.58500814,
+   0.72913229,
+   0.96523631,
+   0.7677334
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20131029_Jewish Agency - American Section, Inc._Tal, Ittai_Short-Form.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.14709677,
+   0.66241413,
+   0.39483872,
+   0.67713445
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20180629_MMGY Global, LLC_Hughes, Stephanie_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.50852555,
+   0.41244239,
+   0.54964894,
+   0.42703533
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20070927_Hecht, Latham, Spencer _ Associates, Inc._Amendment_Amendment.pdf",
+  "key": "signer_title",
+  "box": [
+   1,
+   0.48602673,
+   0.34582943,
+   0.59902793,
+   0.37113401
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19920701_Daniel J. Edelman, Inc._Dissemination Report_Dissemination Report.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.69289339,
+   0.18056919,
+   0.74492383,
+   0.19528949
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20171010_MSLGROUP Americas, Inc._Harper, Clinton L._Short-Form.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.086330935,
+   0.64250678,
+   0.60374933,
+   0.67379254
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20160930_Greenberg Traurig, LLP_Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.070975922,
+   0.42885181,
+   0.22940432,
+   0.4504416
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930601_NHK Cosmomedia America, Inc._Amendment_Amendment.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.53180659,
+   0.28164867,
+   0.59541982,
+   0.3002944
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20130315_Daniel J. Edelman, Inc._Klempay, Daniel_Short-Form.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.11707317,
+   0.68479264,
+   0.27682927,
+   0.70691246
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20170928_Singapore Economic Development Board_Joshi, Saurabh_Short-Form.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.16433121,
+   0.63493621,
+   0.42038217,
+   0.65063787
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19850801_St. Lucia Tourist Board_Amendment_Amendment.pdf",
+  "key": "signer_title",
+  "box": [
+   1,
+   0.50634515,
+   0.13935231,
+   0.6611675,
+   0.15799804
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20100621_Venable, LLP_Hinckley, Elias_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.5613609,
+   0.35875705,
+   0.6075334,
+   0.38700566
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930801_International Registries, Inc._Dissemination Report_Dissemination Report.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.080194414,
+   0.33552015,
+   0.399757,
+   0.35238987
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19841201_British Virgin Islands Tourist Board_Amendment_Amendment.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.085509472,
+   0.18566903,
+   0.49001536,
+   0.22050673
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19931201_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf",
+  "key": "file_date",
+  "box": [
+   1,
+   0.081409477,
+   0.29334584,
+   0.18104495,
+   0.31958762
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19790101_IDA Ireland_Amendment_Amendment.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.11538462,
+   0.22373651,
+   0.44652909,
+   0.24929018
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20150929_Podesta Group, Inc._Billings, Erin_Short-Form.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.5,
+   0.40235525,
+   0.53954083,
+   0.42296368
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19950629_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf",
+  "key": "file_date",
+  "box": [
+   0,
+   0.039743591,
+   0.93269551,
+   0.17863248,
+   0.9505114
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20081125_Greenberg Traurig, LLP_Vargo, Regina_Short-Form.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.081409477,
+   0.59099436,
+   0.2490887,
+   0.61350846
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20120601_MSLGROUP Americas, Inc._Lagana, Gregory_Short-Form.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.18580645,
+   0.60451424,
+   0.70193547,
+   0.61629051
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19930301_Kobe Trade Information Office_Dissemination Report_Dissemination Report.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.79472142,
+   0.3250283,
+   0.90909094,
+   0.34654588
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19780701_Office of Tibet_Amendment_Amendment.pdf",
+  "key": "file_date",
+  "box": [
+   0,
+   0.12616822,
+   0.85552406,
+   0.49376947,
+   0.87346554
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20171127_MMGY Global, LLC_Hill, Leanne_Short-Form.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.1007162,
+   0.77739251,
+   0.49641898,
+   0.79299581
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20150410_Endeavor Law Firm, PC_Amendment_Amendment.pdf",
+  "key": "signer_name",
+  "box": [
+   1,
+   0.54278731,
+   0.28291318,
+   0.80562347,
+   0.31932774
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20091006_Daniel J. Edelman, Inc._Myers, Richard B._Short-Form.pdf",
+  "key": "foreign_principle_name",
+  "box": [
+   0,
+   0.061968409,
+   0.72352391,
+   0.24058323,
+   0.74976569
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19950724_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf",
+  "key": "registration_num",
+  "box": [
+   0,
+   0.71081412,
+   0.1782364,
+   0.76670718,
+   0.19793621
+  ]
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20170113_LB International Solutions, LLC_McGregor, John_Short-Form.pdf",
+  "key": "registrant_name",
+  "box": [
+   0,
+   0.16050956,
+   0.63788027,
+   0.36050954,
+   0.65848869
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "aad5c844-731e-28fc-c55e-78b98dd6bc4a.pdf",
+  "key": "advertiser",
+  "box": [
+   0,
+   0.5091514,
+   0.028295821,
+   0.64891845,
+   0.043729905
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "a51729d1-964d-a204-918b-6722750bb58a.pdf",
+  "key": "product",
+  "box": [
+   0,
+   0.35252365,
+   0.1206544,
+   0.4692429,
+   0.13496932
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "e06c5eeb-9be4-11ea-1995-6826d4142cc4.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.34193012,
+   0.1659164,
+   0.39600664,
+   0.17749196
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "6d855060-cb88-0ab7-c794-d98f9c2a5313.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.83339179,
+   0.11547845,
+   0.88495266,
+   0.12632149
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "d6be1b3e-1a1c-4039-bf21-c3378c7a9516.pdf",
+  "key": "gross_amount",
+  "box": [
+   0,
+   0.53709197,
+   0.52303261,
+   0.59198815,
+   0.54798466
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "fb4d8868-0de2-3017-686d-69051e7a14b1.pdf",
+  "key": "contract_num",
+  "box": [
+   0,
+   0.66977227,
+   0.082400002,
+   0.73498964,
+   0.094400004
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "528c682d-fef7-2d25-d569-62b7d764b508.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.56405991,
+   0.1459807,
+   0.61813647,
+   0.15755627
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "9c97e029-a04d-611c-39f7-8c5f831ee21d.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.82622331,
+   0.11391178,
+   0.8833124,
+   0.12506059
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "dbd3ea93-a44a-4c42-df97-c4cfb6e33453.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.83055758,
+   0.22586691,
+   0.86965966,
+   0.24554826
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "dd723ebb-a6df-3fe8-29e1-6cf76e6cd5fc.pdf",
+  "key": "gross_amount",
+  "box": [
+   2,
+   0.53259778,
+   0.3922078,
+   0.5917753,
+   0.41298702
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "1291762d-c6ac-1154-8ea5-b4e15468ab8f.pdf",
+  "key": "advertiser",
+  "box": [
+   0,
+   0.35916004,
+   0.072164945,
+   0.48515567,
+   0.089034677
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "14a2e049-7baa-8dbb-eea2-3a97eee4ee42.pdf",
+  "key": "advertiser",
+  "box": [
+   0,
+   0.58732879,
+   0.062872268,
+   0.75428081,
+   0.074784912
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "4add49ba-5a10-92b4-36d4-999b09a9b27a.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.89510489,
+   0.11265432,
+   0.94605392,
+   0.12654321
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "6a47fc12-60c8-6446-8f86-a3fd1369c417.pdf",
+  "key": "gross_amount",
+  "box": [
+   2,
+   0.89523214,
+   0.3160446,
+   0.9579674,
+   0.32816288
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "df5c19e6-546e-311f-2e5a-c4af68838b66.pdf",
+  "key": "tv_address",
+  "box": [
+   0,
+   0.19385515,
+   0.084228374,
+   0.37088516,
+   0.1147541
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "ca356a4b-5c50-5684-c2ed-da9de3d0b37b.pdf",
+  "key": "advertiser",
+  "box": [
+   0,
+   0.50651956,
+   0.030232558,
+   0.70110333,
+   0.042635661
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "00c29ad8-c88b-b3bb-1a39-3267e47c7a88.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.8274678,
+   0.22666667,
+   0.86952788,
+   0.24333334
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "aa9b4790-f75a-e1c8-a4ce-be646c1d360c.pdf",
+  "key": "gross_amount",
+  "box": [
+   0,
+   0.8585757,
+   0.36493507,
+   0.93681043,
+   0.39090911
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "88fa6e33-408f-6ac2-a253-d30e32bce302.pdf",
+  "key": "agency",
+  "box": [
+   0,
+   0.34540391,
+   0.073317304,
+   0.47818014,
+   0.090144232
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "82cef107-b2a2-94ae-253b-84df81ab2d52.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.87854892,
+   0.22346939,
+   0.92192429,
+   0.24387754
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "f56e2fc1-7f41-68e3-bfe5-06176b9a2e8a.pdf",
+  "key": "product",
+  "box": [
+   0,
+   0.61777395,
+   0.146,
+   0.78947371,
+   0.15666667
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "f27113a6-a13d-da0a-851f-e6e25b3c7547.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.53392071,
+   0.066084787,
+   0.57004404,
+   0.083541147
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8b687291-2dfb-fcd3-d827-7f36e3e89ef3.pdf",
+  "key": "advertiser",
+  "box": [
+   0,
+   0.53940457,
+   0.088335223,
+   0.64886165,
+   0.10758777
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "2776cce3-4602-acdd-6a39-a482449b78cc.pdf",
+  "key": "product",
+  "box": [
+   0,
+   0.36356467,
+   0.11122449,
+   0.50788641,
+   0.12755102
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "e1a17837-6866-9e53-d352-f014aef15468.pdf",
+  "key": "product",
+  "box": [
+   0,
+   0.50351053,
+   0.1751938,
+   0.74122369,
+   0.18914729
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8cdc0d13-803b-fe21-34fc-004299c8034b.pdf",
+  "key": "contract_num",
+  "box": [
+   0,
+   0.82817185,
+   0.068672836,
+   0.93406594,
+   0.08410494
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "493496-315597-up-obama-10-30-12-13516185156783-_-pdf.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.48445335,
+   0.063565895,
+   0.55165499,
+   0.079844959
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "cfb3bae5-102b-8fcb-06a5-9a0bc89fa14f.pdf",
+  "key": "flight_from",
+  "box": [
+   0,
+   0.36945304,
+   0.058666665,
+   0.40608874,
+   0.07333333
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "414978-collect-files-25453-political-file-2012-non.pdf",
+  "key": "tv_address",
+  "box": [
+   0,
+   0.26892745,
+   0.0865326,
+   0.65378547,
+   0.10542352
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "6135cac3-ec97-4588-4fbb-689db748d424.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.87615383,
+   0.22487563,
+   0.93461537,
+   0.24477611
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "89b8c007-4189-bfa6-e0a5-fe1d173edf92.pdf",
+  "key": "gross_amount",
+  "box": [
+   0,
+   0.54600304,
+   0.88485557,
+   0.59125191,
+   0.90398127
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "c5cacf05-37a9-2277-0046-234f1732f804.pdf",
+  "key": "property",
+  "box": [
+   0,
+   0.19639279,
+   0.066563465,
+   0.26052105,
+   0.082043342
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "c55fb5ec-8d44-80b4-a4cf-c8b888e60708.pdf",
+  "key": "contract_num",
+  "box": [
+   0,
+   0.34726092,
+   0.045992117,
+   0.40854225,
+   0.064388961
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "493546-warren-for-senate-est-12911-10-26-12-10-28-12.pdf",
+  "key": "contract_num",
+  "box": [
+   0,
+   0.35934645,
+   0.014137606,
+   0.41806263,
+   0.03871933
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "a790bcf4-f0e8-5b62-5363-f823050d49e8.pdf",
+  "key": "property",
+  "box": [
+   0,
+   0.19406228,
+   0.068270847,
+   0.32657495,
+   0.081701174
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "87a7525f-29d8-4d0c-44bb-0e176245e567.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.57246375,
+   0.15440001,
+   0.62422359,
+   0.1672
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "aa7e85a5-922d-a0fe-1ae7-167e6f839d5c.pdf",
+  "key": "flight_to",
+  "box": [
+   0,
+   0.89427948,
+   0.1158366,
+   0.95003623,
+   0.12646894
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "7ea9c6a3-c6de-fff7-2678-746749396bac.pdf",
+  "key": "gross_amount",
+  "box": [
+   0,
+   0.77433312,
+   0.84111112,
+   0.82912761,
+   0.8522222
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "754084fc-3d10-7106-aa4b-fcac89a5d3a1.pdf",
+  "key": "gross_amount",
+  "box": [
+   2,
+   0.90682197,
+   0.77106112,
+   0.96838599,
+   0.78327972
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "c73ae3d2-8709-8348-694d-e43537b56987.pdf",
+  "key": "tv_address",
+  "box": [
+   0,
+   0.19019751,
+   0.082532503,
+   0.38844183,
+   0.11362351
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "494008-103012-murphy-invoice-4-13516266179190-_-pdf.pdf",
+  "key": "line_item[1].sub_amount",
+  "box": [
+   0,
+   0.79342723,
+   0.37224069,
+   0.83646321,
+   0.38131237
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "3f15777d-e41e-3d99-3de9-cc55df747532.pdf",
+  "key": "line_item[6].program_end_date",
+  "box": [
+   0,
+   0.17150573,
+   0.87115282,
+   0.23024984,
+   0.88732392
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "738d52f6-4cf4-3ec1-6990-1c675e100eb0.pdf",
+  "key": "line_item[3].sub_amount",
+  "box": [
+   0,
+   0.80175656,
+   0.4192923,
+   0.83626097,
+   0.43189529
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "4956f339-5a45-9929-25b4-31552572480c.pdf",
+  "key": "line_item[18].program_start_date",
+  "box": [
+   1,
+   0.11017741,
+   0.52597404,
+   0.16900094,
+   0.53607506
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "417792-collect-files-72076-political-file-2012-non.pdf",
+  "key": "line_item[9].program_start_date",
+  "box": [
+   1,
+   0.4037855,
+   0.72299874,
+   0.44242904,
+   0.73697585
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "685a2568-66ec-e3e0-27a1-78b56402b8cb.pdf",
+  "key": "line_item[33].program_desc",
+  "box": [
+   3,
+   0.82629108,
+   0.5592705,
+   0.91784036,
+   0.58966565
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "878e1fbc-6888-9dbd-03ae-8954b999b278.pdf",
+  "key": "line_item[12].program_desc",
+  "box": [
+   1,
+   0.24529347,
+   0.23833975,
+   0.32225913,
+   0.25288832
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "ecf2759a-d672-73cf-158c-e9c948e87777.pdf",
+  "key": "line_item[7].channel",
+  "box": [
+   1,
+   0.10800882,
+   0.44463372,
+   0.14988978,
+   0.45655876
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "b47d90c5-41d3-67dd-12c3-553fcbb24166.pdf",
+  "key": "line_item[0].channel",
+  "box": [
+   0,
+   0.067342505,
+   0.45103526,
+   0.11296162,
+   0.46446559
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "1b3d499b-17c6-eca9-1255-29ea55100b3d.pdf",
+  "key": "line_item[2].sub_amount",
+  "box": [
+   0,
+   0.69619501,
+   0.54783952,
+   0.72502971,
+   0.5636574
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "b1c76403-ede0-1bc1-29f4-9afc2a0d47d3.pdf",
+  "key": "line_item[24].sub_amount",
+  "box": [
+   1,
+   0.92545092,
+   0.70879799,
+   0.96793586,
+   0.72149938
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "429172-collect-files-35042-political-file-2012-non.pdf",
+  "key": "line_item[13].program_desc",
+  "box": [
+   1,
+   0.21559075,
+   0.94888479,
+   0.31912303,
+   0.97955388
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "bbb5a335-7d9e-b232-3c6d-842451e55f86.pdf",
+  "key": "line_item[31].sub_amount",
+  "box": [
+   2,
+   0.68066621,
+   0.57357079,
+   0.7212165,
+   0.59044051
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8dfa0ca9-2457-2309-3c1c-8301ca6a6d14.pdf",
+  "key": "line_item[21].program_end_date",
+  "box": [
+   2,
+   0.22264247,
+   0.53335506,
+   0.25416037,
+   0.54572082
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "883fd7e6-688e-02cf-e1ab-81ffd3742bde.pdf",
+  "key": "line_item[7].program_start_date",
+  "box": [
+   0,
+   0.11327762,
+   0.82137734,
+   0.17084494,
+   0.83357245
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "416277-collect-files-72145-political-file-2012-federal.pdf",
+  "key": "line_item[28].program_end_date",
+  "box": [
+   2,
+   0.25801185,
+   0.31740022,
+   0.28475198,
+   0.32371035
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "88ea014d-d13f-997e-cea1-f4de3d71d1e4.pdf",
+  "key": "line_item[8].program_desc",
+  "box": [
+   1,
+   0.25207987,
+   0.24115756,
+   0.33277869,
+   0.25273311
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "14037edf-c2ea-045f-ce56-417082145e47.pdf",
+  "key": "line_item[35].program_start_date",
+  "box": [
+   2,
+   0.092345081,
+   0.48169014,
+   0.15066829,
+   0.49483567
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "9e480923-edce-4533-56eb-62fcb8e8a7f8.pdf",
+  "key": "line_item[21].channel",
+  "box": [
+   1,
+   0.072122052,
+   0.60664523,
+   0.11165048,
+   0.61736333
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "db4ee420-c938-2ff9-ea91-a7725092488e.pdf",
+  "key": "line_item[12].sub_amount",
+  "box": [
+   0,
+   0.77991521,
+   0.46308893,
+   0.81904143,
+   0.47190729
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "ce72c499-98e0-921c-2078-316aec271c80.pdf",
+  "key": "line_item[2].program_desc",
+  "box": [
+   0,
+   0.24764663,
+   0.53049803,
+   0.3859522,
+   0.54504758
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "91aef191-09f3-f3f6-9607-24ea83cd2ea8.pdf",
+  "key": "line_item[22].program_start_date",
+  "box": [
+   1,
+   0.11734254,
+   0.84399998,
+   0.16738568,
+   0.85799998
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "1d2bcff2-1708-46fb-cf0e-eeeedf908380.pdf",
+  "key": "line_item[27].program_start_date",
+  "box": [
+   1,
+   0.18522267,
+   0.56259781,
+   0.24291497,
+   0.57824725
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "c3e9a6e9-cdc2-6a86-b0c8-d97d6f59ca61.pdf",
+  "key": "line_item[1].program_start_date",
+  "box": [
+   0,
+   0.065204144,
+   0.54121524,
+   0.12065814,
+   0.55157799
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "96dd3063-aa2a-03f9-9e22-2a60a8ec1eb5.pdf",
+  "key": "line_item[0].channel",
+  "box": [
+   0,
+   0.031884059,
+   0.38745981,
+   0.051345754,
+   0.39817792
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "81f10125-b31b-0dc0-366f-1058891ac4e8.pdf",
+  "key": "line_item[33].channel",
+  "box": [
+   2,
+   0.060225848,
+   0.84973341,
+   0.10288582,
+   0.86088222
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "19b5a9f5-b79a-6ec9-3839-3d32ad8328b4.pdf",
+  "key": "line_item[24].sub_amount",
+  "box": [
+   2,
+   0.91872281,
+   0.2411215,
+   0.96952105,
+   0.25121495
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "b21925d7-2f5a-2d7f-46b9-e90023d0bc1e.pdf",
+  "key": "line_item[2].program_desc",
+  "box": [
+   0,
+   0.30984205,
+   0.69389671,
+   0.35479951,
+   0.70704228
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8173f38f-acc7-a721-d963-bb0a5b76388a.pdf",
+  "key": "line_item[12].channel",
+  "box": [
+   1,
+   0.079387188,
+   0.28064516,
+   0.1253482,
+   0.29354838
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "3446ada9-ed5c-86a8-f237-190be5851005.pdf",
+  "key": "line_item[3].program_end_date",
+  "box": [
+   0,
+   0.22646311,
+   0.60519928,
+   0.257801,
+   0.6155979
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "64780ed0-180c-a77b-bfe0-478c2a48a3a0.pdf",
+  "key": "line_item[5].sub_amount",
+  "box": [
+   0,
+   0.66980451,
+   0.60918462,
+   0.70745838,
+   0.62605435
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "7b9146bb-864c-c7e0-d889-55e408a50b8f.pdf",
+  "key": "line_item[8].program_start_date",
+  "box": [
+   1,
+   0.1139008,
+   0.57785141,
+   0.16717698,
+   0.58920968
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "d02b547f-6489-aaa4-57e1-f01e245c6c0c.pdf",
+  "key": "line_item[16].program_desc",
+  "box": [
+   1,
+   0.25188625,
+   0.40242261,
+   0.39582124,
+   0.41453567
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "62add992-e325-62f8-a686-082627c1eea3.pdf",
+  "key": "line_item[39].program_end_date",
+  "box": [
+   4,
+   0.17084494,
+   0.21951219,
+   0.22562674,
+   0.23385939
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "3eb2feea-8655-10c2-3964-ba69eead8ac9.pdf",
+  "key": "line_item[12].sub_amount",
+  "box": [
+   1,
+   0.90731353,
+   0.42921096,
+   0.97320783,
+   0.44152209
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "c706768b-8d21-846c-2e58-307afbd74b24.pdf",
+  "key": "line_item[19].program_start_date",
+  "box": [
+   1,
+   0.11577965,
+   0.52453101,
+   0.16713353,
+   0.53679651
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8bdf348a-6c43-746f-6d38-1eb5881e233a.pdf",
+  "key": "line_item[23].program_end_date",
+  "box": [
+   2,
+   0.41287553,
+   0.64888889,
+   0.45493561,
+   0.66444445
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "74c779b4-423f-d265-d31a-f3852b42c28b.pdf",
+  "key": "line_item[9].program_start_date",
+  "box": [
+   1,
+   0.11377245,
+   0.5,
+   0.16646707,
+   0.51018518
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "12c8b293-f2c5-31ad-f600-b5992a7ed3b9.pdf",
+  "key": "line_item[19].sub_amount",
+  "box": [
+   1,
+   0.91544437,
+   0.69733334,
+   0.97756684,
+   0.71066666
+  ]
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "47e3fb74-ad40-15ce-f945-2ea74b567166.pdf",
+  "key": "line_item[4].program_desc",
+  "box": [
+   0,
+   0.31938997,
+   0.50774413,
+   0.41612199,
+   0.51784509
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0136",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.34375,
+   0.4876543209876543,
+   0.4976851851851852,
+   0.5154320987654321
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0675",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.6643518518518519,
+   0.6280864197530864,
+   0.7847222222222222,
+   0.654320987654321
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0686",
+  "key": "subtotal_etc",
+  "box": [
+   0,
+   0.6927083333333334,
+   0.5462962962962963,
+   0.8211805555555556,
+   0.5798611111111112
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0462",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.3715277777777778,
+   0.5115740740740741,
+   0.6145833333333334,
+   0.5486111111111112
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "dev-0053",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.0798611111111111,
+   0.4074074074074074,
+   0.11805555555555555,
+   0.4664351851851852
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "dev-0047",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.7731481481481481,
+   0.5231481481481481,
+   0.8993055555555556,
+   0.5540123456790124
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0084",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.0798611111111111,
+   0.4097222222222222,
+   0.11805555555555555,
+   0.46296296296296297
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0287",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.11848958333333333,
+   0.46142578125,
+   0.1388888888888889,
+   0.47998046875
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0030",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.32523148148148145,
+   0.5763888888888888,
+   0.5578703703703703,
+   0.6118827160493827
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0425",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.7233796296296297,
+   0.658179012345679,
+   0.875,
+   0.6890432098765432
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0053",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.6927083333333334,
+   0.61796875,
+   0.7708333333333334,
+   0.6375
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0555",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.26263537906137185,
+   0.4871447902571042,
+   0.34747292418772563,
+   0.5216508795669824
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0495",
+  "key": "tax_price",
+  "box": [
+   0,
+   0.6333333333333333,
+   0.59140625,
+   0.765625,
+   0.6234375
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0350",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.83125,
+   0.7171875,
+   0.94375,
+   0.74921875
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0216",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.0763888888888889,
+   0.4861111111111111,
+   0.1076388888888889,
+   0.5208333333333334
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "dev-0023",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.11805555555555555,
+   0.49074074074074076,
+   0.1388888888888889,
+   0.5162037037037037
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "test-0079",
+  "key": "cashprice",
+  "box": [
+   0,
+   0.7760416666666666,
+   0.8171296296296297,
+   0.9184027777777778,
+   0.8472222222222222
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0282",
+  "key": "total_price",
+  "box": [
+   0,
+   0.6226851851851852,
+   0.8703703703703703,
+   0.8240740740740741,
+   0.9591049382716049
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "dev-0078",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.19212962962962962,
+   0.7268518518518519,
+   0.2199074074074074,
+   0.7623456790123457
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0156",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.3958333333333333,
+   0.5578703703703703,
+   0.6006944444444444,
+   0.5879629629629629
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0592",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.33912037037037035,
+   0.6057098765432098,
+   0.5694444444444444,
+   0.6396604938271605
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0077",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.6416666666666667,
+   0.63828125,
+   0.728125,
+   0.66328125
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0267",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.7280092592592593,
+   0.5810185185185185,
+   0.8657407407407407,
+   0.6095679012345679
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0634",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.6840277777777778,
+   0.6697530864197531,
+   0.7881944444444444,
+   0.6929012345679012
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0496",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.78125,
+   0.5995370370370371,
+   0.9583333333333334,
+   0.6388888888888888
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0065",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.23055555555555557,
+   0.71875,
+   0.26944444444444443,
+   0.74296875
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "dev-0028",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.1886574074074074,
+   0.5138888888888888,
+   0.21180555555555555,
+   0.5354938271604939
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "test-0003",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.3819444444444444,
+   0.5601851851851852,
+   0.5752314814814815,
+   0.5964506172839507
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0409",
+  "key": "subtotal_price",
+  "box": [
+   0,
+   0.7835648148148148,
+   0.6450617283950617,
+   0.9212962962962963,
+   0.683641975308642
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0147",
+  "key": "menuqty_cnt",
+  "box": [
+   0,
+   0.16493055555555555,
+   0.4930555555555556,
+   0.1857638888888889,
+   0.5208333333333334
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0342",
+  "key": "menu[2].nm",
+  "box": [
+   0,
+   0.08333333333333333,
+   0.6018518518518519,
+   0.5462962962962963,
+   0.6350308641975309
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0357",
+  "key": "menu[6].price",
+  "box": [
+   0,
+   0.685515873015873,
+   0.6180555555555556,
+   0.7691798941798942,
+   0.6391369047619048
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0386",
+  "key": "menu[4].nm",
+  "box": [
+   0,
+   0.20397111913357402,
+   0.625169147496617,
+   0.4548736462093863,
+   0.6508795669824087
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0217",
+  "key": "menu[0].unitprice",
+  "box": [
+   0,
+   0.2673611111111111,
+   0.5208333333333334,
+   0.40625,
+   0.5486111111111112
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0203",
+  "key": "menu[9].cnt",
+  "box": [
+   0,
+   0.2824074074074074,
+   0.25462962962962965,
+   0.3101851851851852,
+   0.2700617283950617
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0181",
+  "key": "menu[1].price",
+  "box": [
+   0,
+   0.7222222222222222,
+   0.57275390625,
+   0.8311631944444444,
+   0.59375
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0138",
+  "key": "menu[0].price",
+  "box": [
+   0,
+   0.7570806100217865,
+   0.36856617647058826,
+   0.8611111111111112,
+   0.3893995098039216
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0340",
+  "key": "menu[0].nm",
+  "box": [
+   0,
+   0.24782135076252723,
+   0.44577205882352944,
+   0.5571895424836601,
+   0.46660539215686275
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0302",
+  "key": "menu[1].unitprice",
+  "box": [
+   0,
+   0.6180555555555556,
+   0.3773148148148148,
+   0.7013888888888888,
+   0.39814814814814814
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0072",
+  "key": "menu[0].nm",
+  "box": [
+   0,
+   0.11921296296296297,
+   0.43132716049382713,
+   0.5625,
+   0.46219135802469136
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0384",
+  "key": "menu[0].unitprice",
+  "box": [
+   0,
+   0.2986111111111111,
+   0.45987654320987653,
+   0.4027777777777778,
+   0.48148148148148145
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "test-0094",
+  "key": "menu[2].nm",
+  "box": [
+   0,
+   0.2326388888888889,
+   0.6041666666666666,
+   0.5925925925925926,
+   0.6327160493827161
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0045",
+  "key": "menu[0].cnt",
+  "box": [
+   0,
+   0.2092013888888889,
+   0.311279296875,
+   0.23697916666666666,
+   0.3310546875
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "test-0041",
+  "key": "menu[8].price",
+  "box": [
+   0,
+   0.5972222222222222,
+   0.5251736111111112,
+   0.7098765432098766,
+   0.5416666666666666
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0262",
+  "key": "menu[4].price",
+  "box": [
+   0,
+   0.6631944444444444,
+   0.5069444444444444,
+   0.7673611111111112,
+   0.5347222222222222
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0511",
+  "key": "menu[1].cnt",
+  "box": [
+   0,
+   0.20601851851851852,
+   0.5169753086419753,
+   0.22453703703703703,
+   0.5385802469135802
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0727",
+  "key": "menu[2].nm",
+  "box": [
+   0,
+   0.12962962962962962,
+   0.44753086419753085,
+   0.30439814814814814,
+   0.4783950617283951
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0574",
+  "key": "menu[2].cnt",
+  "box": [
+   0,
+   0.45697167755991286,
+   0.49785539215686275,
+   0.47766884531590414,
+   0.5143995098039216
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0019",
+  "key": "menu[1].cnt",
+  "box": [
+   0,
+   0.22604166666666667,
+   0.42109375,
+   0.24270833333333333,
+   0.44453125
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0366",
+  "key": "menu[0].price",
+  "box": [
+   0,
+   0.7638888888888888,
+   0.44598765432098764,
+   0.8773148148148148,
+   0.4691358024691358
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0421",
+  "key": "menu[1].nm",
+  "box": [
+   0,
+   0.20397111913357402,
+   0.4651320243737305,
+   0.4684115523465704,
+   0.4949221394719025
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0177",
+  "key": "menu[1].price",
+  "box": [
+   0,
+   0.5126353790613718,
+   0.6211096075778079,
+   0.5785198555956679,
+   0.6393775372124493
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0166",
+  "key": "menu[0].price",
+  "box": [
+   0,
+   0.6840277777777778,
+   0.683641975308642,
+   0.8703703703703703,
+   0.7183641975308642
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0776",
+  "key": "menu[2].cnt",
+  "box": [
+   0,
+   0.1736111111111111,
+   0.44212962962962965,
+   0.19444444444444445,
+   0.46064814814814814
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0498",
+  "key": "menu[0].cnt",
+  "box": [
+   0,
+   0.1840277777777778,
+   0.5185185185185185,
+   0.2048611111111111,
+   0.5393518518518519
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0767",
+  "key": "menu[4].price",
+  "box": [
+   0,
+   0.7120938628158845,
+   0.5500676589986468,
+   0.8077617328519856,
+   0.5764546684709067
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0439",
+  "key": "menu[3].cnt",
+  "box": [
+   0,
+   0.19444444444444445,
+   0.3333333333333333,
+   0.21354166666666666,
+   0.35648148148148145
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0632",
+  "key": "menu[0].price",
+  "box": [
+   0,
+   0.6545138888888888,
+   0.40162037037037035,
+   0.8784722222222222,
+   0.4409722222222222
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0792",
+  "key": "menu[0].cnt",
+  "box": [
+   0,
+   0.2404513888888889,
+   0.53125,
+   0.2608506944444444,
+   0.548828125
+  ]
+ },
+ {
+  "corpus": "cord",
+  "doc_id": "train-0777",
+  "key": "menu[8].cnt",
+  "box": [
+   0,
+   0.2222222222222222,
+   0.6188271604938271,
+   0.24074074074074073,
+   0.6358024691358025
+  ]
+ }
+]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -114,7 +115,11 @@ def data_build(corpus: str = typer.Argument("all", help="fara, deepform, cord or
                     counts[shard_split(shard)] = counts.get(shard_split(shard), 0) + 1
                     if entry is not None:
                         pages.append(entry)
-            write_manifest(MANIFESTS / "cord-pages.jsonl", pages)
+            write_manifest(
+                MANIFESTS / "cord-pages.jsonl",
+                pages,
+                source="CORD v2 parquet images, PNG bytes kept as published (not rendered)",
+            )
             typer.echo(f"cord: {counts}")
             continue
         docs = list(read_dataset(c, raw))
@@ -141,6 +146,73 @@ def data_build(corpus: str = typer.Argument("all", help="fara, deepform, cord or
         n = write_manifest(MANIFESTS / f"{c}-pages.jsonl", entries)
         write_splits(MANIFESTS / f"{c}-splits.json", c, docs, splits)
         typer.echo(f"{c}: {len(docs)} documents, {n} pages, {len(splits)} headline split files")
+
+
+@data_app.command("audit")
+def data_audit() -> None:
+    """Draw the 200-label audit sample and write the local worksheet (never published)."""
+    from legible.data.audit import crop, flat_values, labels_of, sample, worksheet
+    from legible.data.cord import read_shard
+    from legible.data.fetch import load_checksums
+    from legible.data.render import page_path
+    from legible.data.vrdu import read_dataset
+
+    raw = data_root() / "raw"
+    pages = data_root() / "pages"
+    labels = []
+    for c in ("fara", "deepform"):
+        for d in read_dataset(c, raw / "vrdu"):
+            labels += labels_of(c, d.doc_id, d.boxes, flat_values(d.truth))
+    for shard in sorted(load_checksums("cord").files):
+        for doc, _ in read_shard(raw / "cord" / shard, None):
+            labels += labels_of("cord", doc.doc_id, doc.boxes, flat_values(doc.truth))
+    chosen = sample(labels)
+    crops = {
+        x.label_id: crop((pages / page_path(x.corpus, x.doc_id, x.box[0])).read_bytes(), x.box)
+        for x in chosen
+    }
+    out = data_root() / "audit" / "worksheet.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(worksheet(chosen, crops), encoding="utf-8")
+    (MANIFESTS / "audit-sample.json").write_text(
+        # Ids and boxes only: the values come with the fetched corpus, and a registration
+        # form's names are not redistributed here (docs/data.md).
+        json.dumps([x.model_dump(mode="json", exclude={"value"}) for x in chosen], indent=1) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    typer.echo(f"{len(chosen)} labels; worksheet at {out}")
+
+
+@data_app.command("audit-report")
+def data_audit_report(
+    decisions: Path = typer.Argument(
+        Path("docs/audit/decisions.json"), exists=True, dir_okay=False
+    ),
+) -> None:
+    """Write docs/audit.md from Peter's decisions on the committed sample."""
+    from legible.data.audit import Label, read_decisions, report
+
+    sample = [
+        Label.model_validate({**x, "value": ""})
+        for x in json.loads((MANIFESTS / "audit-sample.json").read_text(encoding="utf-8"))
+    ]
+    rows = report(sample, read_decisions(decisions))
+    lines = [
+        "# Label audit",
+        "",
+        "Written by `legible data audit-report` from `docs/audit/decisions.json`; do not edit.",
+        "",
+        "| Corpus | Labels | Audited | Disagreement (95% CI) | Unreadable |",
+        "|---|---|---:|---|---:|",
+    ]
+    lines += [
+        f"| {r.corpus} | {r.stratum} | {r.audited} | {r.disagreement} | {r.unreadable} |"
+        for r in rows
+    ]
+    text = "\n".join(lines) + "\n"
+    Path("docs/audit.md").write_text(text, encoding="utf-8", newline="\n")
+    typer.echo(text)
 
 
 def main() -> None:

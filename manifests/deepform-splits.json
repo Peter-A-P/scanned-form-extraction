@@ -1,0 +1,125 @@
+{
+  "corpus": "deepform",
+  "documents": 641,
+  "pages": 1598,
+  "files": [
+    {
+      "file": "DeepForm-unk_template-train_200-test_153-valid_100-SD_2.json",
+      "level": "unseen",
+      "template": null,
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 487
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 153,
+        "pages": 388
+      }
+    },
+    {
+      "file": "DeepForm-unk_template-train_200-test_157-valid_100-SD_1.json",
+      "level": "unseen",
+      "template": null,
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 477
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 157,
+        "pages": 405
+      }
+    },
+    {
+      "file": "DeepForm-unk_template-train_200-test_159-valid_100-SD_0.json",
+      "level": "unseen",
+      "template": null,
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 476
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 159,
+        "pages": 415
+      }
+    },
+    {
+      "file": "DeepForm-mixed_template-train_200-test_300-valid_100-SD_0.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 476
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 300,
+        "pages": 774
+      }
+    },
+    {
+      "file": "DeepForm-mixed_template-train_200-test_300-valid_100-SD_1.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 477
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 300,
+        "pages": 774
+      }
+    },
+    {
+      "file": "DeepForm-mixed_template-train_200-test_300-valid_100-SD_2.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 487
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 245
+      },
+      "test": {
+        "documents": 300,
+        "pages": 774
+      }
+    }
+  ],
+  "union": {
+    "test": {
+      "documents": 300,
+      "pages": 774
+    },
+    "valid": {
+      "documents": 100,
+      "pages": 245
+    }
+  }
+}

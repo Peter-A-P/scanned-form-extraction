@@ -1,0 +1,233 @@
+{
+  "corpus": "fara",
+  "documents": 1915,
+  "pages": 3890,
+  "files": [
+    {
+      "file": "FARA-lv3-unk_Amendment-train_200-test_300-valid_100-SD_0.json",
+      "level": "unseen",
+      "template": "Amendment",
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 402
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 207
+      },
+      "test": {
+        "documents": 300,
+        "pages": 610
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Amendment-train_200-test_300-valid_100-SD_1.json",
+      "level": "unseen",
+      "template": "Amendment",
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 405
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 207
+      },
+      "test": {
+        "documents": 300,
+        "pages": 610
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Amendment-train_200-test_300-valid_100-SD_2.json",
+      "level": "unseen",
+      "template": "Amendment",
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 409
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 207
+      },
+      "test": {
+        "documents": 300,
+        "pages": 610
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Dissemination_Report-train_200-test_300-valid_100-SD_0.json",
+      "level": "unseen",
+      "template": "Dissemination_Report",
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 417
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 188
+      },
+      "test": {
+        "documents": 300,
+        "pages": 566
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Dissemination_Report-train_200-test_300-valid_100-SD_1.json",
+      "level": "unseen",
+      "template": "Dissemination_Report",
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 414
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 188
+      },
+      "test": {
+        "documents": 300,
+        "pages": 566
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Dissemination_Report-train_200-test_300-valid_100-SD_2.json",
+      "level": "unseen",
+      "template": "Dissemination_Report",
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 409
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 188
+      },
+      "test": {
+        "documents": 300,
+        "pages": 566
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Short-Form-train_200-test_300-valid_100-SD_0.json",
+      "level": "unseen",
+      "template": "Short-Form",
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 391
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 205
+      },
+      "test": {
+        "documents": 300,
+        "pages": 640
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Short-Form-train_200-test_300-valid_100-SD_1.json",
+      "level": "unseen",
+      "template": "Short-Form",
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 385
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 205
+      },
+      "test": {
+        "documents": 300,
+        "pages": 640
+      }
+    },
+    {
+      "file": "FARA-lv3-unk_Short-Form-train_200-test_300-valid_100-SD_2.json",
+      "level": "unseen",
+      "template": "Short-Form",
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 405
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 205
+      },
+      "test": {
+        "documents": 300,
+        "pages": 640
+      }
+    },
+    {
+      "file": "FARA-lv2-mixed_template-train_200-test_300-valid_100-SD_0.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 0,
+      "train": {
+        "documents": 200,
+        "pages": 409
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 202
+      },
+      "test": {
+        "documents": 300,
+        "pages": 607
+      }
+    },
+    {
+      "file": "FARA-lv2-mixed_template-train_200-test_300-valid_100-SD_1.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 1,
+      "train": {
+        "documents": 200,
+        "pages": 404
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 202
+      },
+      "test": {
+        "documents": 300,
+        "pages": 607
+      }
+    },
+    {
+      "file": "FARA-lv2-mixed_template-train_200-test_300-valid_100-SD_2.json",
+      "level": "mixed",
+      "template": null,
+      "seed": 2,
+      "train": {
+        "documents": 200,
+        "pages": 405
+      },
+      "valid": {
+        "documents": 100,
+        "pages": 202
+      },
+      "test": {
+        "documents": 300,
+        "pages": 607
+      }
+    }
+  ],
+  "union": {
+    "test": {
+      "documents": 1053,
+      "pages": 2128
+    },
+    "valid": {
+      "documents": 380,
+      "pages": 764
+    }
+  }
+}

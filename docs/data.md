@@ -146,6 +146,28 @@ receipt; until then a filled blank box on a receipt counts as blank filled. The
 README notes that store, payment and other information were removed "due to Indonesian legal
 issues".
 
+## Built
+
+Built 2026-10-16 by `legible data fetch` and `legible data build`; the counts are the
+manifests'.
+
+| Corpus | Documents | Pages | Test union (documents / pages) | Dev union |
+|---|---:|---:|---|---|
+| FARA | 1,915 | 3,890 | 1,053 / 2,128 | 380 / 764 |
+| DeepForm | 641 | 1,598 | 300 / 774 | 100 / 245 |
+| CORD | 1,000 | 1,000 | 100 / 100 | 100 / 100 |
+
+## The label audit
+
+`legible data audit` draws 200 labels, fixed by a seed and written to
+`manifests/audit-sample.json`: FARA 60; DeepForm 40 header fields and 40 line-item fields;
+CORD 30 and 30, at most one label per document. Line items are drawn apart because they
+outnumber header fields about eleven to one on DeepForm, and a uniform draw would audit
+almost nothing a headline number rests on. The worksheet (label beside its crop) is written to
+the data root, never to the repository or the site, because it shows registration forms. The
+decisions go to `docs/audit/decisions.json`, and `legible data audit-report` writes
+`docs/audit.md`.
+
 ## NIST Special Database 2
 
 **Terms: unresolved.** The SD2 page, https://www.nist.gov/srd/nist-special-database-2

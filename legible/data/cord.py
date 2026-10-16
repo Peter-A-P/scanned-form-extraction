@@ -43,6 +43,10 @@ class CordDoc(BaseModel):
     split: CordSplit
     truth: Record
     alternatives: dict[str, list[str]]
+    #: (page, x1, y1, x2, y2) normalised, keyed by field name or `group[i].field`, for the
+    #: labels whose printed line could be found: the annotated line whose category matches and
+    #: whose words join to the value.
+    boxes: dict[str, tuple[int, float, float, float, float]] = {}
 
 
 def shard_split(path: str) -> CordSplit:
@@ -125,6 +129,7 @@ def read_shard(path: Path, pages_dir: Path | None) -> Iterator[tuple[CordDoc, Pa
         gt = json.loads(gt_text)
         doc_id = f"{split}-{int(gt['meta']['image_id']):04d}"
         truth, alternatives = parse_gt(doc_id, gt["gt_parse"])
+        boxes = label_boxes(truth, gt.get("valid_line", []), gt["meta"]["image_size"])
         entry = None
         if pages_dir is not None:
             data: bytes = image["bytes"]
@@ -142,4 +147,56 @@ def read_shard(path: Path, pages_dir: Path | None) -> Iterator[tuple[CordDoc, Pa
                 height=int(size["height"]),
                 sha256=hashlib.sha256(data).hexdigest(),
             )
-        yield CordDoc(doc_id=doc_id, split=split, truth=truth, alternatives=alternatives), entry
+        doc = CordDoc(
+            doc_id=doc_id, split=split, truth=truth, alternatives=alternatives, boxes=boxes
+        )
+        yield doc, entry
+
+
+#: The CORD category of each schema path, inverted from parse_gt's flattening.
+def _category(path: str) -> str:
+    group, _, field = path.partition(".")
+    if group == "sub_item":
+        return f"menu.sub_{field}"
+    if group in {"menu", "void_menu"}:
+        return f"{group}.{field}"
+    if path == "subtotal_etc":
+        return "sub_total.etc"
+    section = (
+        "total"
+        if path.startswith(("total", "cash", "change", "credit", "emoney", "menu"))
+        else "sub_total"
+    )
+    return f"{section}.{path}"
+
+
+def label_boxes(
+    truth: Record, valid_line: list[dict[str, Any]], image_size: dict[str, int]
+) -> dict[str, tuple[int, float, float, float, float]]:
+    """Where each truth value is printed, where it can be found."""
+    width, height = float(image_size["width"]), float(image_size["height"])
+    lines: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for line in valid_line:
+        text = " ".join(str(w["text"]) for w in line["words"]).strip()
+        lines.setdefault((str(line["category"]), text), []).append(line)
+    out: dict[str, tuple[int, float, float, float, float]] = {}
+
+    def place(key: str, path: str, value: str | None) -> None:
+        if not value:
+            return
+        found = lines.get((_category(path), value))
+        if not found:
+            return
+        quads = [w["quad"] for w in found[0]["words"]]
+        xs = [q[f"x{i}"] for q in quads for i in range(1, 5)]
+        ys = [q[f"y{i}"] for q in quads for i in range(1, 5)]
+        out[key] = (0, min(xs) / width, min(ys) / height, max(xs) / width, max(ys) / height)
+
+    for name, value in truth.items():
+        if isinstance(value, list):
+            for i, item in enumerate(value):
+                for field, v in item.items():
+                    place(f"{name}[{i}].{field}", f"{name}.{field}", v)
+        else:
+            place(name, name, value)
+    return out

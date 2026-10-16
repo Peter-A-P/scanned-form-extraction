@@ -69,12 +69,13 @@ def renderer() -> str:
     return f"pymupdf {pymupdf.VersionBind} (MuPDF {pymupdf.VersionFitz}) at {SOURCE_DPI} dpi"
 
 
-def write_manifest(path: Path, entries: Iterable[PageEntry]) -> int:
-    """One JSON line per page, sorted, after a header line naming the renderer."""
+def write_manifest(path: Path, entries: Iterable[PageEntry], source: str | None = None) -> int:
+    """One JSON line per page, sorted, after a header line naming the renderer, or for a
+    corpus that is not rendered (CORD's photographs), where its pages came from."""
     rows = sorted(entries, key=lambda e: (e.doc_id, e.page))
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write(json.dumps({"renderer": renderer(), "pages": len(rows)}) + "\n")
+        f.write(json.dumps({"renderer": source or renderer(), "pages": len(rows)}) + "\n")
         for e in rows:
             f.write(e.model_dump_json() + "\n")
     return len(rows)
