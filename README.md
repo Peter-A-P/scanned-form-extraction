@@ -1,12 +1,18 @@
 # Forms That Read Themselves
 
+Vision-language models on the backlog of paper forms, measured on more than 9,000 public pages
+with known answers: a frontier multimodal model, a 2B and a 4B open vision model fine-tuned on
+page images, and the classic OCR pipelines. Every field right or wrong with its interval, the
+cost per thousand pages, what breaks on an unseen form design or a bad scan, and how many fields
+a person still checks at 99 percent accuracy.
+
 Every organisation that still receives paper has a backlog of forms and someone typing them in.
-This project puts vision-language models to work on that backlog and measures them on more than
-9,000 public pages with known answers: a frontier multimodal model reading the scan, a 2B and a 4B
-open vision model fine-tuned to read it, and the classic OCR pipelines beside them. Same pages, same
-fields, one grader. It reports every field read right or wrong with confidence intervals, what each
-approach costs per thousand pages, how it holds up on a form design it has never seen and on a bad
-scan, and the number a director wants: at 99 percent accuracy, how many fields still need a person.
+This project puts vision-language models to work on that backlog: a frontier multimodal model
+reading the scan, a 2B and a 4B open vision model fine-tuned to read it, and the classic OCR
+pipelines beside them. Same pages, same fields, one grader. It reports every field read right or
+wrong with confidence intervals, what each approach costs per thousand pages, how it holds up on
+a form design it has never seen and on a bad scan, and the number a director wants: at 99
+percent accuracy, how many fields still need a person.
 
 ## Result
 
