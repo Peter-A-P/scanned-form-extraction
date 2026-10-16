@@ -70,27 +70,27 @@
 <text x="618.0" y="895.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">The verifier</text>
 <text x="618.0" y="911.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">arithmetic and format checks; catch rate</text>
 <text x="618.0" y="928.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">legible.verify</text>
-<rect x="154.4" y="168.0" width="47.3" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="155.7" y="168.0" width="44.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="178.0" y="180.0" font-size="12" text-anchor="middle" fill="#14201E">carved</text>
-<rect x="600.2" y="168.0" width="35.5" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="602.7" y="168.0" width="30.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="180.0" font-size="12" text-anchor="middle" fill="#14201E">held</text>
-<rect x="1013.8" y="168.0" width="88.4" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="1016.0" y="168.0" width="84.0" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="1058.0" y="180.0" font-size="12" text-anchor="middle" fill="#14201E">by submission</text>
-<rect x="290.5" y="336.0" width="64.9" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="291.3" y="336.0" width="63.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="323.0" y="348.0" font-size="12" text-anchor="middle" fill="#14201E">dev pages</text>
-<rect x="585.5" y="279.5" width="64.9" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="586.3" y="279.5" width="63.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="291.5" font-size="12" text-anchor="middle" fill="#14201E">dev pages</text>
-<rect x="520.9" y="520.0" width="194.3" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="529.3" y="520.0" width="177.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="532.0" font-size="12" text-anchor="middle" fill="#14201E">test pages, untouched until now</text>
-<rect x="782.0" y="476.0" width="112.0" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="788.0" y="476.0" width="100.0" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="838.0" y="488.0" font-size="12" text-anchor="middle" fill="#14201E">frozen thresholds</text>
-<rect x="588.5" y="728.0" width="59.0" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="587.7" y="728.0" width="60.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="740.0" font-size="12" text-anchor="middle" fill="#14201E">outcomes</text>
-<rect x="299.4" y="784.0" width="47.3" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="302.3" y="784.0" width="41.3" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="323.0" y="796.0" font-size="12" text-anchor="middle" fill="#14201E">paired</text>
-<rect x="579.7" y="840.0" width="76.7" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="586.7" y="840.0" width="62.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="852.0" font-size="12" text-anchor="middle" fill="#14201E">every field</text>
-<rect x="860.0" y="784.0" width="106.1" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="864.0" y="784.0" width="98.0" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="913.0" y="796.0" font-size="12" text-anchor="middle" fill="#14201E">with confidences</text>
 <rect x="28" y="960" width="26" height="16" rx="3" fill="#FFFFFF" stroke="#0E6E60" stroke-width="1.6"/>
 <text x="62" y="972" font-size="11" fill="#5C6B67">the guard against leakage</text>

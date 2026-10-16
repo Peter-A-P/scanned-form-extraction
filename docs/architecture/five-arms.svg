@@ -49,11 +49,11 @@
 <text x="1058.0" y="611.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Outcomes per document</text>
 <text x="1058.0" y="627.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">and document-level all-right</text>
 <text x="1058.0" y="644.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">data/runs</text>
-<rect x="347.9" y="281.0" width="100.2" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="346.0" y="281.0" width="104.1" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="398.0" y="293.0" font-size="12" text-anchor="middle" fill="#14201E">page and schema</text>
-<rect x="776.1" y="272.7" width="123.7" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="776.0" y="272.7" width="124.0" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="838.0" y="284.7" font-size="12" text-anchor="middle" fill="#14201E">JSON from every arm</text>
-<rect x="984.4" y="505.5" width="147.2" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="992.3" y="505.5" width="131.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="1058.0" y="517.5" font-size="12" text-anchor="middle" fill="#14201E">per field, per document</text>
 <rect x="28" y="672" width="26" height="16" rx="3" fill="#FFFFFF" stroke="#0E6E60" stroke-width="1.6"/>
 <text x="62" y="684" font-size="11" fill="#5C6B67">the model trained here</text>

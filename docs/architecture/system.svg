@@ -69,29 +69,29 @@
 <text x="618.0" y="1079.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Report and site</text>
 <text x="618.0" y="1095.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">tables, charts, cards; forms.peterparker.ca</text>
 <text x="618.0" y="1112.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">legible.report, legible.site</text>
-<rect x="77.9" y="150.0" width="200.2" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="83.0" y="150.0" width="190.1" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="178.0" y="162.0" font-size="12" text-anchor="middle" fill="#14201E">PDFs, photos, scans, annotations</text>
-<rect x="130.8" y="270.0" width="94.3" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="142.3" y="270.0" width="71.3" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="178.0" y="282.0" font-size="12" text-anchor="middle" fill="#14201E">verified files</text>
-<rect x="125.0" y="398.0" width="106.1" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="130.6" y="398.0" width="94.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="178.0" y="410.0" font-size="12" text-anchor="middle" fill="#14201E">pages and splits</text>
-<rect x="139.7" y="526.0" width="76.7" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="147.7" y="526.0" width="60.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="178.0" y="538.0" font-size="12" text-anchor="middle" fill="#14201E">five levels</text>
-<rect x="362.6" y="584.0" width="70.8" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="364.3" y="584.0" width="67.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="398.0" y="596.0" font-size="12" text-anchor="middle" fill="#14201E">every page</text>
-<rect x="895.2" y="570.7" width="35.5" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="897.0" y="570.7" width="32.0" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="913.0" y="582.7" font-size="12" text-anchor="middle" fill="#14201E">D, E</text>
-<rect x="877.6" y="597.3" width="70.8" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="881.7" y="597.3" width="62.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="913.0" y="609.3" font-size="12" text-anchor="middle" fill="#14201E">A, B, C, D</text>
-<rect x="550.3" y="646.0" width="135.5" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="550.3" y="646.0" width="135.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="658.0" font-size="12" text-anchor="middle" fill="#14201E">JSON per page per arm</text>
-<rect x="559.1" y="774.0" width="117.8" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="564.6" y="774.0" width="106.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="786.0" font-size="12" text-anchor="middle" fill="#14201E">outcomes per field</text>
-<rect x="573.8" y="890.0" width="88.4" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="576.3" y="890.0" width="83.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="902.0" font-size="12" text-anchor="middle" fill="#14201E">test outcomes</text>
-<rect x="868.8" y="956.0" width="88.4" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="872.3" y="956.0" width="81.4" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="913.0" y="968.0" font-size="12" text-anchor="middle" fill="#5C6B67">cost per page</text>
-<rect x="550.3" y="1022.0" width="135.5" height="20.0" rx="3" fill="#FFFFFF"/>
+<rect x="561.6" y="1022.0" width="112.7" height="20.0" rx="3" fill="#FFFFFF"/>
 <text x="618.0" y="1034.0" font-size="12" text-anchor="middle" fill="#14201E">tables with intervals</text>
 <rect x="28" y="1144" width="26" height="16" rx="3" fill="#FFFFFF" stroke="#0E6E60" stroke-width="1.6"/>
 <text x="62" y="1156" font-size="11" fill="#5C6B67">built here</text>
