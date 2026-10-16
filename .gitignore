@@ -20,7 +20,7 @@ build/
 
 # Data (loaders fetch and verify; nothing raw is committed). The data root is ./data unless
 # LEGIBLE_DATA moves it; the page manifests and split summaries are in manifests/, committed.
-data/
+/data/
 data/raw/
 data/pages/
 data/degraded/
