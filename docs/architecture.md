@@ -1,162 +1,80 @@
 # Architecture
 
-The diagrams behind [PLAN.md](../PLAN.md), in Mermaid so they render on GitHub and change in
-the same commit as the code they describe. Six views: the system, one page through the five
-arms, the fine-tuning and serving loop, the evaluation design, the review-rate computation, and
-the public site.
+The figures behind [PLAN.md](../PLAN.md), drawn before the first line of code so the design
+cannot be shaped to fit the result. Four views: the system, one page through the five arms,
+the fine-tuning and serving loop, and the evaluation design with the review rate. Nothing in
+them is measured yet; the module names are the plan's.
 
-## 1. The system
+## The system
 
-Public corpora in, numbers out, and one ledger for every model call.
+![Public pages are fetched with their licences quoted, rendered, split and degraded to five levels; five arms read the same pages, the frontier and OCR-to-model arms through the gateway and the fine-tuned models served as gateway hosts; one grader scores every field, the review rate, the verifier, the cost per page and the release gate are computed from the outcomes, and the report writes the tables and the static site.](architecture/system.svg)
 
-```mermaid
-flowchart LR
-  subgraph corpora["Public corpora (fetched, checksummed, never committed)"]
-    VRDU["VRDU<br/>registration and ad-buy forms<br/>PDF + annotations"]
-    CORD["CORD v2<br/>receipts<br/>photos + annotations"]
-    NIST["NIST SD2<br/>tax forms<br/>binary scans + field files"]
-  end
+Three public corpora, never committed, come in: VRDU's registration and ad-buy forms as PDFs
+with annotations, CORD's receipt photos, and NIST SD2's binary tax-form scans with field
+files (`docs/data.md`). The fetch step keeps loaders, checksums and the licences quoted
+(`legible.data`); pages are rendered at 300 dpi and split, the benchmarks' own splits where
+they exist, NIST by simulated submission, with a dev carve-out and a leakage check; and the
+degradation step produces levels 0 to 4 from a fixed seed, calibrated to Tesseract word
+accuracy rather than to a filter's parameters (`legible.degrade`). Five arms read the same
+pages: A, a frontier vision model; B, Gemma 4 E2B and E4B fine-tuned with QLoRA on page
+images; C, the same bases untuned; D, Tesseract text to the same frontier model; E, Tesseract
+with per-template rules. A and D call through project 04's gateway with image or text blocks at
+the public data class, B and C are served on a rented GPU and registered as gateway hosts, so
+every call is costed in one ledger. One grader (`legible.grade`) scores every field of every
+arm with the schema's matchers and a miss taxonomy, bootstrapped over documents with paired
+deltas on identical items. From the outcomes come the review rate at thresholds chosen on dev,
+the verifier's arithmetic and format checks, the cost per page from the ledger and the release
+gate's non-inferiority verdict per corpus, and the report writes the README tables, the
+charts, the model cards and the static site at forms.peterparker.ca.
 
-  corpora --> fetch["legible data fetch<br/>loaders, checksums, licences quoted"]
-  fetch --> render["render<br/>300 dpi pages + manifest"]
-  render --> split["split<br/>benchmark splits, NIST by submission,<br/>dev carve-out, leakage check"]
-  split --> degrade["degrade<br/>levels 0 to 4, fixed seed,<br/>calibrated to OCR word accuracy"]
-  degrade --> pages[("data/pages<br/>data/degraded")]
+## One page through the five arms
 
-  pages --> arms
-  subgraph arms["Five arms, same pages"]
-    A["A frontier vision"]
-    B["B fine-tuned small vision"]
-    C["C untuned small vision"]
-    D["D OCR text + language model"]
-    E["E OCR + rules"]
-  end
+![One page image at a degradation level, with its corpus schema, is read five ways: a frontier vision model through the gateway, the fine-tuned small vision model, the same model untuned, OCR text to the frontier model, and OCR with per-template rules; one grader scores every field of every arm the same way.](architecture/five-arms.svg)
 
-  A & D -->|"image or text blocks,<br/>data_class=public"| GW["04 boundary gateway<br/>ledger, caps, batch, cache"]
-  GW --> vendors["Anthropic / OpenAI / Google"]
-  B & C -->|"served on rented GPU,<br/>registered as a host"| GW
-  D & E --> OCR["Tesseract (hOCR)"]
+One page image at a level from 0 to 4 and its corpus schema, one definition that the prompt,
+the training targets and the grader all read, go to every arm. A sends an image block with the
+instruction and the schema to a frontier model through the gateway, using structured output
+where the vendor offers it, and returns JSON. B sends the image at 1120 or 560 visual tokens to
+Gemma 4 E2B or E4B with its QLoRA adapter and returns JSON with a per-field confidence from the
+logprobs. C sends the same input to the untuned instruction-tuned base, zero- or few-shot. D
+runs Tesseract, renders the hOCR words as positioned text and sends it to the same frontier
+model as A, text only. E runs Tesseract and applies per-template anchors and patterns built on
+the training templates only, returning JSON or a blank. The grader scores every field as right,
+wrong field, wrong value, blank filled, invented or malformed, and writes outcomes per document
+with a document-level all-right flag.
 
-  arms --> grade["grade<br/>schema matchers, miss taxonomy,<br/>bootstrap over documents, paired deltas"]
-  grade --> results[("data/runs<br/>predictions + outcomes")]
-  results --> review["review<br/>confidence thresholds on dev,<br/>review rate on test"]
-  results --> verify["verify<br/>arithmetic and format checks"]
-  results --> gate["03 gate<br/>non-inferiority per corpus"]
-  GW -->|"cost per page"| cost["bench/cost + breakeven<br/>(06's arithmetic)"]
-  review & verify & gate & cost --> report["report<br/>README tables, charts, cards"]
-  report --> site["site<br/>forms.peterparker.ca (static)"]
-```
+## Fine-tuning and serving
 
-## 2. One page through the five arms
+![Training pages and their JSON targets are fed to QLoRA on a rented spot GPU with the vision encoder frozen and checkpoints in object storage; the ablations run over the token budget, data volume and seeds; the adapters are merged, published with their cards, served, registered with the gateway at a price per page, load-tested and priced into a break-even curve.](architecture/train-serve.svg)
 
-What each arm sees and what it returns. The schema is one definition; the prompt, the training
-target and the grader all read from it.
+Project 06's loop with a vision encoder. The training split's pages and their JSON targets
+from the schema become the dataset (`train/dataset.py`); QLoRA trains rank-16 adapters on the
+4-bit base with the vision encoder frozen and the projector and language layers trained
+(`train/qlora.py`) on a rented spot GPU of the L4 or 4090 class, an A100 for E4B at 1120
+tokens, chosen from the day-one price table and the provider rule in `docs/gpu-prices.md`.
+Checkpoints go to object storage every N steps and a run resumes after a reclaim. The
+ablations cover the token budget, 1120 against 560, the data volume at all, half and a
+quarter, three seeds, and a multi-corpus run. The chosen recipe is merged to bf16, published to
+Hugging Face with cards that state failure modes, and served with vLLM if Gemma 4's vision
+path is supported and otherwise with batched Transformers (`legible.serve`). The endpoint is
+registered with the gateway at a price of the GPU-hour rate over the measured pages per hour,
+load-tested at concurrency 1, 8 and 32 for p50 and p99 (`bench/load.py`), and priced into a
+break-even curve over utilisation by project 06's arithmetic (`bench/breakeven.py`).
 
-```mermaid
-flowchart TB
-  page["One page image<br/>(level 0 to 4)"] --> schema["Schema for its corpus<br/>fields, types, matchers, nesting"]
+## Evaluation design
 
-  schema --> A
-  schema --> B
-  schema --> C
-  schema --> D
-  schema --> E
+![Dev carve-outs from VRDU and CORD are the only pages prompts and confidence thresholds may see; the unseen-template VRDU test carries the headline and the mixed-template test the gap; NIST is split by simulated submission with a leakage check and its 300 degraded pages carry the degradation curve; each test set is run once per arm, bootstrapped over documents, gated per corpus, and the review rate is read at 99 percent.](architecture/evaluation.svg)
 
-  subgraph A["A: frontier vision"]
-    A1["image block + instruction + schema"] --> A2["frontier model via gateway<br/>structured output where offered"] --> A3["JSON"]
-  end
-  subgraph B["B: fine-tuned small vision"]
-    B1["image at 1120 or 560 visual tokens<br/>+ instruction"] --> B2["Gemma 4 E2B / E4B + QLoRA adapter<br/>served on rented GPU"] --> B3["JSON + per-field logprob confidence"]
-  end
-  subgraph C["C: untuned small vision"]
-    C1["same input, zero- or few-shot"] --> C2["Gemma 4 E2B / E4B -it"] --> C3["JSON"]
-  end
-  subgraph D["D: OCR text + language model"]
-    D1["Tesseract hOCR<br/>words with boxes"] --> D2["positioned text rendering"] --> D3["same frontier model as A,<br/>text only, via gateway"] --> D4["JSON"]
-  end
-  subgraph E["E: OCR + rules"]
-    E1["Tesseract hOCR"] --> E2["per-template anchors<br/>+ patterns (training templates only)"] --> E3["JSON or blank"]
-  end
-
-  A3 & B3 & C3 & D4 & E3 --> grader["grader<br/>per field: right / wrong field / wrong value /<br/>blank filled / invented / malformed"]
-  grader --> out["outcomes per document<br/>+ document-level all-right"]
-```
-
-## 3. Fine-tuning and serving
-
-06's loop with a vision encoder. Spot GPUs, so every run resumes from object storage.
-
-```mermaid
-flowchart LR
-  train_pages["training split pages<br/>+ JSON targets from the schema"] --> ds["train/dataset.py"]
-  ds --> qlora["train/qlora.py<br/>4-bit base, PEFT rank 16,<br/>vision encoder frozen,<br/>projector + language layers trained"]
-  prices["docs/gpu-prices.md<br/>day-one table, provider rule"] --> gpu["rented spot GPU<br/>L4 / 4090 class; A100 for E4B at 1120"]
-  qlora --> gpu
-  gpu -->|"every N steps"| ckpt[("object storage<br/>checkpoints")]
-  ckpt -->|"resume after interruption"| gpu
-  gpu --> ablate["ablate: token budget 1120 vs 560,<br/>data volume all / half / quarter,<br/>three seeds, multi-corpus run"]
-  ablate --> merge["merge to bf16"]
-  merge --> hf["Hugging Face<br/>adapters + cards with failure modes"]
-  merge --> serve["serve: vLLM if Gemma 4 vision is supported,<br/>else batched Transformers"]
-  serve --> reg["gateway host registration<br/>price = GPU-hour rate / measured pages per hour"]
-  reg --> load["bench/load.py<br/>concurrency 1, 8, 32; p50, p99"]
-  load --> be["breakeven over utilisation<br/>(06's staircase)"]
-```
-
-## 4. Evaluation design
-
-Which pages carry which claim, and why the test sets are touched once.
-
-```mermaid
-flowchart TB
-  subgraph vrdu["VRDU (both corpora)"]
-    v_train["train templates"] --> v_dev["dev (carved from train)"]
-    v_train --> v_mtl["mixed-template test<br/>(reported as the gap)"]
-    v_utl["unseen-template test<br/>(templates disjoint from train)<br/>HEADLINE"]
-  end
-  subgraph cord["CORD"]
-    c_train["800 train"] --> c_dev["100 dev"]
-    c_test["100 test"]
-  end
-  subgraph nist["NIST SD2"]
-    n_sub["split by simulated submission<br/>leakage check on every build"] --> n_train["train"]
-    n_sub --> n_test["test: 500 clean pages"]
-    n_test --> n_deg["300 pages x levels 1 to 4<br/>DEGRADATION CURVE"]
-    n_train --> n_vol["data-volume curve<br/>all / half / quarter"]
-  end
-
-  v_dev & c_dev --> thresholds["prompt iteration and<br/>confidence thresholds<br/>(dev only)"]
-  thresholds --> once["each test set run once per arm"]
-  v_utl & v_mtl & c_test & n_test & n_deg --> once
-  once --> boot["bootstrap over documents,<br/>95% intervals,<br/>paired deltas on identical items"]
-  boot --> gate["03 gate: non-inferiority,<br/>delta 3 points, per corpus"]
-```
-
-## 5. Review rate
-
-The product number: at 99 percent accuracy on the fields a machine keeps, how many fields go
-to a person.
-
-```mermaid
-flowchart LR
-  B_conf["arm B: per-field<br/>logprob confidence"] --> thr
-  AD_agree["arms A and D: agreement<br/>between vision read and OCR text read<br/>of the same page"] --> thr
-  thr["choose threshold on dev<br/>so accepted fields are 99% right"] --> apply["apply to test"]
-  apply --> keep["accepted fields<br/>(accuracy reported)"]
-  apply --> route["routed to a person<br/>= review rate"]
-  verify["verify: arithmetic and format checks"] --> caught["errors caught before review<br/>(catch rate)"]
-  keep --> caught
-```
-
-## 6. The public site
-
-Static, free, nothing modelled in the browser, nothing uploaded.
-
-```mermaid
-flowchart LR
-  report["legible report"] --> json["site JSON:<br/>per-page reads per arm with boxes,<br/>tables, degradation series"]
-  images["page images shown:<br/>NIST (synthetic), CORD (CC BY 4.0),<br/>VRDU ad-buy (business documents)<br/>never registration forms"] --> build
-  json --> build["legible site<br/>writes site/out"]
-  build --> swa["Azure Static Web Apps (free tier)<br/>forms.peterparker.ca"]
-  swa --> viewer["viewer: boxes right/wrong with truth<br/>slider: levels 0 to 4<br/>tables: cost, review rate, intervals"]
-```
+Which pages carry which claim, and why each test set is touched once. VRDU's train templates
+give a dev carve-out, an unseen-template test whose templates are disjoint from train, which
+is the headline, and a mixed-template test reported as the gap between the two. CORD has 800
+train, 100 dev and 100 test. NIST SD2 is split by simulated submission with a leakage check on
+every build; its training split also yields the data-volume curve at all, half and a quarter,
+and its test is 500 clean pages, 300 of them also at levels 1 to 4, which is the degradation
+curve. Prompt iteration and the confidence thresholds, B's per-field logprob and the agreement
+between A's and D's reads of the same page, are chosen on dev only and frozen. Each test set is
+then run once per arm; outcomes are bootstrapped over documents with 95% intervals and paired
+deltas on identical items; the release gate tests non-inferiority at a three-point delta per
+corpus; the verifier's arithmetic and format checks report what they catch before review; and
+the review rate on test is the share of fields routed to a person when the accepted fields
+are held to 99 percent right (`legible.review`).

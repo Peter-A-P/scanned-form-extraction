@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1236" height="708" viewBox="0 0 1236 708" role="img" aria-label="One page image at a degradation level, with its corpus schema, is read five ways: a frontier vision model through the gateway, the fine-tuned small vision model, the same model untuned, OCR text to the frontier model, and OCR with per-template rules; one grader scores every field of every arm the same way." font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9 z" fill="#14201E"/></marker><marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9 z" fill="#0E6E60"/></marker><marker id="arrow-signal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9 z" fill="#A64C1C"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9 z" fill="#5C6B67"/></marker></defs>
+<rect width="1236" height="708" fill="#FFFFFF"/>
+<text x="28" y="42" font-size="16" font-weight="700" fill="#14201E">One page through the five arms</text>
+<path d="M 328.0 380.0 L 392.0 380.0 Q 398.0 380.0 398.0 374.0 L 398.0 208.0 Q 398.0 202.0 404.0 202.0 L 468.0 202.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 328.0 395.0 L 392.0 395.0 Q 398.0 395.0 398.0 389.0 L 398.0 312.0 Q 398.0 306.0 404.0 306.0 L 468.0 306.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 328.0 410.0 L 468.0 410.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 328.0 425.0 L 392.0 425.0 Q 398.0 425.0 398.0 431.0 L 398.0 508.0 Q 398.0 514.0 404.0 514.0 L 468.0 514.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 328.0 440.0 L 392.0 440.0 Q 398.0 440.0 398.0 446.0 L 398.0 612.0 Q 398.0 618.0 404.0 618.0 L 468.0 618.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 768.0 202.0 L 832.0 202.0 Q 838.0 202.0 838.0 208.0 L 838.0 377.3 Q 838.0 383.3 844.0 383.3 L 908.0 383.3" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 768.0 306.0 L 832.0 306.0 Q 838.0 306.0 838.0 312.0 L 838.0 390.7 Q 838.0 396.7 844.0 396.7 L 908.0 396.7" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 768.0 410.0 L 908.0 410.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 768.0 514.0 L 832.0 514.0 Q 838.0 514.0 838.0 508.0 L 838.0 429.3 Q 838.0 423.3 844.0 423.3 L 908.0 423.3" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 768.0 618.0 L 832.0 618.0 Q 838.0 618.0 838.0 612.0 L 838.0 442.7 Q 838.0 436.7 844.0 436.7 L 908.0 436.7" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 1058.0 450.0 L 1058.0 581.0" fill="none" stroke="#14201E" stroke-width="1.4" marker-end="url(#arrow)"/>
+<path d="M 28.0 372.0 a 150.0 7 0 0 1 300.0 0 L 328.0 448.0 a 150.0 7 0 0 1 -300.0 0 Z" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/><path d="M 28.0 372.0 a 150.0 7 0 0 0 300.0 0" fill="none" stroke="#14201E" stroke-width="1.1"/>
+<text x="178.0" y="395.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">One page image, level 0 to 4</text>
+<text x="178.0" y="411.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">with its corpus schema: fields,</text>
+<text x="178.0" y="427.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">types, matchers, nesting</text>
+<text x="178.0" y="444.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">one schema: prompt, targets, grader</text>
+<rect x="468.0" y="169.0" width="300.0" height="66.0" rx="4" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/>
+<text x="618.0" y="190.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">A: frontier vision</text>
+<text x="618.0" y="206.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">image block, instruction, schema;</text>
+<text x="618.0" y="222.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">via the gateway; JSON</text>
+<rect x="468.0" y="273.0" width="300.0" height="66.0" rx="4" fill="#FFFFFF" stroke="#0E6E60" stroke-width="1.6"/>
+<rect x="468.0" y="273.0" width="5" height="66.0" rx="2" fill="#0E6E60"/>
+<text x="618.0" y="294.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">B: fine-tuned small vision</text>
+<text x="618.0" y="310.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">image at 1120 or 560 visual tokens; Gemma 4</text>
+<text x="618.0" y="326.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">E2B/E4B + QLoRA; JSON + per-field confidence</text>
+<rect x="468.0" y="377.0" width="300.0" height="66.0" rx="4" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/>
+<text x="618.0" y="398.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">C: untuned small vision</text>
+<text x="618.0" y="414.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">same input, zero- or few-shot;</text>
+<text x="618.0" y="430.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Gemma 4 E2B/E4B -it; JSON</text>
+<rect x="468.0" y="481.0" width="300.0" height="66.0" rx="4" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/>
+<text x="618.0" y="502.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">D: OCR text to a language model</text>
+<text x="618.0" y="518.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Tesseract hOCR, positioned text; the same</text>
+<text x="618.0" y="534.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">frontier model as A, text only; JSON</text>
+<rect x="468.0" y="585.0" width="300.0" height="66.0" rx="4" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/>
+<text x="618.0" y="606.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">E: OCR plus rules</text>
+<text x="618.0" y="622.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Tesseract hOCR; per-template anchors and</text>
+<text x="618.0" y="638.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">patterns (training templates); JSON or blank</text>
+<rect x="908.0" y="370.0" width="300.0" height="80.0" rx="4" fill="#FFFFFF" stroke="#A64C1C" stroke-width="1.6"/>
+<rect x="908.0" y="370.0" width="5" height="80.0" rx="2" fill="#A64C1C"/>
+<text x="1058.0" y="391.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">The grader</text>
+<text x="1058.0" y="407.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">per field: right, wrong field, wrong value,</text>
+<text x="1058.0" y="423.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">blank filled, invented, malformed</text>
+<text x="1058.0" y="440.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">legible.grade</text>
+<path d="M 908.0 588.0 a 150.0 7 0 0 1 300.0 0 L 1208.0 648.0 a 150.0 7 0 0 1 -300.0 0 Z" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/><path d="M 908.0 588.0 a 150.0 7 0 0 0 300.0 0" fill="none" stroke="#14201E" stroke-width="1.1"/>
+<text x="1058.0" y="611.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">Outcomes per document</text>
+<text x="1058.0" y="627.0" font-size="13" font-weight="500" text-anchor="middle" fill="#14201E">and document-level all-right</text>
+<text x="1058.0" y="644.0" font-size="11" font-family="Consolas, Menlo, 'DejaVu Sans Mono', monospace" text-anchor="middle" fill="#5C6B67">data/runs</text>
+<rect x="347.9" y="281.0" width="100.2" height="20.0" rx="3" fill="#FFFFFF"/>
+<text x="398.0" y="293.0" font-size="12" text-anchor="middle" fill="#14201E">page and schema</text>
+<rect x="776.1" y="272.7" width="123.7" height="20.0" rx="3" fill="#FFFFFF"/>
+<text x="838.0" y="284.7" font-size="12" text-anchor="middle" fill="#14201E">JSON from every arm</text>
+<rect x="984.4" y="505.5" width="147.2" height="20.0" rx="3" fill="#FFFFFF"/>
+<text x="1058.0" y="517.5" font-size="12" text-anchor="middle" fill="#14201E">per field, per document</text>
+<rect x="28" y="672" width="26" height="16" rx="3" fill="#FFFFFF" stroke="#0E6E60" stroke-width="1.6"/>
+<text x="62" y="684" font-size="11" fill="#5C6B67">the model trained here</text>
+<rect x="206.57999999999998" y="672" width="26" height="16" rx="3" fill="#FFFFFF" stroke="#A64C1C" stroke-width="1.6"/>
+<text x="240.57999999999998" y="684" font-size="11" fill="#5C6B67">the one grader</text>
+<path d="M 342.0 679.0 a 13.0 7 0 0 1 26.0 0 L 368.0 681.0 a 13.0 7 0 0 1 -26.0 0 Z" fill="#FFFFFF" stroke="#14201E" stroke-width="1.1"/><path d="M 342.0 679.0 a 13.0 7 0 0 0 26.0 0" fill="none" stroke="#14201E" stroke-width="1.1"/>
+<text x="376.03999999999996" y="684" font-size="11" fill="#5C6B67">data at rest</text>
+</svg>
