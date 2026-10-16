@@ -15,6 +15,7 @@ rate: word-level edit distance against the reference text over the reference's l
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from collections.abc import Sequence
@@ -44,10 +45,25 @@ class TesseractMissing(RuntimeError):
     """The tesseract binary is not on PATH."""
 
 
+#: Where the Windows installer puts it, which it does not add to PATH.
+_WINDOWS_DEFAULT = Path("C:/Program Files/Tesseract-OCR/tesseract.exe")
+
+
+def tesseract_exe() -> str:
+    """The binary: LEGIBLE_TESSERACT if set, else PATH, else the Windows installer's place."""
+    configured = os.environ.get("LEGIBLE_TESSERACT")
+    if configured:
+        return configured
+    found = shutil.which("tesseract")
+    if found is not None:
+        return found
+    if _WINDOWS_DEFAULT.exists():
+        return str(_WINDOWS_DEFAULT)
+    raise TesseractMissing("tesseract is not installed; it runs on the measurement machine")
+
+
 def tesseract_version() -> str:
-    exe = shutil.which("tesseract")
-    if exe is None:
-        raise TesseractMissing("tesseract is not installed; it runs on the measurement machine")
+    exe = tesseract_exe()
     out = subprocess.run([exe, "--version"], capture_output=True, text=True, check=True)
     return (out.stdout or out.stderr).splitlines()[0].strip()
 
@@ -85,9 +101,7 @@ def parse_tsv(tsv: str) -> list[Word]:
 
 
 def run_tesseract(image: Path, *, lang: str = "eng") -> list[Word]:
-    exe = shutil.which("tesseract")
-    if exe is None:
-        raise TesseractMissing("tesseract is not installed; it runs on the measurement machine")
+    exe = tesseract_exe()
     out = subprocess.run(
         [exe, str(image), "stdout", "-l", lang, "--psm", str(PSM), "tsv"],
         capture_output=True,
