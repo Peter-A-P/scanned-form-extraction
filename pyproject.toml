@@ -1,0 +1,95 @@
+[project]
+name = "legible"
+version = "0.0.1"
+description = "Forms That Read Themselves: frontier vision models, fine-tuned small vision models and OCR pipelines measured on scanned forms with known answers, with cost per thousand pages."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+authors = [{ name = "Peter Parker" }]
+dependencies = [
+  # Every schema, truth record, prediction and manifest is a pydantic model. 2.x is the
+  # current line; 3 would be a rewrite of the validation API the schemas lean on.
+  "pydantic>=2,<3",
+  # Bootstrap intervals, paired deltas, the degradation noise and the review-rate sweep.
+  # 2.x is the line with the stable dtype rules and the Generator API the fixed seeds use.
+  "numpy>=2,<3",
+  # The degradation pipeline is Pillow operations on page images, and its byte-for-byte
+  # determinism depends on Pillow's resampling and its bundled libjpeg. A major release is
+  # where those have changed before, so the degraded set is pinned to the 12.x line and
+  # docs/degradation.md records the exact version it was calibrated on.
+  "pillow>=12,<13",
+  # Line items are matched to their truth by an optimal assignment, so that a correct item
+  # read in a different order is not scored wrong. linear_sum_assignment has been stable
+  # across the 1.x line; 2 is not out and would be allowed to move it.
+  "scipy>=1.14,<2",
+  # Configuration and the docs' front matter.
+  "pyyaml>=6,<7",
+  # Command line. 0.x is the only line typer has; pinned below 1.
+  "typer>=0.15,<1",
+]
+
+[project.optional-dependencies]
+# The 04 gateway, the one route every model call takes, frontier and self-hosted alike, so
+# that cost per page has one ledger. A git tag because it is not on PyPI and because the
+# ledger schema is part of this project's results; v1.2.0 is the current release and the one
+# whose ChatRequest passes vendor-shaped content blocks (the page images) through untouched.
+# An extra so that the grader, the degradation pipeline and the tests install without git
+# access.
+gateway = [
+  "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.2.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9,<10",
+  "mypy>=1,<2",
+  "ruff>=0.13,<1",
+  "types-PyYAML>=6,<7",
+  "scipy-stubs>=1.14",
+]
+
+[project.scripts]
+legible = "legible.cli:main"
+
+[build-system]
+requires = ["hatchling>=1,<2"]
+build-backend = "hatchling.build"
+
+# The gateway extra is a git URL, which hatchling refuses to record in metadata unless
+# told to. It is deliberate: the gateway is not published to PyPI.
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["legible"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+# ruff formats Python blocks inside Markdown by default; the plan and docs keep their layout.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "N", "RUF"]
+ignore = [
+  # Line length is handled by the formatter.
+  "E501",
+  # SchemaDrift and SplitLeak read as the conditions they describe; an Error suffix adds
+  # nothing a reader of the traceback needs.
+  "N818",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Typer declares a command's options as its argument defaults. That is the library's
+# interface rather than the mistake B008 usually catches.
+"legible/cli.py" = ["B008"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["legible", "tests"]
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
