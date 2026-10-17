@@ -16,6 +16,7 @@ gap.
 
 from __future__ import annotations
 
+import ast
 import gzip
 import json
 import re
@@ -27,7 +28,9 @@ from urllib.parse import quote
 
 from pydantic import BaseModel, ConfigDict
 
+from legible.data import patches
 from legible.data.fetch import fetch, load_checksums
+from legible.data.render import Frame
 from legible.data.split import SplitLeak, check_unseen_templates
 from legible.schema import CorpusSchema, Item, Record, SchemaDrift
 from legible.schema.corpora import DEEPFORM, FARA
@@ -61,6 +64,10 @@ class VrduDoc(BaseModel):
     #: Where each truth value is printed: (page, x1, y1, x2, y2), normalised to the page, keyed
     #: by field name or `group[i].field`. Used to show a label to the hand audit.
     boxes: dict[str, Box] = {}
+    #: Each page as the benchmark's OCR saw it, for orienting the render.
+    frames: tuple[Frame, ...] = ()
+    #: Truth fields the audit corrected.
+    patched: tuple[str, ...] = ()
 
 
 class VrduSplit(BaseModel):
@@ -137,6 +144,25 @@ def _text(entity: list[Any]) -> str:
     return str(entity[0]).strip()
 
 
+#: Token boxes kept per page for orienting it; a sample is enough to tell ink from paper.
+_FRAME_TOKENS = 200
+
+
+def _frame(page: dict[str, Any]) -> Frame:
+    """A page's orientation and token boxes, from VRDU's OCR (which stores both as Python
+    reprs inside the JSON)."""
+    dim = page["dimension"]
+    dim = ast.literal_eval(dim) if isinstance(dim, str) else dim
+    tokens = page["tokens"]
+    tokens = ast.literal_eval(tokens) if isinstance(tokens, str) else tokens
+    step = max(1, len(tokens) // _FRAME_TOKENS)
+    boxes = tuple(
+        (float(t["bbox"][1]), float(t["bbox"][2]), float(t["bbox"][3]), float(t["bbox"][4]))
+        for t in tokens[::step]
+    )
+    return Frame(landscape=int(dim["width"]) > int(dim["height"]), boxes=boxes)
+
+
 def _box(entity: list[Any]) -> Box:
     page, x1, y1, x2, y2 = entity[1]
     return (int(page), float(x1), float(y1), float(x2), float(y2))
@@ -184,15 +210,25 @@ def parse_record(corpus: VrduCorpus, record: dict[str, Any]) -> VrduDoc:
         alternatives=alternatives,
         text=record["ocr"]["text"],
         boxes=boxes,
+        frames=tuple(_frame(p) for p in record["ocr"]["pages"]),
     )
 
 
 def read_dataset(corpus: VrduCorpus, raw_dir: Path) -> Iterator[VrduDoc]:
-    """Every document of a corpus, from the fetched (and so verified) annotation file."""
+    """Every document of a corpus, from the fetched (and so verified) annotation file, with
+    the audit's label patches applied (legible/data/patches.py)."""
     path = raw_dir / DIRECTORY[corpus] / "main" / "dataset.jsonl.gz"
     with gzip.open(path, "rt", encoding="utf-8") as f:
         for line in f:
-            yield parse_record(corpus, json.loads(line))
+            doc = parse_record(corpus, json.loads(line))
+            truth, alternatives, patched = patches.apply(
+                corpus, doc.doc_id, doc.truth, doc.alternatives
+            )
+            if patched:
+                doc = doc.model_copy(
+                    update={"truth": truth, "alternatives": alternatives, "patched": patched}
+                )
+            yield doc
 
 
 def read_split(corpus: VrduCorpus, path: Path) -> VrduSplit:

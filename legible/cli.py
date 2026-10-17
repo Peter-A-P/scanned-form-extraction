@@ -12,6 +12,7 @@ import typer
 from PIL import Image
 
 from legible import __version__
+from legible.data.render import PageEntry
 from legible.degrade import LEVELS, degrade, to_png
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -137,7 +138,8 @@ def data_build(corpus: str = typer.Argument("all", help="fara, deepform, cord or
         pdfs = raw / DIRECTORY[c] / "main" / "pdfs"
         with ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) - 1)) as pool:
             futures = [
-                pool.submit(render_pdf, pdfs / d.doc_id, c, d.doc_id, pages_dir) for d in docs
+                pool.submit(render_pdf, pdfs / d.doc_id, c, d.doc_id, pages_dir, d.frames)
+                for d in docs
             ]
             for i, future in enumerate(futures, 1):
                 entries += future.result()
@@ -197,7 +199,12 @@ def data_audit_report(
         Label.model_validate({**x, "value": ""})
         for x in json.loads((MANIFESTS / "audit-sample.json").read_text(encoding="utf-8"))
     ]
-    rows = report(sample, read_decisions(decisions))
+    from legible.data.patches import patches_from, write_patches
+
+    decided = read_decisions(decisions)
+    rows = report(sample, decided)
+    fixes = patches_from(decided)
+    write_patches(Path("legible/data/patches.json"), fixes)
     lines = [
         "# Label audit",
         "",
@@ -209,6 +216,19 @@ def data_audit_report(
     lines += [
         f"| {r.corpus} | {r.stratum} | {r.audited} | {r.disagreement} | {r.unreadable} |"
         for r in rows
+    ]
+    lines += [
+        "",
+        f"{len(fixes)} labels marked wrong with the value the page shows are corrected by the",
+        "loaders from `legible/data/patches.json`; each patched document names its patched fields.",
+        "",
+        "| Corpus | Document | Field | Corrected to |",
+        "|---|---|---|---|",
+    ]
+    lines += [
+        f"| {p.corpus} | {'(registration form)' if p.corpus == 'fara' else p.doc_id} | {p.key} | "
+        f"{'(withheld)' if p.corpus == 'fara' and not p.key.endswith('date') else p.value} |"
+        for p in fixes
     ]
     text = "\n".join(lines) + "\n"
     Path("docs/audit.md").write_text(text, encoding="utf-8", newline="\n")
@@ -251,6 +271,98 @@ def gate_specs(
             )
             (out / f"{name}.yaml").write_text(header + body, encoding="utf-8", newline="\n")
             typer.echo(f"{name}: {len(spec(schema, name=name)['suites'])} suites")
+
+
+ocr_app = typer.Typer(no_args_is_help=True, help="Tesseract over a corpus's pages.")
+app.add_typer(ocr_app, name="ocr")
+
+
+def part_docs(corpus: str, part: str) -> set[str]:
+    """The documents of a split part, over every headline split file: VRDU's train, valid
+    (dev) or test unions; CORD's own split."""
+    from legible.data.render import read_manifest
+
+    if corpus == "cord":
+        return {
+            e.doc_id
+            for e in read_manifest(MANIFESTS / "cord-pages.jsonl")
+            if e.doc_id.startswith(part)
+        }
+    from legible.data.vrdu import headline_split_files, read_split
+
+    raw = data_root() / "raw" / "vrdu"
+    attr = {"train": "train", "dev": "valid", "test": "test"}[part]
+    out: set[str] = set()
+    for level in ("unseen", "mixed"):
+        for p in headline_split_files(corpus, level):  # type: ignore[arg-type]
+            out.update(getattr(read_split(corpus, raw / p), attr))  # type: ignore[arg-type]
+    return out
+
+
+@ocr_app.command("run")
+def ocr_run(
+    corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    part: str = typer.Option("test", help="train, dev or test."),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+    limit: int | None = typer.Option(None, help="At most this many documents, by id order."),
+    workers: int | None = typer.Option(None),
+) -> None:
+    """OCR a split part's pages at a degradation level; resumes where it stopped."""
+    from legible.arms.ocr_run import run
+    from legible.data.render import read_manifest
+
+    docs = sorted(part_docs(corpus, part))[:limit]
+    wanted = set(docs)
+    entries = [e for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl") if e.doc_id in wanted]
+    pages, seconds = run(data_root(), entries, level, workers=workers)
+    typer.echo(
+        f"{corpus} {part} level {level}: {len(docs)} documents, {pages} pages read, {seconds:.0f} s"
+    )
+
+
+rules_app = typer.Typer(no_args_is_help=True, help="Arm E: OCR plus rules.")
+app.add_typer(rules_app, name="rules")
+
+
+@rules_app.command("run")
+def rules_run(
+    corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    part: str = typer.Option(
+        "dev", help="dev or test. Test is run once, on the measurement machine."
+    ),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+) -> None:
+    """Answer every document of a part from its stored OCR, one run per split file."""
+    from legible.arms.rules_run import rule_sets_for, run
+    from legible.data.render import read_manifest
+    from legible.data.vrdu import headline_split_files, read_split
+
+    pages: dict[str, list[PageEntry]] = {}
+    for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl"):
+        pages.setdefault(e.doc_id, []).append(e)
+    out_dir = data_root() / "runs" / "arm-e" / f"level{level}" / corpus
+    if corpus == "cord":
+        docs = sorted(part_docs("cord", part))
+        n = run(
+            data_root(),
+            corpus,
+            docs,
+            pages,
+            rule_sets_for("cord", None),
+            level,
+            out_dir / f"{part}.jsonl",
+        )
+        typer.echo(f"cord {part}: {n} documents")
+        return
+    raw = data_root() / "raw" / "vrdu"
+    attr = {"dev": "valid", "test": "test"}[part]
+    for split_level in ("unseen", "mixed"):
+        for p in headline_split_files(corpus, split_level):  # type: ignore[arg-type]
+            split = read_split(corpus, raw / p)  # type: ignore[arg-type]
+            docs = list(getattr(split, attr))
+            out = out_dir / f"{Path(p).stem}-{part}.jsonl"
+            n = run(data_root(), corpus, docs, pages, rule_sets_for(corpus, split), level, out)
+            typer.echo(f"{Path(p).stem} {part}: {n} documents")
 
 
 def main() -> None:

@@ -25,10 +25,16 @@ def entity(text: str, page: int = 0) -> list[Any]:
     return [text, [page, 0.1, 0.1, 0.2, 0.2], [[0, len(text)]]]
 
 
+#: A page as VRDU stores it: dimension and tokens as Python reprs inside the JSON.
+PAGE = {
+    "dimension": "{'height': 1758, 'width': 2275}",
+    "tokens": "[{'bbox': [0, 0.1, 0.1, 0.2, 0.2], 'text': 'KMSP'}]",
+}
+
 RECORD: dict[str, Any] = {
     "filename": "abc.pdf",
     "file_path": "ad-buy-form/main/pdfs/abc.pdf",
-    "ocr": {"text": "KMSP 12/30/19 $5,625.00", "pages": [{}, {}]},
+    "ocr": {"text": "KMSP 12/30/19 $5,625.00", "pages": [PAGE, PAGE]},
     "annotations": [
         ["property", [entity("KMSP\n"), entity("KMSP\n", 1)]],
         ["advertiser", [entity("Michael Bloomberg 2020, Inc\n"), entity("Bloomberg 2020\n", 1)]],
@@ -45,6 +51,7 @@ RECORD: dict[str, Any] = {
 def test_record_becomes_truth_with_alternatives() -> None:
     doc = parse_record("deepform", RECORD)
     assert doc.pages == 2
+    assert doc.frames[0].landscape and doc.frames[0].boxes == ((0.1, 0.1, 0.2, 0.2),)
     assert doc.truth["property"] == "KMSP"
     assert doc.truth["advertiser"] == "Michael Bloomberg 2020, Inc"
     assert doc.alternatives == {"advertiser": ["Bloomberg 2020"]}
@@ -211,3 +218,26 @@ def test_fara_unseen_templates_are_checked_from_file_names() -> None:
         check_templates(fara_split(("a_Amendment.pdf",), ("b_Amendment.pdf",)))
     with pytest.raises(SplitLeak, match="not Amendment"):
         check_templates(fara_split(("a_Short-Form.pdf",), ("b_Dissemination Report.pdf",)))
+
+
+def test_a_sideways_scan_is_turned_to_the_benchmarks_frame() -> None:
+    """A portrait page whose text runs up the page, where the benchmark read it landscape
+    with a word near the top left: turned so the word's box has ink."""
+    import io
+
+    from PIL import Image, ImageDraw
+
+    from legible.data.render import Frame, orient
+
+    landscape = Image.new("L", (300, 200), 255)
+    ImageDraw.Draw(landscape).rectangle((20, 20, 80, 40), fill=0)
+    portrait = landscape.rotate(270, expand=True)  # what the PDF holds
+    buf = io.BytesIO()
+    portrait.save(buf, format="PNG")
+    frame = Frame(landscape=True, boxes=((20 / 300, 20 / 200, 80 / 300, 40 / 200),))
+    data, rotation = orient(buf.getvalue(), frame)
+    assert rotation == 90
+    with Image.open(io.BytesIO(data)) as img:
+        assert img.size == (300, 200) and img.getpixel((50, 30)) == 0
+    same, none = orient(buf.getvalue(), Frame(landscape=False, boxes=frame.boxes))
+    assert none == 0 and same == buf.getvalue()

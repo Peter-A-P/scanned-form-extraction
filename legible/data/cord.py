@@ -26,6 +26,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from legible.data import patches
 from legible.data.fetch import fetch, load_checksums
 from legible.data.render import PageEntry
 from legible.schema import Item, Record, SchemaDrift
@@ -47,6 +48,8 @@ class CordDoc(BaseModel):
     #: labels whose printed line could be found: the annotated line whose category matches and
     #: whose words join to the value.
     boxes: dict[str, tuple[int, float, float, float, float]] = {}
+    #: Truth fields the audit corrected.
+    patched: tuple[str, ...] = ()
 
 
 def shard_split(path: str) -> CordSplit:
@@ -147,8 +150,14 @@ def read_shard(path: Path, pages_dir: Path | None) -> Iterator[tuple[CordDoc, Pa
                 height=int(size["height"]),
                 sha256=hashlib.sha256(data).hexdigest(),
             )
+        truth, alternatives, patched = patches.apply("cord", doc_id, truth, alternatives)
         doc = CordDoc(
-            doc_id=doc_id, split=split, truth=truth, alternatives=alternatives, boxes=boxes
+            doc_id=doc_id,
+            split=split,
+            truth=truth,
+            alternatives=alternatives,
+            boxes=boxes,
+            patched=patched,
         )
         yield doc, entry
 

@@ -168,6 +168,12 @@ the data root, never to the repository or the site, because it shows registratio
 decisions go to `docs/audit/decisions.json`, and `legible data audit-report` writes
 `docs/audit.md`.
 
+Done by Peter on 2026-10-16: 189 right, 8 wrong, 3 unreadable. FARA 5.1% wrong (0.0 to 11.9),
+DeepForm 6.4% (1.3 to 11.5), CORD 0.0%; seven of the eight wrong labels are dates. The eight
+are corrected through `legible/data/patches.json`, which the loaders apply and name on each
+document. Two of the three unreadable were blank crops of sideways DeepForm scans, fixed in
+the render the same day (docs/ocr.md); they are being looked at again on the corrected pages.
+
 ## NIST Special Database 2
 
 **Terms: unresolved.** The SD2 page, https://www.nist.gov/srd/nist-special-database-2

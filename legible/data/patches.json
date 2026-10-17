@@ -1,0 +1,50 @@
+[
+ {
+  "corpus": "deepform",
+  "doc_id": "3446ada9-ed5c-86a8-f237-190be5851005.pdf",
+  "key": "line_item[3].program_end_date",
+  "value": "03/04/20"
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "416277-collect-files-72145-political-file-2012-federal.pdf",
+  "key": "line_item[28].program_end_date",
+  "value": "08/26/12"
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "493496-315597-up-obama-10-30-12-13516185156783-_-pdf.pdf",
+  "key": "flight_to",
+  "value": "11/06/12"
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "8dfa0ca9-2457-2309-3c1c-8301ca6a6d14.pdf",
+  "key": "line_item[21].program_end_date",
+  "value": "06/09/20"
+ },
+ {
+  "corpus": "deepform",
+  "doc_id": "cfb3bae5-102b-8fcb-06a5-9a0bc89fa14f.pdf",
+  "key": "flight_from",
+  "value": "02/26/20"
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19821101_Aruba Tourism Authority_Amendment_Amendment.pdf",
+  "key": "file_date",
+  "value": "17 day of NOV"
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "19841201_British Virgin Islands Tourist Board_Amendment_Amendment.pdf",
+  "key": "file_date",
+  "value": "14th DECEMBER 1984"
+ },
+ {
+  "corpus": "fara",
+  "doc_id": "20140224_Ketchum Inc. NY_Kontesi, Amalia_Short-Form.pdf",
+  "key": "file_date",
+  "value": "02/20/2014"
+ }
+]

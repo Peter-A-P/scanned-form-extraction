@@ -18,9 +18,13 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import tempfile
+import time
 from collections.abc import Sequence
 from pathlib import Path
 
+import numpy as np
+from PIL import Image, ImageFilter
 from pydantic import BaseModel, ConfigDict
 
 #: Tesseract's page segmentation mode 3 (fully automatic, no OSD) and its default engine.
@@ -150,3 +154,136 @@ def word_accuracy(hypothesis: Sequence[str], reference: Sequence[str]) -> float:
             current.append(min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + (r != h)))
         previous = current
     return 1 - previous[-1] / len(reference)
+
+
+class OcrPage(BaseModel):
+    """One page's OCR, as stored: the words, the page size, the Tesseract that read it and
+    how long it took. One process per page and one thread per process (OMP_THREAD_LIMIT=1),
+    so the wall time is the CPU time OCR's cost per page is computed from."""
+
+    model_config = ConfigDict(frozen=True)
+
+    page_path: str
+    #: The sha256 of the page image read, so OCR of a page since re-rendered is not reused.
+    page_sha256: str
+    width: int
+    height: int
+    tesseract: str
+    preprocess: Preprocess
+    seconds: float
+    words: tuple[Word, ...]
+
+
+class Preprocess(BaseModel):
+    """What is done to a page before Tesseract sees it, per corpus, chosen on training pages.
+
+    Scans (VRDU) go in as rendered at 300 dpi with automatic page segmentation. CORD's
+    receipts are phone photographs of dot-matrix and thermal print at about 100 dpi, under
+    uneven light; as they are, Tesseract read no words at all from the first training receipt
+    tried. So they are scaled up twice, median-filtered, binarised against the local mean (so a
+    shadow does not swallow a column) and read as one uniform block, which keeps an item and
+    its price on one line. Any OCR pipeline that reads receipts does something of this kind;
+    leaving it out would measure a straw man.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    scale: float = 1.0
+    #: Local-mean binarisation window (pixels, after scaling) and offset; 0 for none.
+    window: int = 0
+    offset: float = 0.0
+    median: int = 0
+    psm: int = PSM
+
+
+SCANS = Preprocess()
+PHOTOS = Preprocess(scale=2.0, window=51, offset=10.0, median=3, psm=6)
+PREPROCESS: dict[str, Preprocess] = {"fara": SCANS, "deepform": SCANS, "cord": PHOTOS}
+
+
+def binarise(img: Image.Image, window: int, offset: float) -> Image.Image:
+    """Black where a pixel is darker than the mean of the window around it, less `offset`."""
+    a = np.asarray(img.convert("L"), dtype=np.float64)
+    ii = np.pad(a, ((1, 0), (1, 0))).cumsum(0).cumsum(1)
+    h, w = a.shape
+    r = window // 2
+    y0 = np.clip(np.arange(h) - r, 0, h)
+    y1 = np.clip(np.arange(h) + r + 1, 0, h)
+    x0 = np.clip(np.arange(w) - r, 0, w)
+    x1 = np.clip(np.arange(w) + r + 1, 0, w)
+    total = ii[y1][:, x1] - ii[y0][:, x1] - ii[y1][:, x0] + ii[y0][:, x0]
+    mean = total / ((y1 - y0)[:, None] * (x1 - x0)[None, :])
+    return Image.fromarray(np.where(a < mean - offset, 0, 255).astype(np.uint8))
+
+
+def prepare(image: Path, prep: Preprocess) -> Image.Image:
+    with Image.open(image) as img:
+        page = img.convert("L")
+    if prep.scale != 1.0:
+        page = page.resize(
+            (round(page.width * prep.scale), round(page.height * prep.scale)),
+            Image.Resampling.LANCZOS,
+        )
+    if prep.median:
+        page = page.filter(ImageFilter.MedianFilter(prep.median))
+    if prep.window:
+        page = binarise(page, prep.window, prep.offset)
+    return page
+
+
+def ocr_page(
+    image: Path,
+    page_path: str,
+    page_sha256: str,
+    width: int,
+    height: int,
+    *,
+    version: str,
+    prep: Preprocess = SCANS,
+) -> OcrPage:
+    """One page through the preprocessing and Tesseract. Word boxes are returned in the
+    page's own pixels, whatever scale Tesseract read it at."""
+    exe = tesseract_exe()
+    env = dict(os.environ, OMP_THREAD_LIMIT="1")
+    start = time.perf_counter()
+    with tempfile.TemporaryDirectory() as tmp:
+        source = image
+        if prep != SCANS:
+            source = Path(tmp) / "page.png"
+            prepare(image, prep).save(source)
+        out = subprocess.run(
+            [exe, str(source), "stdout", "-l", "eng", "--psm", str(prep.psm), "tsv"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=True,
+            env=env,
+        )
+    seconds = time.perf_counter() - start
+    words = parse_tsv(out.stdout)
+    if prep.scale != 1.0:
+        k = 1 / prep.scale
+        words = [
+            w.model_copy(
+                update={
+                    "left": round(w.left * k),
+                    "top": round(w.top * k),
+                    "width": round(w.width * k),
+                    "height": round(w.height * k),
+                }
+            )
+            for w in words
+        ]
+    return OcrPage(
+        page_path=page_path,
+        page_sha256=page_sha256,
+        width=width,
+        height=height,
+        tesseract=version,
+        preprocess=prep,
+        seconds=seconds,
+        words=tuple(words),
+    )
+
+
+OcrPage.model_rebuild()

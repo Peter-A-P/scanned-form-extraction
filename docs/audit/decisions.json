@@ -1,0 +1,1002 @@
+[
+ {
+  "label_id": "fara/19821101_Aruba Tourism Authority_Amendment_Amendment.pdf/file_date",
+  "verdict": "wrong",
+  "corrected": "17 day of NOV"
+ },
+ {
+  "label_id": "fara/20140224_Ketchum Inc. NY_Kontesi, Amalia_Short-Form.pdf/file_date",
+  "verdict": "wrong",
+  "corrected": "02/20/2014"
+ },
+ {
+  "label_id": "fara/20090424_Raben Group, LLC_Huffman, Katharine_Short-Form.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19950330_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19631101_Tourism Australia_Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20080206_Hecht, Latham, Spencer _ Associates, Inc._Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20170606_Sonoran Policy Group, LLC_Stryk, Robert Daniel_Short-Form.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19931201_Hill and Knowlton Strategies, LLC_Dissemination Report_Dissemination Report.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20170125_Sonoran Policy Group, LLC_Jolly, Stuart_Short-Form.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20150416_Daschle Group, LLC_Daschle, Nathan_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19960116_JETRO, Houston_Dissemination Report_Dissemination Report.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20160226_Fleishman-Hillard, Inc._Amendment_Amendment.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19931101_Scottish Enterprise_Dissemination Report_Dissemination Report.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20170902_Greenfield Law, LLC_Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19931001_Quebec Government Office_Dissemination Report_Dissemination Report.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20160727_Gallagher Group, LLC_Gallagher, James P._Short-Form.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19941220_JETRO, Houston_Dissemination Report_Dissemination Report.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19950530_Malaysian Industrial Development Authority_Dissemination Report_Dissemination Report.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20180703_BerlinRosen Ltd._Blenner, Michael_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20100309_Akin, Gump, Strauss, Hauer _ Feld, LLP_Cowman, Jordan Wade_Short-Form.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20001221_CMGRP, Inc._Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19920301_JETRO, Atlanta_Dissemination Report_Dissemination Report.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20151130_Sidley Austin, LLP_Amendment_Amendment.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19920301_JETRO, Houston_Dissemination Report_Dissemination Report.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19760301_Italian Government Tourist Board, New York_Amendment_Amendment.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930801_Hill and Knowlton Strategies, LLC_Dissemination Report_Dissemination Report.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20111114_MSLGROUP Americas, Inc._Squitieri, Tom_Short-Form.pdf/file_date",
+  "verdict": "unreadable",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20180221_Ballard Partners_Wexler, Robert_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20111114_MSLGROUP Americas, Inc._Flint, Erica_Short-Form.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20071219_BGR Government Affairs, LLC_Amendment_Amendment.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930801_Far East Trade Services, Inc._Dissemination Report_Dissemination Report.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930901_JETRO, Chicago_Dissemination Report_Dissemination Report.pdf/signer_title",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930301_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19830501_Hong Kong Trade Development Council, Inc._Amendment_Amendment.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20131029_Jewish Agency - American Section, Inc._Tal, Ittai_Short-Form.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20180629_MMGY Global, LLC_Hughes, Stephanie_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20070927_Hecht, Latham, Spencer _ Associates, Inc._Amendment_Amendment.pdf/signer_title",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19920701_Daniel J. Edelman, Inc._Dissemination Report_Dissemination Report.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20171010_MSLGROUP Americas, Inc._Harper, Clinton L._Short-Form.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20160930_Greenberg Traurig, LLP_Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930601_NHK Cosmomedia America, Inc._Amendment_Amendment.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20130315_Daniel J. Edelman, Inc._Klempay, Daniel_Short-Form.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20170928_Singapore Economic Development Board_Joshi, Saurabh_Short-Form.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19850801_St. Lucia Tourist Board_Amendment_Amendment.pdf/signer_title",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20100621_Venable, LLP_Hinckley, Elias_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930801_International Registries, Inc._Dissemination Report_Dissemination Report.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19841201_British Virgin Islands Tourist Board_Amendment_Amendment.pdf/file_date",
+  "verdict": "wrong",
+  "corrected": "14th DECEMBER 1984"
+ },
+ {
+  "label_id": "fara/19931201_JETRO, Los Angeles_Dissemination Report_Dissemination Report.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19790101_IDA Ireland_Amendment_Amendment.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20150929_Podesta Group, Inc._Billings, Erin_Short-Form.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19950629_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20081125_Greenberg Traurig, LLP_Vargo, Regina_Short-Form.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20120601_MSLGROUP Americas, Inc._Lagana, Gregory_Short-Form.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19930301_Kobe Trade Information Office_Dissemination Report_Dissemination Report.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19780701_Office of Tibet_Amendment_Amendment.pdf/file_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20171127_MMGY Global, LLC_Hill, Leanne_Short-Form.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20150410_Endeavor Law Firm, PC_Amendment_Amendment.pdf/signer_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20091006_Daniel J. Edelman, Inc._Myers, Richard B._Short-Form.pdf/foreign_principle_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/19950724_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf/registration_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "fara/20170113_LB International Solutions, LLC_McGregor, John_Short-Form.pdf/registrant_name",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/aad5c844-731e-28fc-c55e-78b98dd6bc4a.pdf/advertiser",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/a51729d1-964d-a204-918b-6722750bb58a.pdf/product",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/e06c5eeb-9be4-11ea-1995-6826d4142cc4.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/6d855060-cb88-0ab7-c794-d98f9c2a5313.pdf/flight_from",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/d6be1b3e-1a1c-4039-bf21-c3378c7a9516.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/fb4d8868-0de2-3017-686d-69051e7a14b1.pdf/contract_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/528c682d-fef7-2d25-d569-62b7d764b508.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/9c97e029-a04d-611c-39f7-8c5f831ee21d.pdf/flight_from",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/dbd3ea93-a44a-4c42-df97-c4cfb6e33453.pdf/flight_from",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/dd723ebb-a6df-3fe8-29e1-6cf76e6cd5fc.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/1291762d-c6ac-1154-8ea5-b4e15468ab8f.pdf/advertiser",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/14a2e049-7baa-8dbb-eea2-3a97eee4ee42.pdf/advertiser",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/4add49ba-5a10-92b4-36d4-999b09a9b27a.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/6a47fc12-60c8-6446-8f86-a3fd1369c417.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/df5c19e6-546e-311f-2e5a-c4af68838b66.pdf/tv_address",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/ca356a4b-5c50-5684-c2ed-da9de3d0b37b.pdf/advertiser",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/00c29ad8-c88b-b3bb-1a39-3267e47c7a88.pdf/flight_from",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/aa9b4790-f75a-e1c8-a4ce-be646c1d360c.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/88fa6e33-408f-6ac2-a253-d30e32bce302.pdf/agency",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/82cef107-b2a2-94ae-253b-84df81ab2d52.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/f56e2fc1-7f41-68e3-bfe5-06176b9a2e8a.pdf/product",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/f27113a6-a13d-da0a-851f-e6e25b3c7547.pdf/flight_from",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/8b687291-2dfb-fcd3-d827-7f36e3e89ef3.pdf/advertiser",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/2776cce3-4602-acdd-6a39-a482449b78cc.pdf/product",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/e1a17837-6866-9e53-d352-f014aef15468.pdf/product",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/8cdc0d13-803b-fe21-34fc-004299c8034b.pdf/contract_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/493496-315597-up-obama-10-30-12-13516185156783-_-pdf.pdf/flight_to",
+  "verdict": "wrong",
+  "corrected": "11/06/12"
+ },
+ {
+  "label_id": "deepform/cfb3bae5-102b-8fcb-06a5-9a0bc89fa14f.pdf/flight_from",
+  "verdict": "wrong",
+  "corrected": "02/26/20"
+ },
+ {
+  "label_id": "deepform/414978-collect-files-25453-political-file-2012-non.pdf/tv_address",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/6135cac3-ec97-4588-4fbb-689db748d424.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/89b8c007-4189-bfa6-e0a5-fe1d173edf92.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/c5cacf05-37a9-2277-0046-234f1732f804.pdf/property",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/c55fb5ec-8d44-80b4-a4cf-c8b888e60708.pdf/contract_num",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/493546-warren-for-senate-est-12911-10-26-12-10-28-12.pdf/contract_num",
+  "verdict": "unreadable",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/a790bcf4-f0e8-5b62-5363-f823050d49e8.pdf/property",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/87a7525f-29d8-4d0c-44bb-0e176245e567.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/aa7e85a5-922d-a0fe-1ae7-167e6f839d5c.pdf/flight_to",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/7ea9c6a3-c6de-fff7-2678-746749396bac.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/754084fc-3d10-7106-aa4b-fcac89a5d3a1.pdf/gross_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/c73ae3d2-8709-8348-694d-e43537b56987.pdf/tv_address",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/494008-103012-murphy-invoice-4-13516266179190-_-pdf.pdf/line_item[1].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/3f15777d-e41e-3d99-3de9-cc55df747532.pdf/line_item[6].program_end_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/738d52f6-4cf4-3ec1-6990-1c675e100eb0.pdf/line_item[3].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/4956f339-5a45-9929-25b4-31552572480c.pdf/line_item[18].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/417792-collect-files-72076-political-file-2012-non.pdf/line_item[9].program_start_date",
+  "verdict": "unreadable",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/685a2568-66ec-e3e0-27a1-78b56402b8cb.pdf/line_item[33].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/878e1fbc-6888-9dbd-03ae-8954b999b278.pdf/line_item[12].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/ecf2759a-d672-73cf-158c-e9c948e87777.pdf/line_item[7].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/b47d90c5-41d3-67dd-12c3-553fcbb24166.pdf/line_item[0].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/1b3d499b-17c6-eca9-1255-29ea55100b3d.pdf/line_item[2].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/b1c76403-ede0-1bc1-29f4-9afc2a0d47d3.pdf/line_item[24].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/429172-collect-files-35042-political-file-2012-non.pdf/line_item[13].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/bbb5a335-7d9e-b232-3c6d-842451e55f86.pdf/line_item[31].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/8dfa0ca9-2457-2309-3c1c-8301ca6a6d14.pdf/line_item[21].program_end_date",
+  "verdict": "wrong",
+  "corrected": "06/09/20"
+ },
+ {
+  "label_id": "deepform/883fd7e6-688e-02cf-e1ab-81ffd3742bde.pdf/line_item[7].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/416277-collect-files-72145-political-file-2012-federal.pdf/line_item[28].program_end_date",
+  "verdict": "wrong",
+  "corrected": "08/26/12"
+ },
+ {
+  "label_id": "deepform/88ea014d-d13f-997e-cea1-f4de3d71d1e4.pdf/line_item[8].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/14037edf-c2ea-045f-ce56-417082145e47.pdf/line_item[35].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/9e480923-edce-4533-56eb-62fcb8e8a7f8.pdf/line_item[21].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/db4ee420-c938-2ff9-ea91-a7725092488e.pdf/line_item[12].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/ce72c499-98e0-921c-2078-316aec271c80.pdf/line_item[2].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/91aef191-09f3-f3f6-9607-24ea83cd2ea8.pdf/line_item[22].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/1d2bcff2-1708-46fb-cf0e-eeeedf908380.pdf/line_item[27].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/c3e9a6e9-cdc2-6a86-b0c8-d97d6f59ca61.pdf/line_item[1].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/96dd3063-aa2a-03f9-9e22-2a60a8ec1eb5.pdf/line_item[0].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/81f10125-b31b-0dc0-366f-1058891ac4e8.pdf/line_item[33].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/19b5a9f5-b79a-6ec9-3839-3d32ad8328b4.pdf/line_item[24].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/b21925d7-2f5a-2d7f-46b9-e90023d0bc1e.pdf/line_item[2].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/8173f38f-acc7-a721-d963-bb0a5b76388a.pdf/line_item[12].channel",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/3446ada9-ed5c-86a8-f237-190be5851005.pdf/line_item[3].program_end_date",
+  "verdict": "wrong",
+  "corrected": "03/04/20"
+ },
+ {
+  "label_id": "deepform/64780ed0-180c-a77b-bfe0-478c2a48a3a0.pdf/line_item[5].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/7b9146bb-864c-c7e0-d889-55e408a50b8f.pdf/line_item[8].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/d02b547f-6489-aaa4-57e1-f01e245c6c0c.pdf/line_item[16].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/62add992-e325-62f8-a686-082627c1eea3.pdf/line_item[39].program_end_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/3eb2feea-8655-10c2-3964-ba69eead8ac9.pdf/line_item[12].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/c706768b-8d21-846c-2e58-307afbd74b24.pdf/line_item[19].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/8bdf348a-6c43-746f-6d38-1eb5881e233a.pdf/line_item[23].program_end_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/74c779b4-423f-d265-d31a-f3852b42c28b.pdf/line_item[9].program_start_date",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/12c8b293-f2c5-31ad-f600-b5992a7ed3b9.pdf/line_item[19].sub_amount",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "deepform/47e3fb74-ad40-15ce-f945-2ea74b567166.pdf/line_item[4].program_desc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0136/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0675/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0686/subtotal_etc",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0462/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/dev-0053/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/dev-0047/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0084/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0287/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0030/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0425/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0053/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0555/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0495/tax_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0350/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0216/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/dev-0023/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/test-0079/cashprice",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0282/total_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/dev-0078/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0156/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0592/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0077/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0267/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0634/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0496/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0065/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/dev-0028/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/test-0003/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0409/subtotal_price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0147/menuqty_cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0342/menu[2].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0357/menu[6].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0386/menu[4].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0217/menu[0].unitprice",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0203/menu[9].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0181/menu[1].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0138/menu[0].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0340/menu[0].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0302/menu[1].unitprice",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0072/menu[0].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0384/menu[0].unitprice",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/test-0094/menu[2].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0045/menu[0].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/test-0041/menu[8].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0262/menu[4].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0511/menu[1].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0727/menu[2].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0574/menu[2].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0019/menu[1].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0366/menu[0].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0421/menu[1].nm",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0177/menu[1].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0166/menu[0].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0776/menu[2].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0498/menu[0].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0767/menu[4].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0439/menu[3].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0632/menu[0].price",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0792/menu[0].cnt",
+  "verdict": "right",
+  "corrected": null
+ },
+ {
+  "label_id": "cord/train-0777/menu[8].cnt",
+  "verdict": "right",
+  "corrected": null
+ }
+]
