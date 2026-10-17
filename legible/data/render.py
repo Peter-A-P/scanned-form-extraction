@@ -88,9 +88,14 @@ def orient(data: bytes, frame: Frame) -> tuple[bytes, int]:
         if (img.width > img.height) == frame.landscape or not frame.boxes:
             return data, 0
         best = max((90, 270), key=lambda angle: _ink(img.rotate(angle, expand=True), frame.boxes))
-        out = io.BytesIO()
-        img.rotate(best, expand=True).save(out, format="PNG")
-        return out.getvalue(), best
+        turned = img.rotate(best, expand=True)
+        # Encoded by MuPDF, like every unturned page, not by Pillow: Pillow's PNG bytes
+        # depend on the zlib it was built with (zlib-ng in the Windows wheel, zlib on Linux),
+        # so the same pixels hashed differently on the laptop and the measuring machine.
+        space = pymupdf.csGRAY if turned.mode == "L" else pymupdf.csRGB
+        rgb = turned if turned.mode in {"L", "RGB"} else turned.convert("RGB")
+        pixmap = pymupdf.Pixmap(space, rgb.width, rgb.height, rgb.tobytes(), False)
+        return pixmap.tobytes("png"), best
 
 
 def render_pdf(

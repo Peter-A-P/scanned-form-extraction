@@ -12,6 +12,32 @@ time OCR's cost is computed from. Each page's OCR is stored under the data root 
 sha256 of the image it read and the preprocessing used, and is reused only while both still
 match (`legible/arms/ocr_run.py`). Measured runs are on the rented CPU machine.
 
+## The measuring machine
+
+A RunPod CPU pod, compute-optimised (`cpu3c`), 16 vCPU and 32 GB, Secure Cloud in EUR-IS-1, at
+US$0.48 an hour (2026-10-17), Ubuntu 24.04 with its own Tesseract, **5.3.4**
+(`tesseract-ocr` 5.3.4-1build5, English model as packaged). The rules were written against
+Tesseract 5.4.0 output on the laptop; the measured numbers are 5.3.4's. `ops/cpu-pod.sh` sets
+the machine up from nothing, fetches and verifies the corpora, renders them, and stops unless
+every page is byte-identical to the committed manifests; then runs Tesseract, 16 pages at a
+time, one thread each.
+
+Level 0, 2026-10-17. A document in the dev part of one split file and the test part of
+another is read once, so the test rows count only pages not already read for dev:
+
+| Corpus | Part | Documents | Pages read | CPU seconds | Seconds a page |
+|---|---|---:|---:|---:|---:|
+| FARA | dev | 380 | 764 | 2,258 | 3.0 |
+| FARA | test | 1,053 | 1,963 | 5,859 | 3.0 |
+| DeepForm | dev | 100 | 245 | 1,104 | 4.5 |
+| DeepForm | test | 300 | 774 | 4,183 | 5.4 |
+| CORD | dev | 100 | 100 | 1,610 | 16.1 |
+| CORD | test | 100 | 100 | 1,037 | 10.4 |
+
+A CORD receipt costs most because its preprocessing doubles the photograph, and some are
+2304 by 4096 pixels as published. Seconds are wall time of a single-threaded Tesseract process
+with all 16 vCPU busy, which is how a batch would be run.
+
 Preprocessing, per corpus, chosen on training pages (`PREPROCESS` in `legible/arms/ocr.py`):
 
 | Corpus | What Tesseract is given | Why |
@@ -19,7 +45,7 @@ Preprocessing, per corpus, chosen on training pages (`PREPROCESS` in `legible/ar
 | FARA, DeepForm | The 300 dpi page as rendered, automatic page segmentation (`--psm 3`) | Scans at scan resolution; nothing to add |
 | CORD | Scaled up twice, median filter 3, binarised against the mean of a 51-pixel window less 10, read as one block (`--psm 6`) | Phone photographs of dot-matrix print at about 100 dpi under uneven light. As published, Tesseract read **no words at all** from the first training receipt tried; the block mode keeps an item and its price on one line |
 
-On the laptop, a VRDU page took 5 to 8 seconds and a CORD receipt about 6, single-threaded.
+On the laptop, while the rules were written, a VRDU page took 5 to 8 seconds and a CORD receipt about 6, single-threaded; those timings are not used.
 
 ## Page orientation
 
@@ -95,3 +121,23 @@ At the gateway's pessimistic pre-call estimate (a token for every 3.5 input char
 the whole output budget spent, batch rate), the test sets come to about US$8.50 for FARA
 (1,053 documents), US$13.70 for DeepForm (300) and US$1.30 for CORD (100), each inside the
 US$25 per-run cap; at about 300 tokens out the expected cost is about US$7 for all three.
+
+## Arm E on dev
+
+Level 0, Tesseract 5.3.4 on the measuring machine, 2026-10-17, VRDU's matchers, 95% bootstrap
+intervals over documents. VRDU's validation part is the same 100 documents in all three seeds
+of a split, so each row stands for three files. Dev, not test: the test run is once, after
+this.
+
+| Split | Documents | Recognised by a rule set | Field accuracy | Invented |
+|---|---:|---:|---|---:|
+| FARA, mixed templates | 100 | 95 | 37.1% (32.6 to 41.5) | 3.4% |
+| FARA, Amendment held out | 100 | 60 | 21.7% (17.4 to 26.0) | 1.2% |
+| FARA, Dissemination Report held out | 100 | 77 | 20.3% (17.5 to 23.1) | 0.2% |
+| FARA, Short-Form held out | 100 | 0 | 0.0% | 0.0% |
+| DeepForm, either split | 100 | 100 | 10.4% (6.5 to 15.5) | 0.9% |
+| CORD | 100 | 100 | 16.6% (13.1 to 20.4) | 0.5% |
+
+On a held-out FARA template the documents a rule set still "recognises" are claimed by
+another template's rules, whose title pattern also appears on the held-out form; their
+fields are read with the wrong layout, which is what an unseen template does to rules.

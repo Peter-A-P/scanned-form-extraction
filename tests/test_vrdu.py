@@ -239,5 +239,6 @@ def test_a_sideways_scan_is_turned_to_the_benchmarks_frame() -> None:
     assert rotation == 90
     with Image.open(io.BytesIO(data)) as img:
         assert img.size == (300, 200) and img.getpixel((50, 30)) == 0
+        assert img.tobytes() == landscape.tobytes()
     same, none = orient(buf.getvalue(), Frame(landscape=False, boxes=frame.boxes))
     assert none == 0 and same == buf.getvalue()
