@@ -35,8 +35,8 @@ wheels = [
 
 [[package]]
 name = "boundary"
-version = "1.4.0"
-source = { git = "https://github.com/Peter-A-P/compliant-ai-gateway.git?rev=v1.4.0#d9809db54399f966c99f717575927aa4be46e328" }
+version = "1.4.2"
+source = { git = "https://github.com/Peter-A-P/compliant-ai-gateway.git?rev=v1.4.2#5450e172daea736136889b6de5fce09f73858287" }
 dependencies = [
     { name = "httpx" },
     { name = "opentelemetry-api" },
@@ -152,7 +152,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boundary", marker = "extra == 'gateway'", git = "https://github.com/Peter-A-P/compliant-ai-gateway.git?rev=v1.4.0" },
+    { name = "boundary", marker = "extra == 'gateway'", git = "https://github.com/Peter-A-P/compliant-ai-gateway.git?rev=v1.4.2" },
     { name = "numpy", specifier = ">=2,<3" },
     { name = "pillow", specifier = ">=12,<13" },
     { name = "pyarrow", specifier = ">=26,<27" },

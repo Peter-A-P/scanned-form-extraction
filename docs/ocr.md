@@ -96,8 +96,8 @@ and then once on test, come from the CPU machine.
 
 ## Arm D: OCR text to the quality model
 
-`legible ocr-text submit` and `legible ocr-text collect` (`legible/arms/text_run.py`). Arm D
-reads the same stored OCR as arm E, laid out as positioned text (each line of the page one
+`legible read submit --arm d` and `legible read collect --arm d` (`legible/arms/read_run.py`,
+which runs arm A the same way with the page images). Arm D reads the same stored OCR as arm E, laid out as positioned text (each line of the page one
 line of text, each word at the column of its left edge, 160 columns across), one block per
 page, followed by the corpus prompt built for OCR text (`legible/prompt.py`). The reader is
 the `quality` route in `boundary.yaml`, Claude Sonnet 5.5, sent through the gateway in
@@ -110,6 +110,8 @@ part, level and prompt version.
 - **A run is resumed only as it was begun.** The run directory keeps the run's description
   and the exact prompt; a different model or a changed prompt is refused, not mixed in, and
   nothing already read or submitted is sent again.
+- **Batches are cut by size** as well as count (`BATCH_BYTES`), so image batches stay inside
+  each vendor's cap, and are built one batch at a time.
 - **Dev before test, once.** A test run is refused until the same prompt has read every dev
   document at the same level, and a test run takes every test document or none (`--limit`
   is for dev).
@@ -121,6 +123,28 @@ At the gateway's pessimistic pre-call estimate (a token for every 3.5 input char
 the whole output budget spent, batch rate), the test sets come to about US$8.50 for FARA
 (1,053 documents), US$13.70 for DeepForm (300) and US$1.30 for CORD (100), each inside the
 US$25 per-run cap; at about 300 tokens out the expected cost is about US$7 for all three.
+
+### Arm D on dev
+
+Submitted from the laptop (PLAN.md, risks), 2026-10-17; Claude Sonnet 5.5 at the batch rate
+(two CORD receipts were a synchronous smoke test at the full rate); level 0; prompt version 1;
+VRDU's matchers; 95% bootstrap intervals over documents. Cost is the gateway ledger's, at the
+2026-10-16 price list. The validation part is the same in every seed of a split.
+
+| Split | Documents | Field accuracy | Invented | Cost, US$ |
+|---|---:|---|---|---:|
+| FARA, mixed templates | 100 | 69.4% (64.0 to 74.5) | 6.4% (4.5 to 8.3) | 0.32 |
+| FARA, Amendment held out | 100 | 63.6% (59.2 to 67.8) | 12.7% (10.7 to 14.7) | 0.29 |
+| FARA, Dissemination Report held out | 100 | 83.6% (79.8 to 87.0) | 1.2% (0.3 to 2.0) | 0.29 |
+| FARA, Short-Form held out | 100 | 61.9% (56.8 to 66.8) | 7.2% (5.1 to 9.3) | 0.37 |
+| DeepForm, either split | 100 | 74.8% (69.6 to 79.6) | 5.6% (3.8 to 7.7) | 1.17 |
+| CORD | 100 | 34.9% (28.0 to 42.3) | 3.6% (1.0 to 7.2) | 0.70 |
+
+All 580 dev documents cost US$3.07. One DeepForm reply ran out of its 8,192-token budget and
+is graded unparsed: document 417792, one of the two upside-down scans (Page orientation,
+above), whose OCR is noise. On CORD 601 of 840 misses are fields left empty; the receipts'
+OCR is the weakest of the three, and arm A on the same receipts will say how much of that is
+the OCR and how much the model.
 
 ## Arm E on dev
 

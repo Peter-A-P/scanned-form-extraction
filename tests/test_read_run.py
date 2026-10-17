@@ -9,7 +9,7 @@ import pytest
 from legible.arms.frontier import Read, RunDir
 from legible.arms.ocr import OcrPage, Preprocess, Word
 from legible.arms.ocr_run import stored
-from legible.arms.text_run import (
+from legible.arms.read_run import (
     MAX_TOKENS,
     DevFirst,
     RunMismatch,
@@ -24,6 +24,7 @@ from legible.arms.text_run import (
 from legible.data.render import PageEntry
 
 SPEC = RunSpec(
+    arm="d",
     corpus="cord",
     part="dev",
     level=0,
@@ -131,3 +132,36 @@ def test_outputs_parse_each_reply_or_say_none(tmp_path: Path) -> None:
         [read("a", '```json\n{"total_price": "60.000"}\n```'), read("b", "sorry"), read("c", None)]
     )
     assert outputs(tmp_path / "r") == {"a": {"total_price": "60.000"}, "b": None, "c": None}
+
+
+def test_arm_a_sends_each_page_image_and_the_image_prompt(tmp_path: Path) -> None:
+    import io
+
+    from PIL import Image
+
+    from legible.arms.read_run import chunks, request_bytes
+
+    pages = {d: [entry(d, 0), entry(d, 1)] for d in ("a", "b", "c")}
+    for es in pages.values():
+        for e in es:
+            out = io.BytesIO()
+            Image.new("L", (40, 40), 255).save(out, format="PNG")
+            path = tmp_path / "pages" / e.path
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(out.getvalue())
+    spec = SPEC.model_copy(update={"arm": "a"})
+    prompt = prompt_for("cord", 1, "a")
+    assert "page images" in prompt.text
+    r = requests_for(tmp_path, spec, prompt, ["a"], pages)["a"]
+    content = r.messages[0]["content"]
+    assert [b["type"] for b in content] == ["image", "image", "text"]
+    one = request_bytes(r)
+    batches = list(chunks(tmp_path, spec, prompt, ["a", "b", "c"], pages, max_bytes=int(one * 2.5)))
+    assert [list(b) for b in batches] == [["a", "b"], ["c"]]
+
+
+def test_an_arm_d_run_does_not_resume_as_arm_a(tmp_path: Path) -> None:
+    path = run_dir(tmp_path, SPEC)
+    open_run(path, SPEC, prompt_for("cord", 1))
+    with pytest.raises(RunMismatch, match="begun as"):
+        open_run(path, SPEC.model_copy(update={"arm": "a"}), prompt_for("cord", 1))

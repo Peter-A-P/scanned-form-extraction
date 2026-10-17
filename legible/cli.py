@@ -16,7 +16,7 @@ from legible.data.render import PageEntry
 from legible.degrade import LEVELS, degrade, to_png
 
 if TYPE_CHECKING:
-    from legible.arms.text_run import RunSpec
+    from legible.arms.read_run import RunSpec
     from legible.prompt import Prompt
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -381,8 +381,11 @@ def rules_run(
             typer.echo(f"{Path(p).stem} {part}: {n} documents")
 
 
-text_app = typer.Typer(no_args_is_help=True, help="Arm D: OCR text read by a frontier model.")
-app.add_typer(text_app, name="ocr-text")
+read_app = typer.Typer(
+    no_args_is_help=True,
+    help="Arms A and D: a frontier model reads the page images (a) or the OCR text (d).",
+)
+app.add_typer(read_app, name="read")
 
 GATEWAY_CONFIG = Path("boundary.yaml")
 
@@ -397,15 +400,18 @@ def _route(name: str) -> tuple[str, str]:
     return routes[name]["provider"], routes[name]["model"]
 
 
-def _text_run(
-    corpus: str, part: str, level: int, route: str, prompt_version: int
+def _read_run(
+    arm: str, corpus: str, part: str, level: int, route: str, prompt_version: int
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
-    from legible.arms.text_run import RunSpec, prompt_for, require_dev, run_dir
+    from legible.arms.read_run import RunSpec, prompt_for, require_dev, run_dir
 
+    if arm not in {"a", "d"}:
+        raise typer.BadParameter("arm is a (page images) or d (OCR text)")
     if part not in {"dev", "test"}:
         raise typer.BadParameter("part is dev or test")
     vendor, model = _route(route)
     spec = RunSpec(
+        arm=arm,
         corpus=corpus,
         part=part,
         level=level,
@@ -414,30 +420,30 @@ def _text_run(
         model=model,
         prompt_version=prompt_version,
     )
-    prompt = prompt_for(corpus, prompt_version)
+    prompt = prompt_for(corpus, prompt_version, spec.arm)
     require_dev(data_root(), spec, sorted(part_docs(corpus, "dev")), prompt)
     return spec, prompt, sorted(part_docs(corpus, part)), run_dir(data_root(), spec)
 
 
-@text_app.command("submit")
-def text_submit(
+@read_app.command("submit")
+def read_submit(
     corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    arm: str = typer.Option(..., help="a (page images) or d (OCR text)."),
     part: str = typer.Option("dev", help="dev or test. Test needs a finished dev run first."),
     level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
     route: str = typer.Option("quality", help="A route in boundary.yaml."),
     prompt_version: int = typer.Option(1, min=1),
     limit: int | None = typer.Option(None, help="Dev only: at most this many documents."),
-    batch_size: int = typer.Option(500, min=1),
     sync: bool = typer.Option(False, help="One call per document instead of batches."),
 ) -> None:
     """Send every document of a part not yet read or submitted, through the gateway."""
     from boundary import Gateway
 
-    from legible.arms.frontier import run_sync, submit_batches
-    from legible.arms.text_run import PURPOSE, open_run, requests_for
+    from legible.arms.frontier import run_sync
+    from legible.arms.read_run import open_run, requests_for, submit
     from legible.data.render import read_manifest
 
-    spec, prompt, docs, path = _text_run(corpus, part, level, route, prompt_version)
+    spec, prompt, docs, path = _read_run(arm, corpus, part, level, route, prompt_version)
     if limit is not None:
         if part == "test":
             raise typer.BadParameter("a test run reads every test document, once")
@@ -446,23 +452,23 @@ def text_submit(
     for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl"):
         pages.setdefault(e.doc_id, []).append(e)
     run = open_run(path, spec, prompt)
-    have = set(run.reads()) | {d for ids in run.batches().values() for d in ids}
-    todo = [d for d in docs if d not in have]
-    requests = requests_for(data_root(), spec, prompt, todo, pages)
     gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")
     if sync:
-        n = run_sync(gateway, requests, run, purpose=PURPOSE, run_id=spec.run_id)
+        have = set(run.reads()) | {d for ids in run.batches().values() for d in ids}
+        requests = requests_for(
+            data_root(), spec, prompt, [d for d in docs if d not in have], pages
+        )
+        n = run_sync(gateway, requests, run, purpose=spec.purpose, run_id=spec.run_id)
         typer.echo(f"{spec.run_id}: {n} documents read")
         return
-    batches = submit_batches(
-        gateway, requests, run, purpose=PURPOSE, run_id=spec.run_id, batch_size=batch_size
-    )
-    typer.echo(f"{spec.run_id}: {len(requests)} documents in {len(batches)} new batches")
+    n, batches = submit(gateway, data_root(), spec, prompt, run, docs, pages)
+    typer.echo(f"{spec.run_id}: {n} documents in {batches} new batches")
 
 
-@text_app.command("collect")
-def text_collect(
+@read_app.command("collect")
+def read_collect(
     corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    arm: str = typer.Option(..., help="a or d."),
     part: str = typer.Option("dev"),
     level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
     route: str = typer.Option("quality"),
@@ -473,9 +479,9 @@ def text_collect(
     from boundary import BatchNotReady, Gateway
 
     from legible.arms.frontier import collect_batches
-    from legible.arms.text_run import describe, open_run
+    from legible.arms.read_run import describe, open_run
 
-    spec, prompt, _, path = _text_run(corpus, part, level, route, prompt_version)
+    spec, prompt, _, path = _read_run(arm, corpus, part, level, route, prompt_version)
     run = open_run(path, spec, prompt)
     gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")
     try:
