@@ -33,7 +33,12 @@ def data_root() -> Path:
     return Path(os.environ.get("LEGIBLE_DATA", "data"))
 
 
-Corpus = Literal["fara", "deepform", "cord"]
+def manifest(corpus: str) -> Path:
+    """A corpus's page manifest. NIST's faces (`nist_1040_1`) share one."""
+    return MANIFESTS / f"{'nist' if corpus.startswith('nist') else corpus}-pages.jsonl"
+
+
+Corpus = Literal["fara", "deepform", "cord", "nist"]
 
 
 @app.callback()
@@ -61,9 +66,9 @@ def degrade_page(
 
 def _corpora(corpus: str) -> list[Corpus]:
     if corpus == "all":
-        return ["fara", "deepform", "cord"]
-    if corpus not in {"fara", "deepform", "cord"}:
-        raise typer.BadParameter("corpus is fara, deepform, cord or all")
+        return ["fara", "deepform", "cord", "nist"]
+    if corpus not in {"fara", "deepform", "cord", "nist"}:
+        raise typer.BadParameter("corpus is fara, deepform, cord, nist or all")
     return [corpus]  # type: ignore[list-item]
 
 
@@ -80,6 +85,12 @@ def data_fetch(corpus: str = typer.Argument("all", help="fara, deepform, cord or
         if c == "cord":
             fetch_shards(data_root() / "raw" / "cord")
             typer.echo("cord: verified")
+            continue
+        if c == "nist":
+            from legible.data.nist import fetch_sd2
+
+            _, md5s = fetch_sd2(data_root() / "raw" / "nist")
+            typer.echo(f"nist: archive verified; {len(md5s)} member checksums")
             continue
         prefix = DIRECTORY[c] + "/"
         paths = sorted(p for p in files if p.startswith(prefix))
@@ -107,6 +118,28 @@ def data_build(corpus: str = typer.Argument("all", help="fara, deepform, cord or
     raw = data_root() / "raw" / "vrdu"
     pages_dir = data_root() / "pages"
     for c in _corpora(corpus):
+        if c == "nist":
+            from legible.data import nist
+
+            zip_path, md5s = nist.fetch_sd2(data_root() / "raw" / "nist")
+            faces, nist_pages = [], []
+            for face, nist_entry in nist.read_sd2(zip_path, md5s, pages_dir):
+                faces.append(face)
+                if nist_entry is not None:
+                    nist_pages.append(nist_entry)
+            rows = nist.split_rows(faces)
+            nist.check_split(rows)
+            write_manifest(
+                MANIFESTS / "nist-pages.jsonl",
+                nist_pages,
+                source="NIST SD2 PNG bytes kept as published (300 ppi binary, not rendered)",
+            )
+            nist.write_splits(MANIFESTS / "nist-splits.json", rows)
+            parts: dict[str, int] = {}
+            for r in rows.values():
+                parts[r.part] = parts.get(r.part, 0) + 1
+            typer.echo(f"nist: {len(faces)} faces, {parts}")
+            continue
         if c == "cord":
             cord_raw = data_root() / "raw" / "cord"
             counts: dict[str, int] = {}
@@ -251,6 +284,45 @@ def data_audit_report(
     typer.echo(text)
 
 
+@app.command("calibrate")
+def calibrate_levels(
+    out: Path = typer.Option(Path("docs/degradation.md")),
+) -> None:
+    """Write docs/degradation.md: what each level does to OCR on the NIST curve pages, from
+    the OCR stored at every level."""
+    from legible.calibrate import calibrate, table
+    from legible.data import nist
+    from legible.data.render import read_manifest
+
+    wanted = part_docs("nist", "curve")
+    entries = sorted(
+        (e for e in read_manifest(manifest("nist")) if e.doc_id in wanted), key=lambda e: e.doc_id
+    )
+    zip_path, md5s = nist.fetch_sd2(data_root() / "raw" / "nist")
+    truths = {
+        d.doc_id: d.truth for d, _ in nist.read_sd2(zip_path, md5s, None) if d.doc_id in wanted
+    }
+    rows = calibrate(data_root(), entries, truths)
+    from legible.arms.ocr_run import load
+
+    version = load(data_root(), 0, entries[0].path).tesseract
+    lines = [
+        "# Degradation: what each level does to reading",
+        "",
+        "Written by `legible calibrate` from the OCR stored at every level; do not edit. "
+        "The method is in `legible/calibrate.py`; the levels are `LEVELS` in `legible/degrade.py`.",
+        "",
+        f"{len(entries)} NIST SD2 pages (the curve pages, `manifests/nist-splits.json`), {version}, "
+        "run on the measuring machine (docs/ocr.md). Each cell is the mean over pages with its "
+        "95% bootstrap interval.",
+        "",
+        *table(rows),
+        "",
+    ]
+    out.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    typer.echo("\n".join(lines))
+
+
 gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")
 app.add_typer(gate_app, name="gate")
 
@@ -295,9 +367,21 @@ app.add_typer(ocr_app, name="ocr")
 
 def part_docs(corpus: str, part: str) -> set[str]:
     """The documents of a split part, over every headline split file: VRDU's train, valid
-    (dev) or test unions; CORD's own split."""
+    (dev) or test unions; CORD's own split; NIST's split by submission, where test is the 500
+    pages every arm reads, and `nist_<face>` is one face's share."""
     from legible.data.render import read_manifest
 
+    if corpus.startswith("nist"):
+        from legible.data.nist import read_splits
+
+        rows = read_splits(MANIFESTS / "nist-splits.json")
+        face = corpus[len("nist_") :] if corpus != "nist" else None
+        return {
+            d
+            for d, r in rows.items()
+            if (face is None or r.face.lower() == face)
+            and (r.arm_test if part == "test" else r.curve if part == "curve" else r.part == part)
+        }
     if corpus == "cord":
         return {
             e.doc_id
@@ -329,7 +413,7 @@ def ocr_run(
 
     docs = sorted(part_docs(corpus, part))[:limit]
     wanted = set(docs)
-    entries = [e for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl") if e.doc_id in wanted]
+    entries = [e for e in read_manifest(manifest(corpus)) if e.doc_id in wanted]
     pages, seconds = run(data_root(), entries, level, workers=workers)
     typer.echo(
         f"{corpus} {part} level {level}: {len(docs)} documents, {pages} pages read, {seconds:.0f} s"
@@ -354,7 +438,7 @@ def rules_run(
     from legible.data.vrdu import headline_split_files, read_split
 
     pages: dict[str, list[PageEntry]] = {}
-    for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl"):
+    for e in read_manifest(manifest(corpus)):
         pages.setdefault(e.doc_id, []).append(e)
     out_dir = data_root() / "runs" / "arm-e" / f"level{level}" / corpus
     if corpus == "cord":
@@ -403,7 +487,7 @@ def _route(name: str) -> tuple[str, str]:
 def _read_run(
     arm: str, corpus: str, part: str, level: int, route: str, prompt_version: int
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
-    from legible.arms.read_run import RunSpec, prompt_for, require_dev, run_dir
+    from legible.arms.read_run import RunSpec, max_tokens_for, prompt_for, require_dev, run_dir
 
     if arm not in {"a", "d"}:
         raise typer.BadParameter("arm is a (page images) or d (OCR text)")
@@ -419,6 +503,7 @@ def _read_run(
         vendor=vendor,
         model=model,
         prompt_version=prompt_version,
+        max_tokens=max_tokens_for(corpus, vendor),  # type: ignore[arg-type]
     )
     prompt = prompt_for(corpus, prompt_version, spec.arm)
     require_dev(data_root(), spec, sorted(part_docs(corpus, "dev")), prompt)
@@ -449,7 +534,7 @@ def read_submit(
             raise typer.BadParameter("a test run reads every test document, once")
         docs = docs[:limit]
     pages: dict[str, list[PageEntry]] = {}
-    for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl"):
+    for e in read_manifest(manifest(corpus)):
         pages.setdefault(e.doc_id, []).append(e)
     run = open_run(path, spec, prompt)
     gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")

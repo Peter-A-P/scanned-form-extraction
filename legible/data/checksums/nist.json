@@ -1,0 +1,10 @@
+{
+"source":"https://www.nist.gov/srd/nist-special-database-2",
+"commit":"sd02.zip Last-Modified 2017-02-16",
+"read":"2026-10-17",
+"checksum":"sha256 of each file as downloaded; the files inside the archive are checked against NIST's own MD5 list, sd02_md5.lst",
+"files":{
+"sd02.zip":[938768464,"dca1f6f812be74087d8fd841a92eb0e4ab82f10fa4bc641576429542cae07bc9"],
+"sd02_md5.lst":[772546,"385593d24d001f26e186ab9772e42d59226300e572e9e9af472dc6e91880145b"]
+}
+}

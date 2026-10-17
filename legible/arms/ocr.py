@@ -198,7 +198,13 @@ class Preprocess(BaseModel):
 
 SCANS = Preprocess()
 PHOTOS = Preprocess(scale=2.0, window=51, offset=10.0, median=3, psm=6)
-PREPROCESS: dict[str, Preprocess] = {"fara": SCANS, "deepform": SCANS, "cord": PHOTOS}
+PREPROCESS: dict[str, Preprocess] = {
+    "fara": SCANS,
+    "deepform": SCANS,
+    "cord": PHOTOS,
+    # 300 ppi binary scans, like the VRDU pages: nothing to add.
+    "nist": SCANS,
+}
 
 
 def binarise(img: Image.Image, window: int, offset: float) -> Image.Image:

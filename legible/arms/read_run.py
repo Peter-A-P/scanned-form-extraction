@@ -45,6 +45,18 @@ SOURCE: Mapping[Arm, Source] = {"a": "images", "d": "ocr_text"}
 #: needs.
 MAX_TOKENS: Mapping[str, int] = {"fara": 1024, "deepform": 8192, "cord": 2048}
 
+#: Added to the output budget for a vendor whose model reasons by default and counts the
+#: reasoning inside the same cap. Gemini 3.8 Flash thinks before it answers and its thoughts
+#: count against maxOutputTokens: on dev at 1,024 tokens, 128 of 380 FARA answers were cut off
+#: mid-record (2026-10-17). Every model runs at its vendor's default reasoning; this only gives
+#: the answer room after it. Claude does not reason unless asked.
+REASONING_HEADROOM: Mapping[Vendor, int] = {"anthropic": 0, "openai": 0, "google": 4096}
+
+
+def max_tokens_for(corpus: str, vendor: Vendor) -> int:
+    return MAX_TOKENS[corpus] + REASONING_HEADROOM[vendor]
+
+
 #: Bytes of request body per batch, well inside each vendor's cap.
 BATCH_BYTES: Mapping[Vendor, int] = {
     "anthropic": 100_000_000,
@@ -65,6 +77,8 @@ class RunSpec(BaseModel):
     vendor: Vendor
     model: str
     prompt_version: int
+    #: The output budget the run's requests carried (`max_tokens_for`).
+    max_tokens: int
 
     @property
     def purpose(self) -> str:
@@ -178,7 +192,7 @@ def request_for(
             spec.model,
             prompt.text,
             images=document_images(root, spec.level, entries),
-            max_tokens=MAX_TOKENS[spec.corpus],
+            max_tokens=spec.max_tokens,
         )
     return build_request(
         spec.vendor,

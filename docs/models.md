@@ -1,7 +1,7 @@
 # Models
 
 Arm A's and D's frontier models, chosen 2026-10-16 from 04's price file of that date
-(`boundary/prices/2026-10-16.yaml`, gateway v1.4.0; run through v1.4.2, whose prices are the same) and confirmed by Peter the same day. The
+(`boundary/prices/2026-10-16.yaml`, gateway v1.4.0; run through v1.4.3, whose prices are the same) and confirmed by Peter the same day. The
 identifiers are the ones the gateway routes to (`boundary.yaml`); a run records the identifier
 each vendor returned, so a silent model change shows in the ledger.
 

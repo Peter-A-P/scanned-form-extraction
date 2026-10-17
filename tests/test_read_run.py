@@ -32,6 +32,7 @@ SPEC = RunSpec(
     vendor="anthropic",
     model="claude-sonnet-5-5",
     prompt_version=1,
+    max_tokens=MAX_TOKENS["cord"],
 )
 
 

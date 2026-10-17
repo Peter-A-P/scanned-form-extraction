@@ -2,8 +2,8 @@
 
 Every licence below is quoted from its primary source, read on **2026-10-16**, before anything
 was fetched. VRDU and CORD were fetched the same day, after this file was written, and every
-file verified against the checksums committed in `legible/data/checksums/`. NIST SD2 has not
-been fetched.
+file verified against the checksums committed in `legible/data/checksums/`. NIST SD2 was
+fetched on 2026-10-17, after NIST confirmed its terms (below).
 
 Fetched and rendered files live under the data root (`LEGIBLE_DATA`, default `./data`), never
 in the repository; the page manifests in `manifests/` are committed, one line per page with its
@@ -16,7 +16,7 @@ sha256 and the renderer's version, and the split summaries beside them.
 | VRDU Registration Forms (FARA) | CC BY 4.0, stated only by a hyperlink in Google's release post; the repository has no licence file | Usable, with the provenance recorded below |
 | VRDU Ad-buy Forms (DeepForm) | As above | Usable, with the provenance recorded below |
 | CORD v2 | CC BY 4.0, stated in the GitHub README, the Hugging Face card and the repository's licence file | Usable |
-| NIST Special Database 2 | **Not stated for SD2.** NIST's general statements point two ways (below) | **Not fetched until resolved** |
+| NIST Special Database 2 | Public domain in the United States, not subject to copyright protection: confirmed by NIST to Peter on 2026-10-17 | Usable |
 | SROIE | No licence or terms stated anywhere authoritative | Out, as the plan already said |
 
 ## VRDU
@@ -180,7 +180,13 @@ page; the box is the benchmark's error, and the label counts as unaudited.
 
 ## NIST Special Database 2
 
-**Terms: unresolved.** The SD2 page, https://www.nist.gov/srd/nist-special-database-2
+**Terms: public domain.** Peter asked NIST which of the two regimes below applies to SD2, and
+NIST replied on 2026-10-17 that SD2 is public domain, not subject to copyright protection: the
+second regime, title 17 United States Code Section 105, not the Standard Reference Data one.
+The pages may be used for measurement and training, shown on the demo, and adapters trained on
+them published. What was found before asking is kept below.
+
+The SD2 page, https://www.nist.gov/srd/nist-special-database-2
 (updated 2025-12-01), states no licence or terms; it says "Price: No charge". The plan's
 "public domain" is not stated anywhere for SD2. The data.nist.gov record (DOI
 10.18434/M3J08M) points to https://www.nist.gov/open/license, which carries two regimes:
@@ -202,8 +208,7 @@ The Special Database Catalog says "Some of these databases will be designated as
 Databases", and nothing found says whether SD2 is one. If it is, https://www.nist.gov/srd/public-law
 applies: "None of our SRD may be reproduced ... without prior permission." Using the pages
 for measurement and training is likely fine under either regime; publishing derived adapters
-and showing page images on the demo is what the answer decides. **SD2 is not fetched until
-NIST confirms which regime applies.**
+and showing page images on the demo is what the answer decided.
 
 **Files.** `https://s3.amazonaws.com/nist-srd/SD2/sd02.zip` (938,768,464 bytes, Last-Modified
 2017-02-16) and `sd02_md5.lst` (an MD5 for each file inside the archive, 11,200 lines). The
@@ -214,10 +219,31 @@ file, 5,590 of each, submissions `r0000` to `r0899`. 300 ppi binary PNG, machine
 synthesised values. `sd02/tables/` holds 20 `.tab` files, one per form face, each listing
 field id, type (alphanumeric, floating point, integer, non-character) and context (data, name,
 SSN). The first line of a `.fmt` names the form face; each following line is a field id and its
-value, with `_ICON_` for check marks and signatures. The exact line syntax is confirmed on the
-first fetch. The form type is known only from that first line, not from the file name.
+value, with `_ICON_` for check marks and signatures. The form type is known only from that
+first line, not from the file name.
 
-**Counts.** 5,590 pages, 12 form types on 20 faces, 900 submissions, as the plan assumed.
+**Fetched 2026-10-17** (`legible data fetch nist`, `legible/data/nist.py`): the archive's
+sha256 and the MD5 list's sha256 are pinned in `legible/data/checksums/nist.json`, and every
+member is checked against NIST's MD5 as it is read; all 11,200 matched. Confirmed on the
+fetch: a value the form wraps onto a second line continues on a line starting with a tab, and
+the wrap falls mid-word ("Duke W. Daws" then "on, 41 Gilmer Lane"), so the loader joins it with
+nothing between. No `_ICON_` appears in a text field.
+
+**Schemas.** One per face, `nist_<face>` (`legible/schema/corpora.py`), built from the 20 tables,
+which are committed as `legible/schema/nist_fields.json` (public domain). The 160 check-mark and
+signature fields are left out, since their answer is a mark, not text; 1,113 text fields
+remain, about 21 filled on an average face. Names and SSNs are compared as VRDU compares names
+and strings; every numeric type is compared digits only, because the forms print an amount as
+`5140  00`, dollars and cents in separate boxes.
+
+**Split** (`manifests/nist-splits.json`, one face a line): by submission, so no submission is
+in two parts, checked on every build. Test is drawn first (20% of submissions), then dev (10%),
+the rest train: 3,850 train faces, 561 dev, 1,179 test. Every arm reads the same 500 test
+faces, drawn in a fixed hash order, and the first 300 of them are the curve pages read at every
+degradation level (PLAN.md sections 2.5 and 7).
+
+**Counts.** 5,590 pages, 12 form types on 20 faces, 900 submissions, as the plan assumed:
+900 faces each of Form 1040 pages 1 and 2, down to 59 of Schedule F page 2.
 
 ## SROIE
 

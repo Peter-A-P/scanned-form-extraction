@@ -192,3 +192,115 @@ CORD = CorpusSchema(
 )
 
 SCHEMAS["cord"] = CORD
+
+
+# --- NIST Special Database 2 -------------------------------------------------------------
+
+#: The 20 form faces of the 1988 IRS 1040 package that SD2 holds, by the id its answer files
+#: open with (users' guide, February 2017).
+NIST_FACES: dict[str, str] = {
+    "1040_1": "Form 1040, page 1",
+    "1040_2": "Form 1040, page 2",
+    "2106_1": "Form 2106 (employee business expenses), page 1",
+    "2106_2": "Form 2106, page 2",
+    "2441": "Form 2441 (child and dependent care expenses)",
+    "4562_1": "Form 4562 (depreciation and amortization), page 1",
+    "4562_2": "Form 4562, page 2",
+    "6251": "Form 6251 (alternative minimum tax)",
+    "sch_a": "Schedule A (itemized deductions)",
+    "sch_b": "Schedule B (interest and dividend income)",
+    "sch_c_1": "Schedule C (profit or loss from business), page 1",
+    "sch_c_2": "Schedule C, page 2",
+    "sch_d_1": "Schedule D (capital gains and losses), page 1",
+    "sch_d_2": "Schedule D, page 2",
+    "sch_e_1": "Schedule E (supplemental income), page 1",
+    "sch_e_2": "Schedule E, page 2",
+    "sch_f_1": "Schedule F (profit or loss from farming), page 1",
+    "sch_f_2": "Schedule F, page 2",
+    "sch_se_1": "Schedule SE (self-employment tax), page 1",
+    "sch_se_2": "Schedule SE, page 2",
+}
+
+
+def nist_name(field_id: str) -> str:
+    """A schema name for an SD2 field id: `1040_1_6c_H1_V1` is `f_1040_1_6c_h1_v1`."""
+    import re
+
+    return "f_" + re.sub(r"[^a-z0-9]+", "_", field_id.lower()).strip("_")
+
+
+def _nist_where(face: str, field_id: str) -> str:
+    """Where a field is on its face, in the users' guide's own terms: the line number, then
+    H for the column across and V for the row down where a line has several boxes."""
+    rest = (
+        field_id[len(face) + 1 :] if field_id.lower().startswith(face.lower() + "_") else field_id
+    )
+    parts = [p for p in rest.split("_") if p]
+    line: list[str] = []
+    place: list[str] = []
+    for p in parts:
+        if len(p) > 1 and p[0] in "HV" and p[1:].isdigit():
+            place.append(("column " if p[0] == "H" else "row ") + p[1:])
+        elif p == "L":
+            line.append("the name and address block")
+        else:
+            line.append(p)
+    where = (
+        "line " + " ".join(line)
+        if line and line[0] != "the name and address block"
+        else " ".join(line)
+    )
+    return where + (", " + ", ".join(place) if place else "")
+
+
+_NIST_KIND = {
+    ("A", "NAME"): (FieldKind.NAME, "a name"),
+    ("A", "SSN"): (FieldKind.STRING, "a social security number as printed"),
+    ("A", "DATA"): (FieldKind.STRING, "text"),
+    ("CA", "DATA"): (FieldKind.STRING, "text"),
+}
+
+
+def _nist_schema(face: str, rows: list[list[str]]) -> CorpusSchema:
+    """One face's schema. Check marks and signatures (type ICON) are left out: their answer is
+    a token for "a mark is here", not text to read. Every numeric type (whole dollars and
+    cents in separate boxes, plain floats, integers, percentages) is compared digits only,
+    VRDU's numerical-string match, because the forms print amounts as `5140  00` with the
+    cents in a box of their own."""
+    fields = []
+    for field_id, kind, context in rows:
+        if kind == "ICON":
+            continue
+        matcher, what = _NIST_KIND.get((kind, context), (FieldKind.CODE, "a number"))
+        fields.append(
+            FieldSpec(
+                name=nist_name(field_id),
+                kind=matcher,
+                description=f"{_nist_where(face, field_id)}: {what} (SD2 field {field_id}).",
+            )
+        )
+    return CorpusSchema(
+        corpus=f"nist_{face.lower()}",
+        version=1,
+        description=(
+            f"A machine-printed {NIST_FACES[face]} of the 1988 IRS 1040 package, filled with "
+            "synthesised values, scanned in black and white."
+        ),
+        fields=tuple(fields),
+    )
+
+
+def _nist_schemas() -> dict[str, CorpusSchema]:
+    import json
+    from importlib import resources
+
+    raw = json.loads(
+        resources.files("legible.schema").joinpath("nist_fields.json").read_text("utf-8")
+    )
+    return {f"nist_{face.lower()}": _nist_schema(face, rows) for face, rows in raw["faces"].items()}
+
+
+#: One schema per SD2 form face, keyed `nist_<face>`: a NIST document is one face, and each
+#: face is its own form with its own fields.
+NIST_SCHEMAS = _nist_schemas()
+SCHEMAS.update(NIST_SCHEMAS)
