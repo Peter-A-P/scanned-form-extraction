@@ -141,3 +141,33 @@ this.
 On a held-out FARA template the documents a rule set still "recognises" are claimed by
 another template's rules, whose title pattern also appears on the held-out form; their
 fields are read with the wrong layout, which is what an unseen template does to rules.
+
+## Arm E on test
+
+Run once, 2026-10-17, with the rules frozen as they were when written (`legible/arms/rule_sets.py`
+at 1de5f5b; not changed after the dev run). The rules read the OCR stored from the measuring
+machine; applying them is arithmetic on stored words, so it ran on the laptop and nothing in
+it is timed. Level 0, VRDU's matchers, 95% bootstrap intervals over documents. A document no
+rule set recognised is graded as answering nothing (every field missing, not malformed;
+`answer` in `legible/arms/rules_run.py`), which leaves field accuracy as it is.
+
+VRDU's FARA test part is the same 300 documents in all three seeds of a split, so a FARA row
+stands for three files; DeepForm's unseen-template test parts differ by seed.
+
+| Split | Documents | Recognised | Field accuracy | Invented | Every field right |
+|---|---:|---:|---|---|---:|
+| FARA, mixed templates | 300 | 284 | 36.2% (33.6 to 38.9) | 3.5% (2.6 to 4.4) | 1.0% |
+| FARA, Amendment held out | 300 | 187 | 22.4% (19.9 to 24.9) | 0.5% (0.1 to 1.0) | 0.0% |
+| FARA, Dissemination Report held out | 300 | 216 | 19.3% (17.6 to 20.9) | 0.2% (0.0 to 0.5) | 0.0% |
+| FARA, Short-Form held out | 300 | 1 | 0.1% (0.0 to 0.2) | 0.0% | 0.0% |
+| DeepForm, mixed templates | 300 | 300 | 11.5% (9.0 to 14.4) | 0.9% (0.7 to 1.1) | 0.7% |
+| DeepForm, unseen templates, seed 0 | 159 | 159 | 13.7% (9.8 to 18.3) | 0.8% (0.6 to 1.0) | 1.3% |
+| DeepForm, unseen templates, seed 1 | 157 | 157 | 12.6% (9.1 to 17.0) | 0.8% (0.6 to 1.0) | 1.3% |
+| DeepForm, unseen templates, seed 2 | 153 | 153 | 13.1% (9.3 to 17.6) | 0.8% (0.6 to 1.1) | 1.3% |
+| CORD | 100 | 100 | 15.8% (11.9 to 19.8) | 0.8% (0.1 to 1.9) | 0.0% |
+
+Most misses are fields left empty: the rules answer only where a label and a value of the
+right shape were found, so arm E invents little and reads little. DeepForm's unseen-template
+number is no worse than its mixed one because its one rule set was never written per
+template. The README's tables will carry these through the report command, beside the other
+arms on the same documents.

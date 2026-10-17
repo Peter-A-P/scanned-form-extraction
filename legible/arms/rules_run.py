@@ -32,6 +32,13 @@ class RulesRead(BaseModel):
     rule_set: str | None
 
 
+def answer(read: RulesRead) -> Record:
+    """What arm E answered, for grading. A document no rule set recognised answers nothing:
+    every field it should have read is missing, not malformed, because nothing unreadable was
+    returned. Field accuracy is the same either way; the miss taxonomy is not."""
+    return read.output if read.output is not None else {}
+
+
 def rule_sets_for(corpus: str, split: VrduSplit | None) -> tuple[TemplateRules, ...]:
     if corpus == "fara":
         if split is None:

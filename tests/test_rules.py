@@ -5,6 +5,8 @@ from __future__ import annotations
 from legible.arms.ocr import OcrPage, Preprocess, Word
 from legible.arms.rule_sets import FARA_BY_TEMPLATE, fara_rules
 from legible.arms.rules import Extract, RowRule, TemplateRules, apply_extract, lines_of, read
+from legible.arms.rules_run import RulesRead, answer
+from legible.grade import Outcome, grade_document
 from tests.schemas import ORDER
 
 
@@ -106,3 +108,10 @@ def test_a_fara_split_gets_only_its_training_templates_rules() -> None:
     names = {r.name for r in fara_rules({"Short-Form", "Dissemination Report"})}
     assert names == {"fara-short-form", "fara-dissemination-report"}
     assert FARA_BY_TEMPLATE["Amendment"].name not in names
+
+
+def test_an_unrecognised_document_is_graded_missing_not_malformed() -> None:
+    unread = RulesRead(doc_id="d", output=None, ocr_seconds=1.0, rule_set=None)
+    truth = {"advertiser": "Smith for Senate", "gross_amount": "$400.00", "line_item": []}
+    g = grade_document(ORDER, "d", truth, answer(unread))
+    assert {o.outcome for o in g.outcomes} == {Outcome.MISSING} and not g.unparsed
