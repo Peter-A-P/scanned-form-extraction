@@ -6,7 +6,7 @@ import json
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import typer
 from PIL import Image
@@ -14,6 +14,10 @@ from PIL import Image
 from legible import __version__
 from legible.data.render import PageEntry
 from legible.degrade import LEVELS, degrade, to_png
+
+if TYPE_CHECKING:
+    from legible.arms.text_run import RunSpec
+    from legible.prompt import Prompt
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -375,6 +379,111 @@ def rules_run(
             out = out_dir / f"{Path(p).stem}-{part}.jsonl"
             n = run(data_root(), corpus, docs, pages, rule_sets_for(corpus, split), level, out)
             typer.echo(f"{Path(p).stem} {part}: {n} documents")
+
+
+text_app = typer.Typer(no_args_is_help=True, help="Arm D: OCR text read by a frontier model.")
+app.add_typer(text_app, name="ocr-text")
+
+GATEWAY_CONFIG = Path("boundary.yaml")
+
+
+def _route(name: str) -> tuple[str, str]:
+    """(vendor, model) for a route in boundary.yaml, the one place models are named."""
+    import yaml
+
+    routes = yaml.safe_load(GATEWAY_CONFIG.read_text(encoding="utf-8"))["routes"]
+    if name not in routes:
+        raise typer.BadParameter(f"no route {name!r} in {GATEWAY_CONFIG}")
+    return routes[name]["provider"], routes[name]["model"]
+
+
+def _text_run(
+    corpus: str, part: str, level: int, route: str, prompt_version: int
+) -> tuple[RunSpec, Prompt, list[str], Path]:
+    from legible.arms.text_run import RunSpec, prompt_for, require_dev, run_dir
+
+    if part not in {"dev", "test"}:
+        raise typer.BadParameter("part is dev or test")
+    vendor, model = _route(route)
+    spec = RunSpec(
+        corpus=corpus,
+        part=part,
+        level=level,
+        route=route,
+        vendor=vendor,
+        model=model,
+        prompt_version=prompt_version,
+    )
+    prompt = prompt_for(corpus, prompt_version)
+    require_dev(data_root(), spec, sorted(part_docs(corpus, "dev")), prompt)
+    return spec, prompt, sorted(part_docs(corpus, part)), run_dir(data_root(), spec)
+
+
+@text_app.command("submit")
+def text_submit(
+    corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    part: str = typer.Option("dev", help="dev or test. Test needs a finished dev run first."),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+    route: str = typer.Option("quality", help="A route in boundary.yaml."),
+    prompt_version: int = typer.Option(1, min=1),
+    limit: int | None = typer.Option(None, help="Dev only: at most this many documents."),
+    batch_size: int = typer.Option(500, min=1),
+    sync: bool = typer.Option(False, help="One call per document instead of batches."),
+) -> None:
+    """Send every document of a part not yet read or submitted, through the gateway."""
+    from boundary import Gateway
+
+    from legible.arms.frontier import run_sync, submit_batches
+    from legible.arms.text_run import PURPOSE, open_run, requests_for
+    from legible.data.render import read_manifest
+
+    spec, prompt, docs, path = _text_run(corpus, part, level, route, prompt_version)
+    if limit is not None:
+        if part == "test":
+            raise typer.BadParameter("a test run reads every test document, once")
+        docs = docs[:limit]
+    pages: dict[str, list[PageEntry]] = {}
+    for e in read_manifest(MANIFESTS / f"{corpus}-pages.jsonl"):
+        pages.setdefault(e.doc_id, []).append(e)
+    run = open_run(path, spec, prompt)
+    have = set(run.reads()) | {d for ids in run.batches().values() for d in ids}
+    todo = [d for d in docs if d not in have]
+    requests = requests_for(data_root(), spec, prompt, todo, pages)
+    gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")
+    if sync:
+        n = run_sync(gateway, requests, run, purpose=PURPOSE, run_id=spec.run_id)
+        typer.echo(f"{spec.run_id}: {n} documents read")
+        return
+    batches = submit_batches(
+        gateway, requests, run, purpose=PURPOSE, run_id=spec.run_id, batch_size=batch_size
+    )
+    typer.echo(f"{spec.run_id}: {len(requests)} documents in {len(batches)} new batches")
+
+
+@text_app.command("collect")
+def text_collect(
+    corpus: str = typer.Argument(..., help="fara, deepform or cord."),
+    part: str = typer.Option("dev"),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+    route: str = typer.Option("quality"),
+    prompt_version: int = typer.Option(1, min=1),
+    wait: float = typer.Option(0.0, help="Seconds to wait for a batch still running."),
+) -> None:
+    """Collect every submitted batch that has finished; say what the run holds."""
+    from boundary import BatchNotReady, Gateway
+
+    from legible.arms.frontier import collect_batches
+    from legible.arms.text_run import describe, open_run
+
+    spec, prompt, _, path = _text_run(corpus, part, level, route, prompt_version)
+    run = open_run(path, spec, prompt)
+    gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")
+    try:
+        added = collect_batches(gateway, run, wait_s=wait)
+    except BatchNotReady as e:
+        typer.echo(f"{spec.run_id}: a batch is still running ({e})")
+        added = 0
+    typer.echo(f"{spec.run_id}: {added} reads added; {json.dumps(describe(path))}")
 
 
 def main() -> None:

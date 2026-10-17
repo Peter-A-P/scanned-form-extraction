@@ -67,3 +67,31 @@ matcher is exact, so an OCR slip in one letter is a miss; and the receipts' OCR 
 after preprocessing. More rule-writing would raise these numbers, but each rule written is a
 rule for one layout, which is the cost the comparison is about. The measured numbers, on dev
 and then once on test, come from the CPU machine.
+
+## Arm D: OCR text to the quality model
+
+`legible ocr-text submit` and `legible ocr-text collect` (`legible/arms/text_run.py`). Arm D
+reads the same stored OCR as arm E, laid out as positioned text (each line of the page one
+line of text, each word at the column of its left edge, 160 columns across), one block per
+page, followed by the corpus prompt built for OCR text (`legible/prompt.py`). The reader is
+the `quality` route in `boundary.yaml`, Claude Sonnet 5.5, sent through the gateway in
+batches with `data_class=public`, `purpose=arm-d`, and a run id naming the route, corpus,
+part, level and prompt version.
+
+- **One read per document** over the union of a part's split files: a zero-shot model does not
+  depend on a split's training part, so each split file's number is cut from the one read
+  when grading.
+- **A run is resumed only as it was begun.** The run directory keeps the run's description
+  and the exact prompt; a different model or a changed prompt is refused, not mixed in, and
+  nothing already read or submitted is sent again.
+- **Dev before test, once.** A test run is refused until the same prompt has read every dev
+  document at the same level, and a test run takes every test document or none (`--limit`
+  is for dev).
+- **Output budget** per corpus: 1,024 tokens for FARA, 8,192 for DeepForm, 2,048 for CORD. The
+  longest training record as JSON is 479, 16,169 and 3,763 characters; an answer that runs
+  out of budget is graded as malformed, as it is.
+
+At the gateway's pessimistic pre-call estimate (a token for every 3.5 input characters,
+the whole output budget spent, batch rate), the test sets come to about US$8.50 for FARA
+(1,053 documents), US$13.70 for DeepForm (300) and US$1.30 for CORD (100), each inside the
+US$25 per-run cap; at about 300 tokens out the expected cost is about US$7 for all three.
