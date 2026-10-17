@@ -39,7 +39,9 @@ each costs a thousand pages. The plan is in [PLAN.md](PLAN.md); the diagrams in
   demo.
 - **Every model call goes through the gateway**, frontier and self-hosted alike, so cost per
   page has one source.
-- **Nothing is measured on the laptop.** The 4 GB card runs tests and the site build.
+- **Nothing is measured on the laptop.** The 4 GB card runs tests and the site build. The one
+  exception (PLAN.md, risks): frontier batches are submitted from it through the gateway, and
+  nothing timed is taken from them.
 - **Checkpoint from the first step.** Every training run resumes from object storage.
 - **Every reported number carries a confidence interval**, and every price carries its date.
 - **Plain punctuation** in everything written here: no em-dashes or other typographic dashes,
