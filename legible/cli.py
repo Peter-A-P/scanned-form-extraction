@@ -192,7 +192,9 @@ def data_audit_report(
         Path("docs/audit/decisions.json"), exists=True, dir_okay=False
     ),
 ) -> None:
-    """Write docs/audit.md from Peter's decisions on the committed sample."""
+    """Write docs/audit.md from Peter's decisions on the committed sample. A recheck file
+    beside the decisions (labels looked at again, on corrected pages) overrides them, by
+    label."""
     from legible.data.audit import Label, read_decisions, report
 
     sample = [
@@ -202,6 +204,10 @@ def data_audit_report(
     from legible.data.patches import patches_from, write_patches
 
     decided = read_decisions(decisions)
+    recheck = decisions.with_name("recheck.json")
+    rechecked = read_decisions(recheck) if recheck.exists() else []
+    later = {d.label_id: d for d in rechecked}
+    decided = [later.get(d.label_id, d) for d in decided]
     rows = report(sample, decided)
     fixes = patches_from(decided)
     write_patches(Path("legible/data/patches.json"), fixes)
@@ -216,6 +222,12 @@ def data_audit_report(
     lines += [
         f"| {r.corpus} | {r.stratum} | {r.audited} | {r.disagreement} | {r.unreadable} |"
         for r in rows
+    ]
+    lines += [
+        "",
+        f"{len(rechecked)} labels were looked at again on 2026-10-16 (`docs/audit/recheck.json`), "
+        "after their crops came out blank: the pages had been rendered in the PDF's orientation, "
+        "not the benchmark's (docs/ocr.md). The recheck replaces the first decision.",
     ]
     lines += [
         "",

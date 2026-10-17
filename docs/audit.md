@@ -5,12 +5,14 @@ Written by `legible data audit-report` from `docs/audit/decisions.json`; do not 
 | Corpus | Labels | Audited | Disagreement (95% CI) | Unreadable |
 |---|---|---:|---|---:|
 | fara | all | 59 | 5.1% (0.0% to 11.9%, n = 59) | 1 |
-| deepform | all | 78 | 6.4% (1.3% to 11.5%, n = 78) | 2 |
-| deepform | fields | 39 | 5.1% (0.0% to 12.8%, n = 39) | 1 |
+| deepform | all | 79 | 6.3% (1.3% to 12.7%, n = 79) | 1 |
+| deepform | fields | 40 | 5.0% (0.0% to 12.5%, n = 40) | 0 |
 | deepform | line items | 39 | 7.7% (0.0% to 17.9%, n = 39) | 1 |
 | cord | all | 60 | 0.0% (0.0% to 0.0%, n = 60) | 0 |
 | cord | fields | 30 | 0.0% (0.0% to 0.0%, n = 30) | 0 |
 | cord | line items | 30 | 0.0% (0.0% to 0.0%, n = 30) | 0 |
+
+2 labels were looked at again on 2026-10-16 (`docs/audit/recheck.json`), after their crops came out blank: the pages had been rendered in the PDF's orientation, not the benchmark's (docs/ocr.md). The recheck replaces the first decision.
 
 8 labels marked wrong with the value the page shows are corrected by the
 loaders from `legible/data/patches.json`; each patched document names its patched fields.

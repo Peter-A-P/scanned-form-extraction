@@ -172,7 +172,11 @@ Done by Peter on 2026-10-16: 189 right, 8 wrong, 3 unreadable. FARA 5.1% wrong (
 DeepForm 6.4% (1.3 to 11.5), CORD 0.0%; seven of the eight wrong labels are dates. The eight
 are corrected through `legible/data/patches.json`, which the loaders apply and name on each
 document. Two of the three unreadable were blank crops of sideways DeepForm scans, fixed in
-the render the same day (docs/ocr.md); they are being looked at again on the corrected pages.
+the render the same day (docs/ocr.md), and looked at again on the corrected pages
+(`docs/audit/recheck.json`): the contract number is right; the other stays unreadable,
+because VRDU's box for it (`line_item[9].program_start_date`, label "SEP14") falls on blank
+paper between two columns of an upside-down scan. The label text is printed elsewhere on the
+page; the box is the benchmark's error, and the label counts as unaudited.
 
 ## NIST Special Database 2
 
