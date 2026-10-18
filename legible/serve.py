@@ -190,4 +190,7 @@ def gateway_config(
     # One attempt: a self-hosted server that fails is a finding, and a retry would hide it
     # in the latency (06's served configuration does the same).
     config.setdefault("retry", {})["max_attempts"] = 1
+    # A DeepForm answer runs to 8,192 tokens, minutes on a busy server; the default 120-second
+    # read timeout cut the first one off and stopped the pass (2026-10-18).
+    config.setdefault("defaults", {}).setdefault("timeouts", {})["read_s"] = 900.0
     return config

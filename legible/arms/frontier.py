@@ -279,15 +279,24 @@ def run_concurrent(
     async def go() -> int:
         gate = asyncio.Semaphore(concurrency)
 
+        failed: list[str] = []
+
         async def one(doc_id: str, request: ChatRequest) -> None:
             async with gate:
-                response = await gateway.achat(
-                    request, purpose=purpose, run_id=run_id, data_class=DATA_CLASS
-                )
+                try:
+                    response = await gateway.achat(
+                        request, purpose=purpose, run_id=run_id, data_class=DATA_CLASS
+                    )
+                except Exception as error:
+                    print(f"{doc_id}: {type(error).__name__}: {error}"[:300], flush=True)
+                    failed.append(doc_id)
+                    return
             run.add_reads([to_read(doc_id, response)])
 
         await asyncio.gather(*(one(d, r) for d, r in todo))
-        return len(todo)
+        # A failed call is left unread rather than stopping the pass; a later pass, or the
+        # report's "of N", accounts for it.
+        return len(todo) - len(failed)
 
     start = time.perf_counter()
     added = asyncio.run(go())
