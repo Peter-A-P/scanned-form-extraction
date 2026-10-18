@@ -48,6 +48,19 @@ gateway = [
   "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.4.3",
 ]
 
+# Arm B's training stack, on the rented card only. Exact pins, 06's (smallprint, pyproject at
+# 3adf4fad): a fine-tune is a measurement and the stack it ran on is part of it, and these are
+# the versions 06 trained Gemma 4 on. torch 2.14.0 from PyPI is a CUDA 13 build that needs a
+# 580 driver or newer. No TRL: the image examples are built by legible/train/vision.py.
+train = [
+  "torch==2.14.0",
+  "transformers==5.17.0",
+  "peft==0.21.0",
+  # 4-bit NF4 base weights: the Q in QLoRA.
+  "bitsandbytes==0.50.2",
+  "accelerate==1.15.0",
+]
+
 [dependency-groups]
 dev = [
   # The arms are tested against a stub gateway but typed against the real one, so mypy
@@ -107,6 +120,12 @@ plugins = ["pydantic.mypy"]
 # are held as Any, which keeps strict mode on this project's own code.
 [[tool.mypy.overrides]]
 module = ["pymupdf", "pymupdf.*", "pyarrow", "pyarrow.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+# The training stack is installed on the GPU machine only, so it is absent where mypy runs.
+[[tool.mypy.overrides]]
+module = ["torch", "torch.*", "transformers", "transformers.*", "peft", "peft.*"]
 ignore_missing_imports = true
 follow_imports = "skip"
 

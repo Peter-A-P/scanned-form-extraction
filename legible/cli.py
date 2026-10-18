@@ -820,5 +820,142 @@ def read_collect(
     typer.echo(f"{spec.run_id}: {added} reads added; {json.dumps(describe(path))}")
 
 
+train_app = typer.Typer(no_args_is_help=True, help="Arm B: QLoRA on the page images.")
+app.add_typer(train_app, name="train")
+
+
+def _training_sets() -> dict[str, tuple[str, list[str], set[str]]]:
+    """Every training set the headline needs: name to (schema key, train documents, held-out
+    documents). FARA's unseen level is one set per held-out template and seed, DeepForm's one
+    per seed, the mixed level one per corpus and seed, CORD and NIST one each."""
+    from legible.data.vrdu import headline_split_files, read_split
+
+    raw = data_root() / "raw" / "vrdu"
+    out: dict[str, tuple[str, list[str], set[str]]] = {}
+    for c in ("fara", "deepform"):
+        for level in ("unseen", "mixed"):
+            for f in headline_split_files(c, level):
+                sp = read_split(c, raw / f)
+                template = f"-{sp.template.lower().replace(' ', '_')}" if sp.template else ""
+                name = f"{c}-{level}{template}-s{sp.seed}"
+                out[name] = (c, list(sp.train), set(sp.valid) | set(sp.test))
+    held = part_docs("cord", "dev") | part_docs("cord", "test")
+    out["cord"] = ("cord", sorted(part_docs("cord", "train")), held)
+    for face in sorted(k for k in _nist_keys()):
+        held = part_docs(face, "dev") | part_docs(face, "test")
+        out[face] = (face, sorted(_nist_part(face, "train")), held)
+    return out
+
+
+def _nist_keys() -> list[str]:
+    from legible.schema.corpora import NIST_SCHEMAS
+
+    return sorted(NIST_SCHEMAS)
+
+
+def _nist_part(face: str, part: str) -> set[str]:
+    from legible.data.nist import read_splits
+
+    rows = read_splits(MANIFESTS / "nist-splits.json")
+    return {d for d, r in rows.items() if f"nist_{r.face.lower()}" == face and r.part == part}
+
+
+@train_app.command("sets")
+def train_sets() -> None:
+    """Write every training set under the data root's train/ directory."""
+    from legible.data.cord import read_shard
+    from legible.data.fetch import load_checksums
+    from legible.data.render import read_manifest
+    from legible.data.vrdu import read_dataset
+    from legible.schema.corpora import SCHEMAS
+    from legible.train.dataset import write_training_set
+
+    raw = data_root() / "raw"
+    truth: dict[str, object] = {}
+    for c in ("fara", "deepform"):
+        for d in read_dataset(c, raw / "vrdu"):
+            truth[d.doc_id] = d.truth
+    for shard in sorted(load_checksums("cord").files):
+        for cd, _ in read_shard(raw / "cord" / shard, None):
+            truth[cd.doc_id] = cd.truth
+    from legible.data import nist
+
+    zip_path, md5s = nist.fetch_sd2(raw / "nist")
+    for nd, _ in nist.read_sd2(zip_path, md5s, None):
+        truth[nd.doc_id] = nd.truth
+    pages: dict[str, list[str]] = {}
+    for c in ("fara", "deepform", "cord", "nist"):
+        for e in sorted(read_manifest(manifest(c)), key=lambda e: e.page):
+            pages.setdefault(e.doc_id, []).append(e.path)
+    for name, (key, docs, held) in _training_sets().items():
+        n = write_training_set(
+            data_root() / "train" / f"{name}.jsonl",
+            SCHEMAS[key],
+            name,
+            ((d, truth[d], pages[d]) for d in docs),  # type: ignore[misc]
+            held_out=held,
+        )
+        typer.echo(f"{name}: {n} documents")
+
+
+@train_app.command("run")
+def train_run(
+    dataset: str = typer.Argument(..., help="A training set name, as `train sets` wrote it."),
+    size: str = typer.Option(..., help="2b or 4b."),
+    seed: int = typer.Option(0),
+    visual_tokens: int = typer.Option(1120),
+    volume: int | None = typer.Option(None, help="Train on the first n documents only."),
+    checkpoint_uri: str | None = typer.Option(None, help="s3://<volume>/checkpoints"),
+    s3_datacenter: str | None = typer.Option(None),
+) -> None:
+    """One fine-tune on the rented card, resuming from its newest checkpoint."""
+    from legible.schema.corpora import SCHEMAS
+    from legible.train.checkpoint import CheckpointStore, runpod_s3
+    from legible.train.dataset import TrainingHeader, read_training_set
+    from legible.train.recipe import chosen
+    from legible.train.vision import describe, train
+
+    # "nist" is the twenty faces' sets read as one: one model for the form family, each face
+    # asked with its own prompt.
+    names = [k for k in _nist_keys()] if dataset == "nist" else [dataset]
+    headers: list[TrainingHeader] = []
+    examples = []
+    for name in names:
+        path = data_root() / "train" / f"{name}.jsonl"
+        with path.open(encoding="utf-8") as f:
+            key = TrainingHeader.model_validate_json(f.readline()).corpus
+        header, rows = read_training_set(path, SCHEMAS[key])
+        headers.append(header)
+        examples += [(header.instruction, r) for r in rows]
+    if dataset == "nist":
+        # Faces interleaved in a fixed order, so a step sees every form and a volume cut
+        # takes some of each.
+        import hashlib
+
+        examples.sort(key=lambda e: hashlib.sha256(e[1].doc_id.encode()).hexdigest())
+    config = chosen(
+        size,  # type: ignore[arg-type]
+        dataset,
+        seed=seed,
+        visual_tokens=visual_tokens,
+        volume=volume,
+    )
+    out = data_root() / "models" / config.run_id
+    syncer = (
+        runpod_s3(f"{checkpoint_uri}/{config.run_id}", s3_datacenter)
+        if checkpoint_uri and s3_datacenter
+        else None
+    )
+    record = train(
+        config,
+        headers,
+        examples,
+        data_root() / "pages",
+        out_dir=out,
+        store=CheckpointStore(out, syncer, keep=2),
+    )
+    typer.echo(describe(record))
+
+
 def main() -> None:
     app()
