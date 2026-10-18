@@ -16,6 +16,9 @@ On 2026-10-18 RunPod's Community Cloud had no 4090 or A5000 free, so both GPUs a
 Cloud; a first 4090 offered at US$0.89 on a host RunPod flagged with "a critical error" was
 deleted unused.
 
-Checkpoints and adapters go to 06's network volume (`smallprint-checkpoints`, 100 GB,
-EU-RO-1) through RunPod's S3 API, under `legible/`, and each run's checkpoints are removed once
-its adapter is stored.
+Checkpoints and adapters go to this project's network volume (`legible-checkpoints`, 60 GB,
+EU-RO-1, created 2026-10-18) through RunPod's S3 API, under `legible/`, and each run's
+checkpoints are removed once its adapter is stored. The first runs used 06's volume, which 06's
+merged formats nearly fill: an upload of the rendered pages (6.2 GB, to give the other pods the
+pages rather than render them again) was refused for quota, and the three adapters already
+there were moved across.
