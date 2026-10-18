@@ -424,16 +424,42 @@ rules_app = typer.Typer(no_args_is_help=True, help="Arm E: OCR plus rules.")
 app.add_typer(rules_app, name="rules")
 
 
+@rules_app.command("learn-nist")
+def rules_learn_nist() -> None:
+    """Learn NIST's face templates and field zones from the training pages' stored OCR and
+    answer files, and write legible/arms/nist_zones.json (committed)."""
+    from legible.arms.ocr_run import load
+    from legible.arms.zonal import FaceRules, learn_face, save
+    from legible.data import nist
+    from legible.data.render import read_manifest
+    from legible.schema import Record
+
+    train = part_docs("nist", "train")
+    entries = {e.doc_id: e for e in read_manifest(manifest("nist")) if e.doc_id in train}
+    zip_path, md5s = nist.fetch_sd2(data_root() / "raw" / "nist")
+    by_face: dict[str, list[tuple[str, Record]]] = {}
+    for d, _ in nist.read_sd2(zip_path, md5s, None):
+        if d.doc_id in entries:
+            by_face.setdefault(d.face, []).append((d.doc_id, d.truth))
+    rules: dict[str, FaceRules] = {}
+    for face, docs in sorted(by_face.items()):
+        faces = ((load(data_root(), 0, entries[d].path), t) for d, t in docs)
+        r = rules[face] = learn_face(face, faces)
+        typer.echo(
+            f"{face}: {len(docs)} pages, {len(r.template_words)} words, {len(r.zones)} zones"
+        )
+    save(rules)
+
+
 @rules_app.command("run")
 def rules_run(
-    corpus: str = typer.Argument(..., help="fara, deepform or cord."),
-    part: str = typer.Option(
-        "dev", help="dev or test. Test is run once, on the measurement machine."
-    ),
+    corpus: str = typer.Argument(..., help="fara, deepform, cord or nist."),
+    part: str = typer.Option("dev", help="dev or test (NIST also curve). Test is run once."),
     level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
 ) -> None:
-    """Answer every document of a part from its stored OCR, one run per split file."""
-    from legible.arms.rules_run import rule_sets_for, run
+    """Answer every document of a part from its stored OCR, one run per split file (NIST:
+    one run per part, with the zones learned from its training pages)."""
+    from legible.arms.rules_run import rule_sets_for, run, run_nist
     from legible.data.render import read_manifest
     from legible.data.vrdu import headline_split_files, read_split
 
@@ -441,6 +467,11 @@ def rules_run(
     for e in read_manifest(manifest(corpus)):
         pages.setdefault(e.doc_id, []).append(e)
     out_dir = data_root() / "runs" / "arm-e" / f"level{level}" / corpus
+    if corpus == "nist":
+        nist_docs = sorted(part_docs("nist", part))
+        n = run_nist(data_root(), nist_docs, pages, level, out_dir / f"{part}.jsonl")
+        typer.echo(f"nist {part} level {level}: {n} faces")
+        return
     if corpus == "cord":
         docs = sorted(part_docs("cord", part))
         n = run(

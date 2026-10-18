@@ -85,3 +85,36 @@ def run(
 def read_run(path: Path) -> list[RulesRead]:
     with path.open(encoding="utf-8") as f:
         return [RulesRead.model_validate(json.loads(line)) for line in f if line.strip()]
+
+
+def run_nist(
+    root: Path,
+    doc_ids: Sequence[str],
+    pages: dict[str, list[PageEntry]],
+    level: int,
+    out: Path,
+) -> int:
+    """Arm E on NIST faces: each page read with the committed zones (`legible.arms.zonal`).
+    `rule_set` names the face the page was read as, which may not be its true face."""
+    from legible.arms.zonal import load_rules
+    from legible.arms.zonal import read as read_zones
+
+    rules = load_rules()
+    missing = [
+        e.path for d in doc_ids for e in pages[d] if not stored(root, level, e.path).exists()
+    ]
+    if missing:
+        raise FileNotFoundError(
+            f"{len(missing)} pages have no OCR at level {level}, first {missing[:3]}"
+        )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8", newline="\n") as f:
+        for d in doc_ids:
+            (entry,) = pages[d]
+            page = load(root, level, entry.path)
+            face, record = read_zones(page, rules)
+            row = RulesRead(
+                doc_id=d, output=record if face else None, ocr_seconds=page.seconds, rule_set=face
+            )
+            f.write(row.model_dump_json() + "\n")
+    return len(doc_ids)

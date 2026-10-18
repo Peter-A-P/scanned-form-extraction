@@ -33,6 +33,12 @@ another is read once, so the test rows count only pages not already read for dev
 | DeepForm | test | 300 | 774 | 4,183 | 5.4 |
 | CORD | dev | 100 | 100 | 1,610 | 16.1 |
 | CORD | test | 100 | 100 | 1,037 | 10.4 |
+| NIST | train | 3,850 | 3,850 | 16,660 | 4.3 |
+| NIST | dev | 561 | 561 | 2,713 | 4.8 |
+| NIST | test (the 500 every arm reads) | 500 | 500 | 2,582 | 5.2 |
+| NIST | curve, levels 1 to 4 | 300 | 1,200 | 5,138 | 4.3 |
+
+NIST was read on a second pod of the same kind (EU-RO-1), 2026-10-17, the same Tesseract.
 
 A CORD receipt costs most because its preprocessing doubles the photograph, and some are
 2304 by 4096 pixels as published. Seconds are wall time of a single-threaded Tesseract process
@@ -43,6 +49,7 @@ Preprocessing, per corpus, chosen on training pages (`PREPROCESS` in `legible/ar
 | Corpus | What Tesseract is given | Why |
 |---|---|---|
 | FARA, DeepForm | The 300 dpi page as rendered, automatic page segmentation (`--psm 3`) | Scans at scan resolution; nothing to add |
+| NIST | The 300 ppi binary page as published, `--psm 3` | As for the VRDU scans |
 | CORD | Scaled up twice, median filter 3, binarised against the mean of a 51-pixel window less 10, read as one block (`--psm 6`) | Phone photographs of dot-matrix print at about 100 dpi under uneven light. As published, Tesseract read **no words at all** from the first training receipt tried; the block mode keeps an item and its price on one line |
 
 On the laptop, while the rules were written, a VRDU page took 5 to 8 seconds and a CORD receipt about 6, single-threaded; those timings are not used.
@@ -195,3 +202,36 @@ right shape were found, so arm E invents little and reads little. DeepForm's uns
 number is no worse than its mixed one because its one rule set was never written per
 template. The README's tables will carry these through the report command, beside the other
 arms on the same documents.
+
+## Arm E on NIST: zonal OCR
+
+SD2's twenty faces never change layout, so arm E there is the classic fixed-form pipeline:
+zones, not label anchors (`legible/arms/zonal.py`). The face, each field's zone and the page
+registration are learned from the 3,850 training pages' OCR and answer files by `legible rules
+learn-nist`, and committed as `legible/arms/nist_zones.json`; nothing is learned from dev or
+test. The design was tuned on dev only.
+
+On dev, level 0, 2026-10-17: every one of the 561 faces is identified correctly, and **16.3% of
+fields (15.0 to 17.8) are read right**, with 14.5% of scored fields invented (a zone that read
+the form's own print or a neighbour's value). That is far below what a template pipeline is
+supposed to reach, and the ceiling is Tesseract's, not the zones': of the 11,791 filled fields on
+the dev faces, only **56% appear anywhere in Tesseract's output as the value's own words on one
+line**. SD2 prints machine type into boxes whose lines touch the characters, and Tesseract
+merges adjacent columns ("9784\Parent"), drops a character ("Sierr") or reads a box line as one
+("[broker"). Of the values Tesseract did read whole, 81% fall inside their learned zone; the
+rest sit a row away, because the synthesis jitters each value by about a row's height.
+
+What was tried on dev, in order, each one kept only if it helped:
+
+| Change | Field accuracy |
+|---|---:|
+| Zones from the 5th to 95th percentile of every sample | 0.6% |
+| A sample only where the value is found once on the page; outliers dropped; the form's own print left out of a read | 12.9% |
+| Registration of each page by its anchors (a shift) | 17.1% |
+| A scale and a shift on each axis; low-confidence words dropped; a word given to one zone only | 15.9 to 17.5% |
+| Keeping printed words longer than two characters (so "and" in a joint name survives) | 14.4%, reverted |
+
+## Calibration
+
+`docs/degradation.md`, written by `legible calibrate` from the NIST curve pages' OCR at every
+level.
