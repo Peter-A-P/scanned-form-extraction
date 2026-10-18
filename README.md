@@ -17,6 +17,86 @@ percent accuracy, how many fields still need a person.
 ## Result
 
 <!-- results:start -->
+Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's own matchers, one grader for every arm; intervals are 95% bootstrap over documents. Frontier cost is the gateway ledger's at the 2026-10-16 price list, batch rate; OCR is costed at US$0.03 per vCPU-hour (RunPod, 2026-10-17). Written by `legible report`; do not edit.
+
+**FARA registration forms, templates never seen in training (headline)**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 14.2% (13.0 to 15.4) | 0.0% (0.0 to 0.0) | 0.2% (0.1 to 0.4) | US$0.02 (0.02 to 0.02) | 900 |
+
+**DeepForm ad-buy forms, templates never seen in training (headline)**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 13.7% (9.9 to 18.3) | 1.3% (0.0 to 3.1) | 0.8% (0.6 to 1.0) | US$0.05 (0.04 to 0.05) | 159 |
+
+**CORD receipts, test set**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 15.8% (11.9 to 19.8) | 0.0% (0.0 to 0.0) | 0.8% (0.1 to 1.9) | US$0.09 (0.04 to 0.15) | 100 |
+
+**NIST tax forms, 500 test faces**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 16.0% (14.6 to 17.4) | 0.0% (0.0 to 0.0) | 15.2% (14.1 to 16.3) | US$0.04 (0.04 to 0.05) | 500 |
+
+**FARA, templates seen in training (the gap beside the headline)**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 36.2% (33.6 to 38.9) | 1.0% (0.0 to 2.3) | 3.5% (2.6 to 4.4) | US$0.03 (0.02 to 0.03) | 300 |
+
+**DeepForm, templates seen in training (the gap beside the headline)**
+
+| Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---:|
+| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| E, OCR plus rules | 11.5% (8.9 to 14.4) | 0.7% (0.0 to 1.7) | 0.9% (0.7 to 1.1) | US$0.05 (0.04 to 0.05) | 300 |
+
+**NIST, the 300 curve pages at each degradation level** (fields correct; what each level does to OCR is in [docs/degradation.md](docs/degradation.md))
+
+| Arm | Level 0 | Level 1 | Level 2 | Level 3 | Level 4 |
+|---|---|---|---|---|---|
+| A, Claude Sonnet 5.5 on the image |  |  |  |  |  |
+| A, Claude Haiku 5.5 on the image |  |  |  |  |  |
+| A, GPT-6.1 Sol on the image |  |  |  |  |  |
+| A, Gemini 3.8 Flash on the image |  |  |  |  |  |
+| D, Claude Sonnet 5.5 on the OCR text |  |  |  |  |  |
+| E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
+
+Not yet measured: the fine-tuned and untuned small models (arms B and C), the review rate at 99%, and latency, which batch reads do not give.
 <!-- results:end -->
 
 ## What this does not do
