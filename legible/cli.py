@@ -1018,7 +1018,7 @@ def train_run(
         dataset,
         seed=seed,
         **({"visual_tokens": visual_tokens} if visual_tokens else {}),
-        volume=volume,
+        **({"volume": volume} if volume else {}),
         save_steps=save_steps,
     )
     out = data_root() / "models" / config.run_id

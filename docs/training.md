@@ -48,3 +48,8 @@ read that was archived, not reported:
 | The vendors' 1,568-pixel page | The fine-tunes were trained on the page as rendered and their processor scales it to the visual budget itself | No: the page as rendered |
 | A 120-second read timeout | A DeepForm answer of up to 8,192 tokens outran it and stopped the pass | No: 900 seconds, and a failed call left unread for a second pass |
 | **Constrained JSON decoding** (vLLM structured outputs on the schema) | It cut unparsed answers from 15% to 1% on the first FARA model, but it writes JSON in the grammar's spacing (`"advertiser": null`) rather than the compact form the models were trained on (`"advertiser":null`). Pushed off its trained format, the DeepForm 2B answered null for every field: on 6 dev orders it filled the advertiser on none, against all 6 read freely. Without optional whitespace, it looped on spaces to the token limit instead | **No: rejected.** The models are read freely and their malformed answers are counted as malformed |
+
+NIST's fine-tunes read 800 of its 3,850 training faces, the first 800 in the interleaved order,
+about 40 a face (`VOLUME_FOR` in `legible/train/recipe.py`). The whole part ran at 145 seconds a
+step for the 4B on an RTX A6000, its prompts listing every field of a face: nineteen hours for
+one run. The 4B's full-volume run was stopped at step 34 of 463.

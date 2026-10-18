@@ -106,6 +106,13 @@ VISUAL_TOKENS_FOR: Final[dict[str, VisualTokens]] = {}
 MAX_SEQ_LEN_FOR: Final[dict[str, int]] = {"nist": 16_384}
 
 
+#: Training documents for a corpus whose whole training part costs more than its result is
+#: worth. NIST's 3,850 faces at up to 16,384 tokens ran at 145 seconds a step for the 4B on an
+#: RTX A6000, nineteen hours for one run (2026-10-18); its first 800 in the interleaved order
+#: (about 40 a face) are a fifth of that. The data-volume ablation is the plan's own.
+VOLUME_FOR: Final[dict[str, int]] = {"nist": 800}
+
+
 def chosen(size: Size, dataset: str, *, seed: int = 0, **changes: object) -> TrainConfig:
     """06's chosen recipe for a size on a training set, with any ablation's changes."""
     rank, lr = (64, 1e-4) if size == "2b" else (16, 2e-4)
@@ -118,5 +125,6 @@ def chosen(size: Size, dataset: str, *, seed: int = 0, **changes: object) -> Tra
         learning_rate=lr,
         visual_tokens=VISUAL_TOKENS_FOR.get(corpus, 1120),
         max_seq_len=MAX_SEQ_LEN_FOR.get(corpus, 12_288),
+        volume=VOLUME_FOR.get(corpus),
     )
     return base.model_copy(update={"seed": seed, **changes})
