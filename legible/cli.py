@@ -905,6 +905,7 @@ def train_run(
     seed: int = typer.Option(0),
     visual_tokens: int = typer.Option(1120),
     volume: int | None = typer.Option(None, help="Train on the first n documents only."),
+    save_steps: int = typer.Option(25, help="Steps between checkpoints (a smoke run: 1)."),
     checkpoint_uri: str | None = typer.Option(None, help="s3://<volume>/checkpoints"),
     s3_datacenter: str | None = typer.Option(None),
 ) -> None:
@@ -939,6 +940,7 @@ def train_run(
         seed=seed,
         visual_tokens=visual_tokens,
         volume=volume,
+        save_steps=save_steps,
     )
     out = data_root() / "models" / config.run_id
     syncer = (
