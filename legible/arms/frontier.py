@@ -108,7 +108,13 @@ def build_request(
     then the instruction. Exactly one of the two inputs is given."""
     if bool(images) == bool(ocr_pages):
         raise ValueError("a request reads the page images or the OCR text, exactly one")
-    content: list[dict[str, Any]] = [image_block(vendor, vendor_image(png)) for png in images]
+    # The vendors get every page at 1,568 pixels on the long edge, the same pixels each. A
+    # self-hosted model gets the page as rendered, the pixels it was trained on: its own
+    # processor scales a page to its visual budget, and a page already cut to 1,568 pixels
+    # reached it with fewer patches than in training (the first fine-tuned reads, 2026-10-18).
+    content: list[dict[str, Any]] = [
+        image_block(vendor, png if vendor == "selfhosted" else vendor_image(png)) for png in images
+    ]
     if ocr_pages:
         joined = "\n\n".join(f"--- page {i + 1} ---\n{text}" for i, text in enumerate(ocr_pages))
         content.append(text_block(vendor, joined))
