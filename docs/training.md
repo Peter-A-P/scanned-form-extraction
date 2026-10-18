@@ -19,7 +19,10 @@ as one model on all twenty sets, each face asked with its own prompt.
 - One user turn of page images then the prompt, one assistant turn of the JSON; the loss on
   the answer's tokens only, computed from the answer's logits alone.
 - 1,120 visual tokens a page, the top of Gemma 4's range and what the card recommends for
-  documents; 560 is the ablation.
+  documents, except DeepForm at 560: its orders run to eleven pages, and at 1,120 the 2B ran
+  out of memory on a 24 GB card at the third step (2026-10-18), with the documents over
+  12,288 tokens already left out. 560 is the plan's own ablation value; on the other corpora
+  it is the ablation.
 - Checkpoints to the volume from the first save (`legible/train/checkpoint.py`, 06's, copied at
   3adf4fad); a run resumes from the newest complete one. `ops/train-queue.sh` runs a seed's
   list on one pod and skips what is done, so several pods can share a list.

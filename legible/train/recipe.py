@@ -91,8 +91,23 @@ class TrainConfig(BaseModel):
         return f"{self.size}-{self.dataset}-v{self.visual_tokens}-s{self.seed}-{digest}"
 
 
+#: DeepForm trains at 560 visual tokens a page. Its orders run to eleven pages, and at 1,120
+#: the 2B ran out of memory on a 24 GB card at the third step of its first run (2026-10-18),
+#: with the documents over 12,288 tokens already left out. 560 is the plan's own ablation
+#: value, and the README says which budget each corpus's fine-tune read at.
+VISUAL_TOKENS_FOR: Final[dict[str, VisualTokens]] = {"deepform": 560}
+
+
 def chosen(size: Size, dataset: str, *, seed: int = 0, **changes: object) -> TrainConfig:
     """06's chosen recipe for a size on a training set, with any ablation's changes."""
     rank, lr = (64, 1e-4) if size == "2b" else (16, 2e-4)
-    base = TrainConfig(size=size, dataset=dataset, rank=rank, alpha=2 * rank, learning_rate=lr)
+    corpus = dataset.split("-")[0]
+    base = TrainConfig(
+        size=size,
+        dataset=dataset,
+        rank=rank,
+        alpha=2 * rank,
+        learning_rate=lr,
+        visual_tokens=VISUAL_TOKENS_FOR.get(corpus, 1120),
+    )
     return base.model_copy(update={"seed": seed, **changes})

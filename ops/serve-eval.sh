@@ -39,7 +39,8 @@ else
   fi
   [ -d "$LEGIBLE_DATA/merged/$model" ] || legible serve merge "$model"
   dataset=$(python -c "import json; print(json.load(open('$dir/run.json'))['config']['dataset'])")
-  args=$(legible serve argv "$model")
+  budget=$(python -c "import json; print(json.load(open('$dir/run.json'))['config']['visual_tokens'])")
+  args=$(legible serve argv "$model" --visual-tokens "$budget")
   reads=$(legible serve reads "$dataset")
 fi
 

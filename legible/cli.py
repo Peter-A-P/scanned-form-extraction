@@ -953,7 +953,7 @@ def train_run(
     dataset: str = typer.Argument(..., help="A training set name, as `train sets` wrote it."),
     size: str = typer.Option(..., help="2b or 4b."),
     seed: int = typer.Option(0),
-    visual_tokens: int = typer.Option(1120),
+    visual_tokens: int | None = typer.Option(None, help="Default: the corpus's (recipe.py)."),
     volume: int | None = typer.Option(None, help="Train on the first n documents only."),
     save_steps: int = typer.Option(25, help="Steps between checkpoints (a smoke run: 1)."),
     checkpoint_uri: str | None = typer.Option(None, help="s3://<volume>/checkpoints"),
@@ -988,7 +988,7 @@ def train_run(
         size,  # type: ignore[arg-type]
         dataset,
         seed=seed,
-        visual_tokens=visual_tokens,
+        **({"visual_tokens": visual_tokens} if visual_tokens else {}),
         volume=volume,
         save_steps=save_steps,
     )
