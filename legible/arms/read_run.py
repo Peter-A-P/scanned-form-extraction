@@ -44,6 +44,9 @@ SOURCE: Mapping[Arm, Source] = {"a": "images", "d": "ocr_text"}
 #: estimate charges the whole budget, so it is no larger than the longest training record
 #: needs.
 MAX_TOKENS: Mapping[str, int] = {"fara": 1024, "deepform": 8192, "cord": 2048}
+#: Every NIST face (`nist_<face>`): the longest training record, Schedule D page 1 with every
+#: key, is 6,030 characters of JSON, about 2,000 tokens.
+NIST_MAX_TOKENS = 3072
 
 #: Added to the output budget for a vendor whose model reasons by default and counts the
 #: reasoning inside the same cap. Gemini 3.8 Flash thinks before it answers and its thoughts
@@ -54,7 +57,8 @@ REASONING_HEADROOM: Mapping[Vendor, int] = {"anthropic": 0, "openai": 0, "google
 
 
 def max_tokens_for(corpus: str, vendor: Vendor) -> int:
-    return MAX_TOKENS[corpus] + REASONING_HEADROOM[vendor]
+    base = NIST_MAX_TOKENS if corpus.startswith("nist_") else MAX_TOKENS[corpus]
+    return base + REASONING_HEADROOM[vendor]
 
 
 #: Bytes of request body per batch, well inside each vendor's cap.
@@ -152,10 +156,11 @@ def finished(path: Path, doc_ids: Sequence[str]) -> bool:
 
 
 def require_dev(root: Path, spec: RunSpec, dev_docs: Sequence[str], prompt: Prompt) -> None:
-    """Refuse a test run unless this prompt has read every dev document at this level."""
-    if spec.part != "test":
+    """Refuse a test run (or a NIST curve run, which is test pages at a degradation level)
+    unless this prompt has read every dev document, at level 0, where prompts are tuned."""
+    if spec.part not in {"test", "curve"}:
         return
-    dev = run_dir(root, spec.model_copy(update={"part": "dev"}))
+    dev = run_dir(root, spec.model_copy(update={"part": "dev", "level": 0}))
     if not finished(dev, dev_docs):
         raise DevFirst(f"no finished dev run at {dev}; test is run after dev, once")
     kept = load_prompt(dev / "prompt.json", SCHEMAS[spec.corpus])
@@ -199,7 +204,7 @@ def request_for(
         spec.model,
         prompt.text,
         ocr_pages=document_text(root, spec.level, entries),
-        max_tokens=MAX_TOKENS[spec.corpus],
+        max_tokens=spec.max_tokens,
     )
 
 

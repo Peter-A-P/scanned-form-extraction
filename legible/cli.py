@@ -522,8 +522,8 @@ def _read_run(
 
     if arm not in {"a", "d"}:
         raise typer.BadParameter("arm is a (page images) or d (OCR text)")
-    if part not in {"dev", "test"}:
-        raise typer.BadParameter("part is dev or test")
+    if part not in {"dev", "test"} and not (part == "curve" and corpus.startswith("nist")):
+        raise typer.BadParameter("part is dev or test, or curve for NIST")
     vendor, model = _route(route)
     spec = RunSpec(
         arm=arm,
@@ -561,7 +561,7 @@ def read_submit(
 
     spec, prompt, docs, path = _read_run(arm, corpus, part, level, route, prompt_version)
     if limit is not None:
-        if part == "test":
+        if part != "dev":
             raise typer.BadParameter("a test run reads every test document, once")
         docs = docs[:limit]
     pages: dict[str, list[PageEntry]] = {}
