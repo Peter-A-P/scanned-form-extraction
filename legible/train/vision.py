@@ -264,10 +264,10 @@ def train(
         # The first, and those that could be long: four pages and more at up to 1,120 visual
         # tokens each, a long answer, or a long instruction. A one-page receipt cannot reach the limit, and running
         # the processor over all 3,850 NIST faces first would be half an hour of GPU rent.
-        # A long instruction too: Schedule D's prompt lists 191 fields and is 47,000
-        # characters, and its pages are over the limit with one image (the 4B's first NIST
-        # run stopped mid-way on one, 2026-10-18).
-        short = len(ex[1].pages) < 4 and len(ex[1].target) < 6_000 and len(ex[0]) < 30_000
+        # A long instruction too: NIST's prompts run to 47,000 characters (Schedule D, 191
+        # fields), and both sizes' first NIST runs stopped mid-way on a one-page face over
+        # the limit (2026-10-18).
+        short = len(ex[1].pages) < 4 and len(ex[1].target) < 6_000 and len(ex[0]) < 15_000
         if i and short:
             fits.append(ex)
             continue

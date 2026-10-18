@@ -98,6 +98,14 @@ class TrainConfig(BaseModel):
 VISUAL_TOKENS_FOR: Final[dict[str, VisualTokens]] = {}
 
 
+#: A corpus's sequence limit where 12,288 is too short. NIST's prompts list every field of a
+#: face and then its JSON Schema, so a one-page example runs to 14,933 tokens on Form 4562
+#: page 2 and to 30,572 on Schedule D page 1 (measured on the longest training example of
+#: each face, 2026-10-18). At 16,384 every face fits but Schedule D page 1, whose 151 pages
+#: (3.9% of NIST's training part) are left out and counted.
+MAX_SEQ_LEN_FOR: Final[dict[str, int]] = {"nist": 16_384}
+
+
 def chosen(size: Size, dataset: str, *, seed: int = 0, **changes: object) -> TrainConfig:
     """06's chosen recipe for a size on a training set, with any ablation's changes."""
     rank, lr = (64, 1e-4) if size == "2b" else (16, 2e-4)
@@ -109,5 +117,6 @@ def chosen(size: Size, dataset: str, *, seed: int = 0, **changes: object) -> Tra
         alpha=2 * rank,
         learning_rate=lr,
         visual_tokens=VISUAL_TOKENS_FOR.get(corpus, 1120),
+        max_seq_len=MAX_SEQ_LEN_FOR.get(corpus, 12_288),
     )
     return base.model_copy(update={"seed": seed, **changes})
