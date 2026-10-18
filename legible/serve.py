@@ -172,7 +172,7 @@ def vllm_argv(
         # then spaces and newlines to the 8,192-token limit on 150 of 159 test documents
         # (2026-10-18).
         "--structured-outputs-config",
-        json.dumps({"disable_any_whitespace": True}),
+        json.dumps({"backend": "xgrammar", "disable_any_whitespace": True}),
     ]
 
 
