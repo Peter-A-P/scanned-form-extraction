@@ -35,3 +35,16 @@ as one model on all twenty sets, each face asked with its own prompt.
 
 After the fixes: two steps of 8 documents, 28 seconds a step for the 2B at 1,120 visual
 tokens, train loss 0.78, both checkpoints written to the volume and listed back.
+
+## Reading the fine-tunes: what was tried on dev
+
+The self-hosted models are read through vLLM and the gateway (`ops/serve-eval.sh`). Four
+settings were changed on 2026-10-18 before any of their numbers were kept, each on dev or on a
+read that was archived, not reported:
+
+| Setting | What happened | Kept |
+|---|---|---|
+| vLLM's default temperature, 1 | The merged checkpoint carries no sampling defaults, so every read was sampled | No: temperature 0, 06's rule |
+| The vendors' 1,568-pixel page | The fine-tunes were trained on the page as rendered and their processor scales it to the visual budget itself | No: the page as rendered |
+| A 120-second read timeout | A DeepForm answer of up to 8,192 tokens outran it and stopped the pass | No: 900 seconds, and a failed call left unread for a second pass |
+| **Constrained JSON decoding** (vLLM structured outputs on the schema) | It cut unparsed answers from 15% to 1% on the first FARA model, but it writes JSON in the grammar's spacing (`"advertiser": null`) rather than the compact form the models were trained on (`"advertiser":null`). Pushed off its trained format, the DeepForm 2B answered null for every field: on 6 dev orders it filled the advertiser on none, against all 6 read freely. Without optional whitespace, it looped on spaces to the token limit instead | **No: rejected.** The models are read freely and their malformed answers are counted as malformed |

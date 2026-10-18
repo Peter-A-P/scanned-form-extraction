@@ -90,9 +90,8 @@ class RunSpec(BaseModel):
     prompt_version: int
     #: The output budget the run's requests carried (`max_tokens_for`).
     max_tokens: int
-    #: Whether the server was held to the schema's JSON (constrained decoding). On for the
-    #: self-hosted arms, whose first read wrote invalid JSON escapes in 15% of answers
-    #: (`structured_for`); off for the vendors, as the dev runs were read.
+    #: Whether the server was held to the schema's JSON (constrained decoding): tried for
+    #: the self-hosted arms and rejected (`structured_for`).
     structured: bool = False
     #: The sampling temperature sent, or None for the vendor's default (`temperature_for`).
     temperature: float | None = None
@@ -207,11 +206,15 @@ def check_inputs(
 
 
 def structured_for(vendor: Vendor) -> bool:
-    """Constrained JSON decoding: on for a self-hosted server (vLLM's structured outputs,
-    from the OpenAI `response_format` field). The first fine-tuned 2B, read without it on
-    2026-10-18, gave answers whose JSON did not parse on 46 of 300 test documents, mostly
-    invalid backslash escapes inside strings."""
-    return vendor == "selfhosted"
+    """Constrained JSON decoding: off for every arm.
+
+    Tried for the self-hosted models on 2026-10-18 and rejected on dev. vLLM's structured
+    outputs write JSON in the grammar's own spacing (`"advertiser": null`), not the compact
+    form the fine-tunes were trained on (`"advertiser":null`), and pushed off its trained
+    format the DeepForm 2B answered null for every field on 6 of 6 dev orders, where the
+    same model reading freely filled the advertiser on all 6. Read freely and greedily, the
+    fine-tunes' JSON is graded as it comes, malformed answers counted as malformed."""
+    return False
 
 
 def _extra(spec: RunSpec) -> dict[str, Any]:
