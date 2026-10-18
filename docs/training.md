@@ -19,10 +19,7 @@ as one model on all twenty sets, each face asked with its own prompt.
 - One user turn of page images then the prompt, one assistant turn of the JSON; the loss on
   the answer's tokens only, computed from the answer's logits alone.
 - 1,120 visual tokens a page, the top of Gemma 4's range and what the card recommends for
-  documents, except DeepForm at 560: its orders run to eleven pages, and at 1,120 the 2B ran
-  out of memory on a 24 GB card at the third step (2026-10-18), with the documents over
-  12,288 tokens already left out. 560 is the plan's own ablation value; on the other corpora
-  it is the ablation.
+  documents; 560 is the ablation.
 - Checkpoints to the volume from the first save (`legible/train/checkpoint.py`, 06's, copied at
   3adf4fad); a run resumes from the newest complete one. `ops/train-queue.sh` runs a seed's
   list on one pod and skips what is done, so several pods can share a list.
@@ -34,6 +31,7 @@ as one model on all twenty sets, each face asked with its own prompt.
 | `Could not import module 'Gemma4Processor'` | Gemma 4's image processor is written in torchvision, which 06 never needed | `torchvision==0.29.1` in the train extra |
 | `assert module.weight.shape[1] == 1` in bitsandbytes at the first step | transformers 5.17 matched the skip list's short names (`vision_tower`) against nothing, so the vision tower and the tied output layer were quantised | The skip list by full module path (`model.vision_tower`, `lm_head`) |
 | Out of memory in the loss | The logits of a whole page example over the 262k-token vocabulary, 2.6 GB in fp32 | Logits for the answer's positions only (`logits_to_keep`) |
+| Out of memory again on DeepForm, at 1,120 and at 560 visual tokens | A DeepForm answer runs to about 5,000 tokens, and its logits alone are 5 GB in fp32 | The loss over the answer in chunks of 512 positions, each recomputed in the backward pass (`AnswerLossTrainer`); DeepForm then trained at 1,120, 80 seconds a step on the A5000 |
 
 After the fixes: two steps of 8 documents, 28 seconds a step for the 2B at 1,120 visual
 tokens, train loss 0.78, both checkpoints written to the volume and listed back.
