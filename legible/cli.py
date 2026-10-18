@@ -435,8 +435,56 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         "level does to OCR is in [docs/degradation.md](docs/degradation.md))",
         "",
         *curve(range(5), cells),
-        "Not yet measured: the fine-tuned and untuned small models (arms B and C), the review "
-        "rate at 99%, and latency, which batch reads do not give.",
+    ]
+    from legible.report import agreed_grades, review_table
+    from legible.review import review
+
+    sonnet_a, sonnet_d = ARMS[0], ARMS[4]
+
+    def review_for(corpora: list[str], dev: list[str], test: list[str]) -> object:
+        parts = {}
+        for part, ids in (("dev", dev), ("test", test)):
+            va = answers_for(root, sonnet_a, corpora, part, 0, [])
+            vd = answers_for(root, sonnet_d, corpora, part, 0, [])
+            if va is None or vd is None:
+                return None
+            parts[part] = agreed_grades(ids, truth, va, vd)
+        return review(parts["dev"], parts["test"])
+
+    def vrdu_ids(corpus: str, level: str, attr: str) -> list[str]:
+        files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+        splits = [read_split(corpus, raw / "vrdu" / f) for f in files]  # type: ignore[arg-type]
+        return sorted({d for sp in splits for d in getattr(sp, attr)})
+
+    body += [
+        "**Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the "
+        "OCR text.** A field is accepted when the two reads agree; the threshold is chosen on "
+        "dev and applied once to test (legible/review.py, legible/agreement.py).",
+        "",
+        *review_table(
+            [
+                (
+                    "FARA, unseen templates",
+                    review_for(
+                        ["fara"],
+                        vrdu_ids("fara", "unseen", "valid"),
+                        vrdu_ids("fara", "unseen", "test"),
+                    ),
+                ),
+                (
+                    "DeepForm, unseen templates",
+                    review_for(
+                        ["deepform"],
+                        vrdu_ids("deepform", "unseen", "valid"),
+                        vrdu_ids("deepform", "unseen", "test"),
+                    ),
+                ),
+                ("CORD", review_for(["cord"], sorted(part_docs("cord", "dev")), cord_test)),
+                ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
+            ]
+        ),
+        "Not yet measured: the fine-tuned and untuned small models (arms B and C), and latency, "
+        "which batch reads do not give.",
     ]
     text = readme.read_text(encoding="utf-8")
     readme.write_text(splice(text, body), encoding="utf-8", newline="\n")

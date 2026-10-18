@@ -256,3 +256,48 @@ def answers_for(
     if not found.outputs:
         return None
     return with_ocr_cost(found, ocr.ocr_seconds) if arm.arm == "d" else found
+
+
+def agreed_grades(
+    doc_ids: Sequence[str], truth: Mapping[str, Truth], vision: Answers, text: Answers | None
+) -> list[DocGrade]:
+    """The vision read graded with each field's agreement with the text read as confidence.
+    A document the text read lacks has no confidence, so all its fields go to review."""
+    from legible.agreement import confidences
+
+    out = []
+    for d in doc_ids:
+        if d not in vision.outputs:
+            continue
+        other = text.outputs.get(d) if text is not None else None
+        conf = confidences(truth[d].schema, vision.outputs[d], other) if other is not None else {}
+        out.append(
+            grade_document(
+                truth[d].schema,
+                d,
+                truth[d].record,
+                vision.outputs[d],
+                page_text=truth[d].text,
+                alternatives=truth[d].alternatives,
+                confidences=conf,
+            )
+        )
+    return out
+
+
+def review_table(rows: Sequence[tuple[str, Any]]) -> list[str]:
+    """Rows of (corpus label, ReviewResult or None)."""
+    import math
+
+    out = [
+        "| Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | "
+        "Reached 99% on dev |",
+        "|---|---|---|---|",
+    ]
+    for label, r in rows:
+        if r is None:
+            out.append(f"| {label} | not yet measured | | |")
+            continue
+        reached = "yes" if math.isfinite(r.threshold.value) else "no: every field reviewed"
+        out.append(f"| {label} | {pct(r.review_rate)} | {pct(r.accepted_accuracy)} | {reached} |")
+    return [*out, ""]
