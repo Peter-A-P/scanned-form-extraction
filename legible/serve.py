@@ -67,10 +67,10 @@ def served_generation_config(
 
 
 def merge(adapter_dir: Path, out_dir: Path, check: Any) -> MergeRecord:
-    """Merge a run's adapter into its bf16 base and check it on one example.
+    """Merge a run's adapter into its bf16 base and check it on training examples.
 
-    `check` is the (encoding, labels) of one training example, from the training
-    collator, so the check is on the format the model was trained on."""
+    `check` is the (encoding, labels) of a training example, or a list of them, from the
+    training collator, so the check is on the format the model was trained on."""
     import torch
     from huggingface_hub import hf_hub_download
     from peft import PeftModel
@@ -84,19 +84,32 @@ def merge(adapter_dir: Path, out_dir: Path, check: Any) -> MergeRecord:
         base.repo, revision=base.revision, dtype=torch.bfloat16, device_map="cuda"
     )
     tuned = PeftModel.from_pretrained(model, str(adapter_dir))
-    enc, labels = check
-    enc = {k: v.to("cuda") if hasattr(v, "to") else v for k, v in enc.items()}
-    answer = [i for i, t in enumerate(labels) if t != IGNORE]
-    # Logits over the answer's positions only: over a 262k-token vocabulary, a DeepForm
-    # example's full logits did not fit beside the 4B on a 24 GB card (2026-10-18).
-    keep = len(labels) - answer[0] + 1
+    # Several short examples, so that one bf16 near-tie on an 87-token answer (1.1%) does
+    # not refuse a sound merge (the 4B DeepForm merge, 2026-10-18, agreed on 0.989).
+    checks = check if isinstance(check, list) else [check]
+    prepared = []
+    for enc, labels in checks:
+        enc = {k: v.to("cuda") if hasattr(v, "to") else v for k, v in enc.items()}
+        answer = [i for i, t in enumerate(labels) if t != IGNORE]
+        # Logits over the answer's positions only: a DeepForm example's full logits over a
+        # 262k-token vocabulary did not fit beside the 4B on a 24 GB card.
+        keep = len(labels) - answer[0] + 1
+        # Index j of the kept logits is position len(labels) - keep + j, predicting the next.
+        prepared.append((enc, keep, [i - 1 - (len(labels) - keep) for i in answer]))
     with torch.no_grad():
-        before = tuned(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
+        before = [
+            tuned(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
+            for enc, keep, _ in prepared
+        ]
         merged = tuned.merge_and_unload()
-        after = merged(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
-    # Index j of the kept logits is position len(labels) - keep + j, which predicts the next.
-    positions = [i - 1 - (len(labels) - keep) for i in answer]
-    share = agreement([before[i] for i in positions], [after[i] for i in positions])
+        after = [
+            merged(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
+            for enc, keep, _ in prepared
+        ]
+    a_tokens = [b[i] for b, (_, _, pos) in zip(before, prepared, strict=True) for i in pos]
+    b_tokens = [x[i] for x, (_, _, pos) in zip(after, prepared, strict=True) for i in pos]
+    positions = a_tokens
+    share = agreement(a_tokens, b_tokens)
     if share < MIN_AGREEMENT:
         raise RuntimeError(f"the merge agrees with the adapter on {share:.3f} of the answer")
     out_dir.mkdir(parents=True, exist_ok=True)

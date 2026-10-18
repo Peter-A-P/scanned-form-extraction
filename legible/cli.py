@@ -1064,14 +1064,13 @@ def serve_merge(run_id: str = typer.Argument(..., help="A finished run under mod
         with Image.open(data_root() / "pages" / rel) as img:
             return img.convert("RGB")
 
-    # The check example: the shortest answer among the first 50 training documents, so that
-    # its logits fit beside a 4B on 24 GB (a DeepForm order's 7,500-token answer did not).
+    # The check examples: the four shortest answers among the first 50 training documents,
+    # so their logits fit beside a 4B on 24 GB (a DeepForm order's 7,500-token answer did not).
     import itertools
 
-    shortest = min(itertools.islice(rows, 50), key=lambda r: len(r.target))
-    check = Collator(processor, load_page, record.config.max_seq_len).example(
-        (header.instruction, shortest)
-    )
+    shortest = sorted(itertools.islice(rows, 50), key=lambda r: len(r.target))[:4]
+    collator = Collator(processor, load_page, record.config.max_seq_len)
+    check = [collator.example((header.instruction, r)) for r in shortest]
     done = merge(out / "adapter", data_root() / "merged" / run_id, check)
     typer.echo(done.model_dump_json())
 
