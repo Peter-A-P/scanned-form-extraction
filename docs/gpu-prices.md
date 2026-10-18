@@ -8,6 +8,8 @@ Every machine this project rented, at the rate RunPod's API returned when the po
 | CPU pod `cpu3c`, 16 vCPU, 32 GB (EUR-IS-1, then EU-RO-1) | Tesseract on every dev, test and curve page; OCR is costed at a sixteenth of this a vCPU | Secure | 0.48 | 2026-10-17 |
 | RTX A5000, 24 GB (CA-MTL-1) | Arm B's fine-tunes, 2B first | Secure | 0.27 | 2026-10-18 |
 | RTX 4090, 24 GB (US) | Arm B's fine-tunes, 4B | Secure | 0.89 | 2026-10-18 |
+| RTX 3090, 24 GB | Arms B and C served by vLLM and read through the gateway | Secure | 0.50 | 2026-10-18 |
+| RTX A6000, 48 GB | Arm B's 4B on DeepForm, which ran out of memory on 24 GB at its first step | Secure | 0.59 | 2026-10-18 |
 
 **The provider rule** is 06's (`docs/gpu-prices.md` there): a hyperscaler's spot GPU if it is
 within 20% of the rental marketplaces, otherwise the marketplace. 06 found GCP's L4 spot 24%
