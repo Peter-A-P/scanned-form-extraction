@@ -167,6 +167,12 @@ def vllm_argv(
         json.dumps({"image": max_images}),
         "--mm-processor-kwargs",
         json.dumps({"max_soft_tokens": visual_tokens}),
+        # The schema's JSON with no whitespace between tokens. With the grammar's optional
+        # whitespace allowed, the fine-tuned 2B on DeepForm wrote its first line items and
+        # then spaces and newlines to the 8,192-token limit on 150 of 159 test documents
+        # (2026-10-18).
+        "--structured-outputs-config",
+        json.dumps({"disable_any_whitespace": True}),
     ]
 
 
