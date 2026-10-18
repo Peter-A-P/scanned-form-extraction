@@ -90,6 +90,10 @@ class RunSpec(BaseModel):
     prompt_version: int
     #: The output budget the run's requests carried (`max_tokens_for`).
     max_tokens: int
+    #: Whether the server was held to the schema's JSON (constrained decoding). On for the
+    #: self-hosted arms, whose first read wrote invalid JSON escapes in 15% of answers
+    #: (`structured_for`); off for the vendors, as the dev runs were read.
+    structured: bool = False
 
     @property
     def purpose(self) -> str:
@@ -200,6 +204,26 @@ def check_inputs(
             )
 
 
+def structured_for(vendor: Vendor) -> bool:
+    """Constrained JSON decoding: on for a self-hosted server (vLLM's structured outputs,
+    from the OpenAI `response_format` field). The first fine-tuned 2B, read without it on
+    2026-10-18, gave answers whose JSON did not parse on 46 of 300 test documents, mostly
+    invalid backslash escapes inside strings."""
+    return vendor == "selfhosted"
+
+
+def _extra(spec: RunSpec) -> dict[str, Any]:
+    if not spec.structured:
+        return {}
+    schema = SCHEMAS[spec.corpus].json_schema()
+    return {
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": spec.corpus, "schema": schema, "strict": True},
+        }
+    }
+
+
 def request_for(
     root: Path, spec: RunSpec, prompt: Prompt, entries: Sequence[PageEntry]
 ) -> ChatRequest:
@@ -210,6 +234,7 @@ def request_for(
             prompt.text,
             images=document_images(root, spec.level, entries),
             max_tokens=spec.max_tokens,
+            extra=_extra(spec),
         )
     return build_request(
         spec.vendor,
@@ -217,6 +242,7 @@ def request_for(
         prompt.text,
         ocr_pages=document_text(root, spec.level, entries),
         max_tokens=spec.max_tokens,
+        extra=_extra(spec),
     )
 
 

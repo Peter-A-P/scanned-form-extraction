@@ -736,7 +736,14 @@ def _read_run(
     config: Path = GATEWAY_CONFIG,
     split: str | None = None,
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
-    from legible.arms.read_run import RunSpec, max_tokens_for, prompt_for, require_dev, run_dir
+    from legible.arms.read_run import (
+        RunSpec,
+        max_tokens_for,
+        prompt_for,
+        require_dev,
+        run_dir,
+        structured_for,
+    )
 
     if arm not in {"a", "b", "c", "d"}:
         raise typer.BadParameter("arm is a, b or c (page images) or d (OCR text)")
@@ -755,6 +762,7 @@ def _read_run(
         model=model,
         prompt_version=prompt_version,
         max_tokens=max_tokens_for(corpus, vendor),  # type: ignore[arg-type]
+        structured=structured_for(vendor),  # type: ignore[arg-type]
     )
     prompt = prompt_for(corpus, prompt_version, spec.arm)
     dev, docs = sorted(part_docs(corpus, "dev")), sorted(part_docs(corpus, part))
