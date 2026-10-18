@@ -59,11 +59,13 @@ class Truth:
 
 @dataclass(frozen=True)
 class Arm:
-    """One reader as the tables name it."""
+    """One reader as the tables name it. A fine-tune (arm B) has a model per training set,
+    so its route depends on the table: `size` names which of the two it is."""
 
     label: str
     arm: str
     route: str | None
+    size: str | None = None
 
 
 ARMS: tuple[Arm, ...] = (
@@ -73,6 +75,35 @@ ARMS: tuple[Arm, ...] = (
     Arm("A, Gemini 3.8 Flash on the image", "a", "google"),
     Arm("D, Claude Sonnet 5.5 on the OCR text", "d", "quality"),
     Arm("E, OCR plus rules", "e", None),
+    Arm("B, Gemma 4 E2B fine-tuned on the image", "b", None, size="2b"),
+    Arm("B, Gemma 4 E4B fine-tuned on the image", "b", None, size="4b"),
+    Arm("C, Gemma 4 E2B untuned on the image", "c", "2b-it"),
+    Arm("C, Gemma 4 E4B untuned on the image", "c", "4b-it"),
+)
+
+#: The training sets whose fine-tunes read each table's documents, at seed 0 (the gate's).
+TABLE_SETS: Mapping[str, tuple[str, ...]] = {
+    "fara-unseen": (
+        "fara-unseen-amendment-s0",
+        "fara-unseen-dissemination_report-s0",
+        "fara-unseen-short-form-s0",
+    ),
+    "deepform-unseen": ("deepform-unseen-s0",),
+    "cord": ("cord",),
+    "nist": ("nist",),
+    "fara-mixed": ("fara-mixed-s0",),
+    "deepform-mixed": ("deepform-mixed-s0",),
+}
+
+#: The serving pod's rate (docs/gpu-prices.md): a self-hosted page costs the GPU time it took,
+#: from the wall time of each read pass at its concurrency.
+SERVE_PRICE = GpuPrice(
+    gpu="RTX 3090 24 GB",
+    provider="RunPod",
+    kind=PriceKind.ON_DEMAND,
+    usd_per_hour=0.50,
+    checked=dt.date(2026, 10, 18),
+    source="RunPod's create-pod response, costPerHr 0.50",
 )
 
 
@@ -99,6 +130,37 @@ def frontier_answers(dirs: Sequence[Path]) -> Answers:
             usd[doc] = 0.0 if r.status == "missing" else float(r.cost_usd or 0.0)
             if r.cost_usd is None and r.status != "missing":
                 raise ValueError(f"{d}: {doc} has no cost in the ledger")
+    return Answers(outputs=out, usd=usd, ocr_seconds={})
+
+
+def selfhosted_answers(dirs: Sequence[Path]) -> Answers:
+    """A served model's reads, each costed at its pass's GPU seconds a document."""
+    import json
+
+    out: dict[str, Any] = {}
+    usd: dict[str, float] = {}
+    for d in dirs:
+        if not (d / "run.json").exists():
+            continue
+        passes = (
+            [
+                json.loads(line)
+                for line in (d / "throughput.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            if (d / "throughput.jsonl").exists()
+            else []
+        )
+        reads = sum(p["reads"] for p in passes)
+        per_doc = (
+            sum(p["seconds"] for p in passes) / reads * SERVE_PRICE.usd_per_hour / 3600
+            if reads
+            else 0.0
+        )
+        parsed = outputs(d)
+        for doc in RunDir(d).reads():
+            out[doc] = parsed[doc]
+            usd[doc] = per_doc
     return Answers(outputs=out, usd=usd, ocr_seconds={})
 
 
@@ -246,12 +308,29 @@ def answers_for(
     part: str,
     level: int,
     rules_files: Sequence[Path],
+    table: str = "",
 ) -> Answers | None:
     """An arm's answers on some corpora: frontier reads from their run directories (arm D
-    charged for its OCR too), arm E from its rules runs."""
+    charged for its OCR too), arm E from its rules runs, arms B and C from their served
+    reads (B's model the one trained for the table)."""
     ocr = rules_answers(rules_files)
     if arm.arm == "e":
         return ocr if ocr.outputs else None
+    if arm.arm in {"b", "c"}:
+        from legible.train.recipe import chosen
+
+        routes = (
+            [chosen(arm.size, ds).run_id for ds in TABLE_SETS.get(table, ())]  # type: ignore[arg-type]
+            if arm.arm == "b"
+            else [str(arm.route)]
+        )
+        dirs = [
+            root / "runs" / f"arm-{arm.arm}" / r / "p1" / f"level{level}" / c / part
+            for r in routes
+            for c in corpora
+        ]
+        found = selfhosted_answers(dirs)
+        return found if found.outputs else None
     found = frontier_answers(run_dirs(root, arm, corpora, part, level))
     if not found.outputs:
         return None

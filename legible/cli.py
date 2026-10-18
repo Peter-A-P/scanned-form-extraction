@@ -392,7 +392,12 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         docs = sorted({d for f in files for d in read_split(corpus, raw / "vrdu" / f).test})  # type: ignore[arg-type]
         rules = [e_dir / "level0" / corpus / f"{Path(f).stem}-test.jsonl" for f in files]
         return [
-            row(a.label, docs, truth, answers_for(root, a, [corpus], "test", 0, rules))
+            row(
+                a.label,
+                docs,
+                truth,
+                answers_for(root, a, [corpus], "test", 0, rules, f"{corpus}-{level}"),
+            )
             for a in ARMS
         ]
 
@@ -423,7 +428,13 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 cord_test,
                 truth,
                 answers_for(
-                    root, a, ["cord"], "test", 0, [e_dir / "level0" / "cord" / "test.jsonl"]
+                    root,
+                    a,
+                    ["cord"],
+                    "test",
+                    0,
+                    [e_dir / "level0" / "cord" / "test.jsonl"],
+                    "cord",
                 ),
             )
             for a in ARMS
@@ -437,7 +448,13 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 nist_test,
                 truth,
                 answers_for(
-                    root, a, nist_faces, "test", 0, [e_dir / "level0" / "nist" / "test.jsonl"]
+                    root,
+                    a,
+                    nist_faces,
+                    "test",
+                    0,
+                    [e_dir / "level0" / "nist" / "test.jsonl"],
+                    "nist",
                 ),
             )
             for a in ARMS
@@ -457,7 +474,7 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         for lv in range(5):
             part = "test" if lv == 0 else "curve"
             rules = [e_dir / f"level{lv}" / "nist" / f"{part}.jsonl"]
-            found = answers_for(root, a, nist_faces, part, lv, rules)
+            found = answers_for(root, a, nist_faces, part, lv, rules, "nist")
             if found is not None:
                 cells[a.label][lv] = row(a.label, curve_docs, truth, found)
     body += [
@@ -513,8 +530,10 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
             ]
         ),
-        "Not yet measured: the fine-tuned and untuned small models (arms B and C), and latency, "
-        "which batch reads do not give.",
+        "Arms B and C read through vLLM on an RTX 3090, held to the schema's JSON, and are "
+        "costed at the GPU's US$0.50 an hour over the measured wall time of each read pass. "
+        "B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are "
+        "the training variance. Not yet measured: latency, which batch reads do not give.",
     ]
     text = readme.read_text(encoding="utf-8")
     readme.write_text(splice(text, body), encoding="utf-8", newline="\n")
