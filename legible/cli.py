@@ -323,6 +323,126 @@ def calibrate_levels(
     typer.echo("\n".join(lines))
 
 
+@app.command("report")
+def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
+    """Grade every arm's stored test reads and write the README's result tables."""
+    from legible.data import nist
+    from legible.data.cord import read_shard
+    from legible.data.fetch import load_checksums
+    from legible.data.vrdu import headline_split_files, read_dataset, read_split
+    from legible.report import (
+        ARMS,
+        PRICE_LIST_DATE,
+        Row,
+        Truth,
+        answers_for,
+        curve,
+        row,
+        splice,
+        table,
+    )
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+
+    root, raw = data_root(), data_root() / "raw"
+    truth: dict[str, Truth] = {}
+    for c in ("fara", "deepform"):
+        for d in read_dataset(c, raw / "vrdu"):
+            truth[d.doc_id] = Truth(SCHEMAS[c], d.truth, d.alternatives, d.text, d.pages)
+    for shard in sorted(load_checksums("cord").files):
+        for cd, _ in read_shard(raw / "cord" / shard, None):
+            truth[cd.doc_id] = Truth(SCHEMAS["cord"], cd.truth, cd.alternatives, None, 1)
+    zip_path, md5s = nist.fetch_sd2(raw / "nist")
+    for nd, _ in nist.read_sd2(zip_path, md5s, None):
+        truth[nd.doc_id] = Truth(SCHEMAS[nd.corpus], nd.truth, {}, None, 1)
+
+    e_dir = root / "runs" / "arm-e"
+
+    def vrdu_rows(corpus: str, level: str) -> list[Row]:
+        files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+        docs = sorted({d for f in files for d in read_split(corpus, raw / "vrdu" / f).test})  # type: ignore[arg-type]
+        rules = [e_dir / "level0" / corpus / f"{Path(f).stem}-test.jsonl" for f in files]
+        return [
+            row(a.label, docs, truth, answers_for(root, a, [corpus], "test", 0, rules))
+            for a in ARMS
+        ]
+
+    nist_faces = sorted(NIST_SCHEMAS)
+    nist_test = sorted(part_docs("nist", "test"))
+    cord_test = sorted(part_docs("cord", "test"))
+    body = [
+        "Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's own "
+        "matchers, one grader for every arm; intervals are 95% bootstrap over documents. "
+        f"Frontier cost is the gateway ledger's at the {PRICE_LIST_DATE} price list, batch "
+        "rate; OCR is costed at US$0.03 per vCPU-hour (RunPod, 2026-10-17). Written by "
+        "`legible report`; do not edit.",
+        "",
+    ]
+    body += table(
+        "FARA registration forms, templates never seen in training (headline)",
+        vrdu_rows("fara", "unseen"),
+    )
+    body += table(
+        "DeepForm ad-buy forms, templates never seen in training (headline)",
+        vrdu_rows("deepform", "unseen"),
+    )
+    body += table(
+        "CORD receipts, test set",
+        [
+            row(
+                a.label,
+                cord_test,
+                truth,
+                answers_for(
+                    root, a, ["cord"], "test", 0, [e_dir / "level0" / "cord" / "test.jsonl"]
+                ),
+            )
+            for a in ARMS
+        ],
+    )
+    body += table(
+        "NIST tax forms, 500 test faces",
+        [
+            row(
+                a.label,
+                nist_test,
+                truth,
+                answers_for(
+                    root, a, nist_faces, "test", 0, [e_dir / "level0" / "nist" / "test.jsonl"]
+                ),
+            )
+            for a in ARMS
+        ],
+    )
+    body += table(
+        "FARA, templates seen in training (the gap beside the headline)", vrdu_rows("fara", "mixed")
+    )
+    body += table(
+        "DeepForm, templates seen in training (the gap beside the headline)",
+        vrdu_rows("deepform", "mixed"),
+    )
+    curve_docs = sorted(part_docs("nist", "curve"))
+    cells: dict[str, dict[int, Row]] = {}
+    for a in ARMS:
+        cells[a.label] = {}
+        for lv in range(5):
+            part = "test" if lv == 0 else "curve"
+            rules = [e_dir / f"level{lv}" / "nist" / f"{part}.jsonl"]
+            found = answers_for(root, a, nist_faces, part, lv, rules)
+            if found is not None:
+                cells[a.label][lv] = row(a.label, curve_docs, truth, found)
+    body += [
+        "**NIST, the 300 curve pages at each degradation level** (fields correct; what each "
+        "level does to OCR is in [docs/degradation.md](docs/degradation.md))",
+        "",
+        *curve(range(5), cells),
+        "Not yet measured: the fine-tuned and untuned small models (arms B and C), the review "
+        "rate at 99%, and latency, which batch reads do not give.",
+    ]
+    text = readme.read_text(encoding="utf-8")
+    readme.write_text(splice(text, body), encoding="utf-8", newline="\n")
+    typer.echo("\n".join(body))
+
+
 gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")
 app.add_typer(gate_app, name="gate")
 

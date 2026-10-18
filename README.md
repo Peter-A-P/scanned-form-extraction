@@ -16,11 +16,8 @@ percent accuracy, how many fields still need a person.
 
 ## Result
 
-Building since 2026-10-16. Nothing has been measured yet. The columns the benchmark will fill:
-
-| Arm | Corpus | Fields correct (95% CI) | Every field right | Unseen templates | At degradation level 3 | Hallucinated fields | Review rate at 99% | Cost per 1,000 pages | p99 per page |
-|---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | |
+<!-- results:start -->
+<!-- results:end -->
 
 ## What this does not do
 
