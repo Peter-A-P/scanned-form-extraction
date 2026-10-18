@@ -18,7 +18,8 @@ touch "$done_list"
 while true; do
   ready=$(aws s3 ls --recursive "s3://$VOLUME_ID/legible/checkpoints/" \
       --endpoint-url "https://s3api-$dc.runpod.io" --region "$dc" 2>/dev/null \
-    | awk '{print $4}' | grep '/adapter/.complete$' | cut -d/ -f3 | sort -u)
+    | awk '{print $4}' | grep '/adapter/.complete$' | cut -d/ -f3 | sort -u     | awk '{ s = ($0 ~ /-s0-/) ? 0 : 1; print s, $0 }' | sort | cut -d' ' -f2)
+  # Seed 0 first, every corpus and size: the headline and the gate are seed 0's.
   next=""
   for run in $ready; do
     grep -qx "$run" "$done_list" || { next="$run"; break; }
