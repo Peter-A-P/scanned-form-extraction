@@ -309,10 +309,13 @@ def train(
             return chosen[i]
 
     class AnswerLossTrainer(Trainer):  # type: ignore[misc]
-        """The loss from the answer's logits alone. The answer is the end of each example,
-        so the model is asked for logits over its last positions only: over a 262k-token
-        vocabulary, the logits of a whole 2,500-token page example are 2.6 GB in fp32, and
-        the first smoke run of 2026-10-18 ran out of memory computing them."""
+        """The loss from the answer's positions alone, in chunks.
+
+        The answer is the end of each example, so only its positions are projected onto the
+        262k-token vocabulary, and in chunks of 512 that are recomputed in the backward pass
+        rather than kept: the logits of a 5,000-token DeepForm answer are 5 GB in fp32, and
+        the first runs of 2026-10-18 ran out of memory on them twice. The projection and
+        Gemma's final soft cap are the model's own (`lm_head`, `final_logit_softcapping`)."""
 
         def compute_loss(
             self,
@@ -321,15 +324,35 @@ def train(
             return_outputs: bool = False,
             num_items_in_batch: Any = None,
         ) -> Any:
+            from torch.utils.checkpoint import checkpoint
+
             labels = inputs.pop("labels")
             keep = int((labels != IGNORE).sum().item()) + 1
-            outputs = model(**inputs, logits_to_keep=keep)
-            logits = outputs.logits[:, :-1].float()
+            outer = model.get_base_model() if hasattr(model, "get_base_model") else model
+            hidden = outer.model(**inputs, return_dict=True).last_hidden_state
+            states = hidden[:, -keep:-1]
             target = labels[:, -keep + 1 :]
-            loss = torch.nn.functional.cross_entropy(
-                logits.reshape(-1, logits.shape[-1]), target.reshape(-1), ignore_index=IGNORE
+            cap = outer.config.get_text_config().final_logit_softcapping
+
+            def chunk(h: Any, t: Any) -> Any:
+                logits = outer.lm_head(h).float()
+                if cap is not None:
+                    logits = torch.tanh(logits / cap) * cap
+                return torch.nn.functional.cross_entropy(
+                    logits.reshape(-1, logits.shape[-1]),
+                    t.reshape(-1),
+                    ignore_index=IGNORE,
+                    reduction="sum",
+                )
+
+            total = sum(
+                checkpoint(
+                    chunk, states[:, i : i + 512], target[:, i : i + 512], use_reentrant=False
+                )
+                for i in range(0, states.shape[1], 512)
             )
-            return (loss, outputs) if return_outputs else loss
+            loss = total / (target != IGNORE).sum()
+            return (loss, None) if return_outputs else loss
 
     trainer = AnswerLossTrainer(
         model=model, args=arguments, train_dataset=Rows(), data_collator=collator

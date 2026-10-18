@@ -30,7 +30,7 @@ from typing import Any, Final
 from pydantic import BaseModel, ConfigDict
 
 MIN_AGREEMENT: Final = 0.99
-PROCESSOR_FILES: Final = ("preprocessor_config.json", "processor_config.json")
+PROCESSOR_FILES: Final = ("processor_config.json",)
 PROVIDER: Final = "selfhosted"
 
 
@@ -97,17 +97,19 @@ def merge(adapter_dir: Path, out_dir: Path, check: Any) -> MergeRecord:
         raise RuntimeError(f"the merge agrees with the adapter on {share:.3f} of the answer")
     out_dir.mkdir(parents=True, exist_ok=True)
     merged.save_pretrained(str(out_dir), safe_serialization=True)
+    # The processor and chat template the run saved beside its adapter: Gemma 4's base
+    # repository ships no preprocessor_config.json at its pinned revision (the first merge,
+    # 2026-10-18, stopped on the 404), and vLLM will not serve the model without one.
+    for f in adapter_dir.iterdir():
+        if (
+            f.is_file()
+            and not f.name.startswith("adapter_")
+            and f.name not in {"run.json", "README.md"}
+        ):
+            shutil.copy(f, out_dir / f.name)
     for name in PROCESSOR_FILES:
-        shutil.copy(hf_hub_download(base.repo, name, revision=base.revision), out_dir / name)
-    shutil.copytree(adapter_dir, out_dir / "processor", dirs_exist_ok=True)
-    for name in (
-        "tokenizer.json",
-        "tokenizer_config.json",
-        "chat_template.jinja",
-        "special_tokens_map.json",
-    ):
-        if (adapter_dir / name).exists():
-            shutil.copy(adapter_dir / name, out_dir / name)
+        if not (out_dir / name).exists():
+            raise FileNotFoundError(f"{name} is neither saved with the adapter nor in the base")
     instruct = json.loads(
         Path(
             hf_hub_download(
