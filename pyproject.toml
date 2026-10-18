@@ -54,6 +54,9 @@ gateway = [
 # 580 driver or newer. No TRL: the image examples are built by legible/train/vision.py.
 train = [
   "torch==2.14.0",
+  # Gemma 4's image processor is written in torchvision transforms; 06 never loaded it (its
+  # runs were text only). 0.29.1 is the release built against torch 2.14.0.
+  "torchvision==0.29.1",
   "transformers==5.17.0",
   "peft==0.21.0",
   # 4-bit NF4 base weights: the Q in QLoRA.
