@@ -94,6 +94,8 @@ class RunSpec(BaseModel):
     #: self-hosted arms, whose first read wrote invalid JSON escapes in 15% of answers
     #: (`structured_for`); off for the vendors, as the dev runs were read.
     structured: bool = False
+    #: The sampling temperature sent, or None for the vendor's default (`temperature_for`).
+    temperature: float | None = None
 
     @property
     def purpose(self) -> str:
@@ -224,6 +226,14 @@ def _extra(spec: RunSpec) -> dict[str, Any]:
     }
 
 
+def temperature_for(vendor: Vendor) -> float | None:
+    """Greedy decoding on a self-hosted server, 06's rule: the merged checkpoint carries no
+    sampling defaults, and vLLM's own is temperature 1, which sampled the first fine-tuned
+    CORD reads (2026-10-18). The vendors are read at their defaults: their reasoning models
+    (GPT-6.1 Sol, Gemini 3.8 Flash) fix the temperature themselves."""
+    return 0.0 if vendor == "selfhosted" else None
+
+
 def request_for(
     root: Path, spec: RunSpec, prompt: Prompt, entries: Sequence[PageEntry]
 ) -> ChatRequest:
@@ -235,6 +245,7 @@ def request_for(
             images=document_images(root, spec.level, entries),
             max_tokens=spec.max_tokens,
             extra=_extra(spec),
+            temperature=spec.temperature,
         )
     return build_request(
         spec.vendor,
@@ -243,6 +254,7 @@ def request_for(
         ocr_pages=document_text(root, spec.level, entries),
         max_tokens=spec.max_tokens,
         extra=_extra(spec),
+        temperature=spec.temperature,
     )
 
 

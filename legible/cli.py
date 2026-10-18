@@ -762,6 +762,7 @@ def _read_run(
         require_dev,
         run_dir,
         structured_for,
+        temperature_for,
     )
 
     if arm not in {"a", "b", "c", "d"}:
@@ -782,6 +783,7 @@ def _read_run(
         prompt_version=prompt_version,
         max_tokens=max_tokens_for(corpus, vendor),  # type: ignore[arg-type]
         structured=structured_for(vendor),  # type: ignore[arg-type]
+        temperature=temperature_for(vendor),  # type: ignore[arg-type]
     )
     prompt = prompt_for(corpus, prompt_version, spec.arm)
     dev, docs = sorted(part_docs(corpus, "dev")), sorted(part_docs(corpus, part))

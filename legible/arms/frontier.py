@@ -102,6 +102,7 @@ def build_request(
     ocr_pages: Sequence[str] = (),
     max_tokens: int,
     extra: Mapping[str, Any] | None = None,
+    temperature: float | None = None,
 ) -> ChatRequest:
     """One document's request: its page images (arm A) or its pages' positioned text (arm D),
     then the instruction. Exactly one of the two inputs is given."""
@@ -117,6 +118,7 @@ def build_request(
         messages=[{"role": "user", "content": content}],
         max_tokens=max_tokens,
         extra=dict(extra or {}),
+        temperature=temperature,
     )
 
 
