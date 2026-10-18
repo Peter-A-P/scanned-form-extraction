@@ -20,6 +20,8 @@ source /root/s3.env
 export LEGIBLE_DATA="${LEGIBLE_DATA:-/root/legible-data}" HF_HOME=/root/hf PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 cd "$(dirname "$0")/.."
+# The checkpoint store shells out to `aws`, installed in the environment beside legible.
+export PATH="$PWD/.venv/bin:$PATH"
 
 if [ $# -eq 0 ]; then
   set -- "fara-unseen-amendment-s$seed" "fara-unseen-dissemination_report-s$seed" \
