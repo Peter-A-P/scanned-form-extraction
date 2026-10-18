@@ -353,6 +353,8 @@ def train(
         }
     )
     finished.write(out_dir)
+    # The record travels with the adapter, so a pod that did not train it can merge it.
+    finished.write(out_dir / "adapter")
     from legible.train.checkpoint import CommandSyncer
 
     if isinstance(checkpoints.syncer, CommandSyncer):

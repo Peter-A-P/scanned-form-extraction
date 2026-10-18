@@ -1074,6 +1074,37 @@ def serve_argv(
     typer.echo("\n".join(argv))
 
 
+@serve_app.command("reads")
+def serve_reads(
+    dataset: str = typer.Argument(..., help="The training set a model learned."),
+) -> None:
+    """The reads a model trained on this set owes: one `corpus split part level` a line
+    ("-" for no split file), dev before test. A VRDU model reads its own split file's dev
+    and test documents; CORD's its test set; NIST's the twenty faces' dev, test and curve."""
+    from legible.data.vrdu import headline_split_files, read_split
+
+    lines: list[str] = []
+    if dataset.startswith(("fara-", "deepform-")):
+        corpus = dataset.split("-")[0]
+        raw = data_root() / "raw" / "vrdu"
+        for level in ("unseen", "mixed"):
+            for f in headline_split_files(corpus, level):  # type: ignore[arg-type]
+                sp = read_split(corpus, raw / f)  # type: ignore[arg-type]
+                template = f"-{sp.template.lower().replace(' ', '_')}" if sp.template else ""
+                if f"{corpus}-{level}{template}-s{sp.seed}" == dataset:
+                    stem = Path(f).stem
+                    lines += [f"{corpus} {stem} dev 0", f"{corpus} {stem} test 0"]
+    elif dataset == "cord":
+        lines += ["cord - dev 0", "cord - test 0"]
+    elif dataset == "nist":
+        faces = _nist_keys()
+        lines += [f"{c} - dev 0" for c in faces] + [f"{c} - test 0" for c in faces]
+        lines += [f"{c} - curve {lv}" for lv in (1, 2, 3, 4) for c in faces]
+    if not lines:
+        raise typer.BadParameter(f"no reads known for {dataset}")
+    typer.echo("\n".join(lines))
+
+
 @serve_app.command("config")
 def serve_config(
     served_name: str = typer.Argument(...),

@@ -153,7 +153,8 @@ def vllm_argv(
         "--port",
         str(port),
         "--max-model-len",
-        "16384",
+        # An eleven-page ad buy at 1,120 visual tokens a page and its 8,192-token answer.
+        "32768",
         "--gpu-memory-utilization",
         "0.90",
         "--dtype",
