@@ -156,11 +156,16 @@ def finished(path: Path, doc_ids: Sequence[str]) -> bool:
 
 
 def require_dev(root: Path, spec: RunSpec, dev_docs: Sequence[str], prompt: Prompt) -> None:
-    """Refuse a test run (or a NIST curve run, which is test pages at a degradation level)
-    unless this prompt has read every dev document, at level 0, where prompts are tuned."""
-    if spec.part not in {"test", "curve"}:
+    """Refuse any read of test pages (a test run, a NIST curve level, a test subset) unless
+    this prompt has read every dev document, at level 0, where prompts are tuned."""
+    if spec.part == "dev":
         return
-    dev = run_dir(root, spec.model_copy(update={"part": "dev", "level": 0}))
+    # The ceiling model reads its subset with the prompt the quality model was tuned with on
+    # dev: a dev pass of its own at its price would buy nothing a test read does not.
+    tuned = spec.model_copy(update={"part": "dev", "level": 0})
+    if spec.part == "ceiling":
+        tuned = tuned.model_copy(update={"route": "quality"})
+    dev = run_dir(root, tuned)
     if not finished(dev, dev_docs):
         raise DevFirst(f"no finished dev run at {dev}; test is run after dev, once")
     kept = load_prompt(dev / "prompt.json", SCHEMAS[spec.corpus])

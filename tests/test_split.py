@@ -50,3 +50,13 @@ def test_unseen_templates_must_be_disjoint() -> None:
     check_unseen_templates({"t1", "t2"}, {"t3"}, corpus="adbuy")
     with pytest.raises(SplitLeak, match="t2"):
         check_unseen_templates({"t1", "t2"}, {"t2", "t3"}, corpus="adbuy")
+
+
+def test_a_subset_takes_whole_documents_up_to_its_page_budget() -> None:
+    from legible.data.subsets import draw
+
+    pages = {f"d{i}": 1 + i % 3 for i in range(50)}
+    chosen = draw("ceiling", sorted(pages), pages, 20)
+    assert sum(pages[d] for d in chosen) <= 20 and len(chosen) >= 7
+    assert chosen == draw("ceiling", sorted(pages, reverse=True), pages, 20)
+    assert chosen != draw("repeat", sorted(pages), pages, 20)

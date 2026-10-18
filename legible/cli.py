@@ -187,6 +187,36 @@ def data_build(corpus: str = typer.Argument("all", help="fara, deepform, cord or
         typer.echo(f"{c}: {len(docs)} documents, {n} pages, {len(splits)} headline split files")
 
 
+@data_app.command("subsets")
+def data_subsets() -> None:
+    """Draw the ceiling, repeat and VRDU-curve test subsets into manifests/subsets.json."""
+    from legible.data.render import read_manifest
+    from legible.data.subsets import build, write
+    from legible.data.vrdu import headline_split_files, read_split
+
+    raw = data_root() / "raw" / "vrdu"
+    pages: dict[str, int] = {}
+    for c in ("fara", "deepform", "cord", "nist"):
+        for e in read_manifest(manifest(c)):
+            pages[e.doc_id] = pages.get(e.doc_id, 0) + 1
+    tests: dict[str, list[str]] = {}
+    for c in ("fara", "deepform"):
+        files = [f for f in headline_split_files(c, "unseen") if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+        splits = [read_split(c, raw / f) for f in files]  # type: ignore[arg-type]
+        tests[c] = sorted({d for sp in splits for d in sp.test})
+    tests["cord"] = sorted(part_docs("cord", "test"))
+    tests["nist"] = sorted(part_docs("nist", "test"))
+    subsets = build(tests, pages)
+    write(MANIFESTS / "subsets.json", subsets)
+    for name, per in subsets.items():
+        typer.echo(
+            f"{name}: "
+            + ", ".join(
+                f"{c} {len(ds)} docs {sum(pages[d] for d in ds)} pages" for c, ds in per.items()
+            )
+        )
+
+
 @data_app.command("audit")
 def data_audit() -> None:
     """Draw the 200-label audit sample and write the local worksheet (never published)."""
@@ -533,12 +563,24 @@ ocr_app = typer.Typer(no_args_is_help=True, help="Tesseract over a corpus's page
 app.add_typer(ocr_app, name="ocr")
 
 
+#: Test subsets (legible/data/subsets.py): read as parts of their own, each once.
+SUBSETS = ("ceiling", "repeat", "vrdu_curve")
+
+
 def part_docs(corpus: str, part: str) -> set[str]:
     """The documents of a split part, over every headline split file: VRDU's train, valid
     (dev) or test unions; CORD's own split; NIST's split by submission, where test is the 500
     pages every arm reads, and `nist_<face>` is one face's share."""
     from legible.data.render import read_manifest
 
+    if part in SUBSETS:
+        from legible.data.subsets import read
+
+        family = "nist" if corpus.startswith("nist") else corpus
+        chosen = set(read(MANIFESTS / "subsets.json")[part].get(family, []))
+        if corpus.startswith("nist_"):
+            return chosen & part_docs(corpus, "test")
+        return chosen
     if corpus.startswith("nist"):
         from legible.data.nist import read_splits
 
@@ -690,8 +732,10 @@ def _read_run(
 
     if arm not in {"a", "d"}:
         raise typer.BadParameter("arm is a (page images) or d (OCR text)")
-    if part not in {"dev", "test"} and not (part == "curve" and corpus.startswith("nist")):
-        raise typer.BadParameter("part is dev or test, or curve for NIST")
+    if part not in {"dev", "test", *SUBSETS} and not (
+        part == "curve" and corpus.startswith("nist")
+    ):
+        raise typer.BadParameter("part is dev, test, a subset, or curve for NIST")
     vendor, model = _route(route)
     spec = RunSpec(
         arm=arm,
