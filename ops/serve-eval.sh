@@ -56,10 +56,14 @@ for _ in $(seq 1 180); do
 done
 legible serve config "$model" --out boundary-served.yaml
 
-while read -r corpus split part level; do
-  extra=()
-  [ "$split" != "-" ] && extra=(--split "$split")
-  legible read submit "$corpus" --arm "$arm" --route "$model" --part "$part" --level "$level" \
-    --gateway-config boundary-served.yaml --concurrency 8 "${extra[@]}"
-done <<< "$reads"
+# Two passes: a call that fails is left unread by the first, and the second, a resume, tries
+# only those.
+for pass in 1 2; do
+  while read -r corpus split part level; do
+    extra=()
+    [ "$split" != "-" ] && extra=(--split "$split")
+    legible read submit "$corpus" --arm "$arm" --route "$model" --part "$part" --level "$level" \
+      --gateway-config boundary-served.yaml --concurrency 8 "${extra[@]}"
+  done <<< "$reads"
+done
 echo "EVALDONE $model"
