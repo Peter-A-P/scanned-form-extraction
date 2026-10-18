@@ -55,6 +55,8 @@ class RunRecord(BaseModel):
     train_loss: float | None = None
     seconds_per_step: float | None = None
     max_tokens_seen: int = 0
+    #: Training documents left out for exceeding max_seq_len.
+    left_out: int = 0
     versions: dict[str, str] = {}
 
     def write(self, out_dir: Path) -> Path:
@@ -213,7 +215,18 @@ def train(
             bnb_4bit_quant_type="nf4",
             bnb_4bit_use_double_quant=True,
             bnb_4bit_compute_dtype=torch.bfloat16,
-            llm_int8_skip_modules=["vision_tower", "audio_tower", "embed_vision", "embed_audio"],
+            # The towers, the projector and the output layer stay at full precision. The names
+            # are the modules' full paths: transformers 5.17 matched the short names
+            # ("vision_tower") against nothing, quantised the vision tower and the output
+            # layer anyway, and bitsandbytes asserted on the tied output layer at the first
+            # step (the smoke runs of 2026-10-18).
+            llm_int8_skip_modules=[
+                "model.vision_tower",
+                "model.audio_tower",
+                "model.embed_vision",
+                "model.embed_audio",
+                "lm_head",
+            ],
         ),
         dtype=torch.bfloat16,
         device_map="auto",
@@ -243,7 +256,27 @@ def train(
 
     chosen = examples if config.volume is None else examples[: config.volume]
     collator = Collator(processor, load_page, config.max_seq_len)
-    collator.example(chosen[0])  # the loss mask and the length, checked before a step is paid
+    # Every example's length and loss mask checked before a step is paid for. A document too
+    # long for max_seq_len (an eleven-page ad buy) is left out and counted; more than 5% left
+    # out stops the run, since the set would no longer be the split's training part.
+    fits: list[Example] = []
+    for i, ex in enumerate(chosen):
+        # The first, and those that could be long: four pages and more at up to 1,120 visual
+        # tokens each, or a long answer. A one-page receipt cannot reach the limit, and running
+        # the processor over all 3,850 NIST faces first would be half an hour of GPU rent.
+        if i and len(ex[1].pages) < 4 and len(ex[1].target) < 6_000:
+            fits.append(ex)
+            continue
+        try:
+            collator.example(ex)
+        except ValueError as long:
+            print(f"left out: {long}", flush=True)
+            continue
+        fits.append(ex)
+    left_out = len(chosen) - len(fits)
+    if left_out > 0.05 * len(chosen):
+        raise RuntimeError(f"{left_out} of {len(chosen)} examples exceed max_seq_len")
+    chosen = fits
 
     arguments = TrainingArguments(
         output_dir=str(out_dir),
@@ -275,7 +308,32 @@ def train(
         def __getitem__(self, i: int) -> Example:
             return chosen[i]
 
-    trainer = Trainer(model=model, args=arguments, train_dataset=Rows(), data_collator=collator)
+    class AnswerLossTrainer(Trainer):  # type: ignore[misc]
+        """The loss from the answer's logits alone. The answer is the end of each example,
+        so the model is asked for logits over its last positions only: over a 262k-token
+        vocabulary, the logits of a whole 2,500-token page example are 2.6 GB in fp32, and
+        the first smoke run of 2026-10-18 ran out of memory computing them."""
+
+        def compute_loss(
+            self,
+            model: Any,
+            inputs: dict[str, Any],
+            return_outputs: bool = False,
+            num_items_in_batch: Any = None,
+        ) -> Any:
+            labels = inputs.pop("labels")
+            keep = int((labels != IGNORE).sum().item()) + 1
+            outputs = model(**inputs, logits_to_keep=keep)
+            logits = outputs.logits[:, :-1].float()
+            target = labels[:, -keep + 1 :]
+            loss = torch.nn.functional.cross_entropy(
+                logits.reshape(-1, logits.shape[-1]), target.reshape(-1), ignore_index=IGNORE
+            )
+            return (loss, outputs) if return_outputs else loss
+
+    trainer = AnswerLossTrainer(
+        model=model, args=arguments, train_dataset=Rows(), data_collator=collator
+    )
     from legible.train.callbacks import SaveToStore, StepTimer
 
     trainer.add_callback(SaveToStore(checkpoints, out_dir))
@@ -291,14 +349,19 @@ def train(
             "train_loss": float(result.training_loss),
             "seconds_per_step": timer.seconds_per_step,
             "max_tokens_seen": collator.longest,
+            "left_out": left_out,
         }
     )
     finished.write(out_dir)
     from legible.train.checkpoint import CommandSyncer
 
     if isinstance(checkpoints.syncer, CommandSyncer):
-        # Beside the checkpoints, under a name the resume logic does not read as one.
+        # Beside the checkpoints, under a name the resume logic does not read as one; then
+        # the checkpoints go, since a finished run resumes from nothing and 48 runs' last two
+        # checkpoints would fill the volume.
         checkpoints.syncer.push(out_dir / "adapter", "adapter")
+        for name in checkpoints.syncer.names():
+            checkpoints.syncer.remove(name)
     return finished
 
 
