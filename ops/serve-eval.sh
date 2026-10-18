@@ -45,7 +45,8 @@ else
 fi
 
 mapfile -t argv <<< "$args"
-"/root/vllm-env/bin/${argv[0]}" "${argv[@]:1}" > "/root/vllm-$model.log" 2>&1 &
+# vLLM's kernels compile on first use with the ninja its environment installs, found on PATH.
+PATH="/root/vllm-env/bin:$PATH" "/root/vllm-env/bin/${argv[0]}" "${argv[@]:1}"   > "/root/vllm-$model.log" 2>&1 &
 server=$!
 trap 'kill $server 2>/dev/null || true' EXIT
 for _ in $(seq 1 180); do
