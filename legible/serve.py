@@ -87,11 +87,15 @@ def merge(adapter_dir: Path, out_dir: Path, check: Any) -> MergeRecord:
     enc, labels = check
     enc = {k: v.to("cuda") if hasattr(v, "to") else v for k, v in enc.items()}
     answer = [i for i, t in enumerate(labels) if t != IGNORE]
+    # Logits over the answer's positions only: over a 262k-token vocabulary, a DeepForm
+    # example's full logits did not fit beside the 4B on a 24 GB card (2026-10-18).
+    keep = len(labels) - answer[0] + 1
     with torch.no_grad():
-        before = tuned(**enc).logits[0].argmax(-1).tolist()
+        before = tuned(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
         merged = tuned.merge_and_unload()
-        after = merged(**enc).logits[0].argmax(-1).tolist()
-    positions = [i - 1 for i in answer]
+        after = merged(**enc, logits_to_keep=keep).logits[0].argmax(-1).tolist()
+    # Index j of the kept logits is position len(labels) - keep + j, which predicts the next.
+    positions = [i - 1 - (len(labels) - keep) for i in answer]
     share = agreement([before[i] for i in positions], [after[i] for i in positions])
     if share < MIN_AGREEMENT:
         raise RuntimeError(f"the merge agrees with the adapter on {share:.3f} of the answer")
