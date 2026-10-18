@@ -4,10 +4,13 @@
 # quality model over every test set, about US$18) with room for retries; US$40 a day, which
 # bounds a retry loop. Raise them here and in 04 together, deliberately, in a commit; never
 # bypass a cap in code.
+# Monthly 110 from 90, and the portfolio 670 from 650, on 2026-10-17, approved by Peter: the
+# VRDU documents are multi-page, NIST SD2 was added, and the vision dev runs came to about
+# US$12, so the build's API spend is about US$105 (PLAN.md section 7).
 version: 1
-portfolio_monthly_usd: 650
+portfolio_monthly_usd: 670
 projects:
   legible:
-    monthly_usd: 90
+    monthly_usd: 110
     per_run_usd: 25
     daily_usd: 40
