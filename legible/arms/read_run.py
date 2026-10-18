@@ -36,8 +36,9 @@ from legible.grade import parse_output
 from legible.prompt import Prompt, Source, build_prompt, load_prompt, save_prompt
 from legible.schema.corpora import SCHEMAS
 
-Arm = Literal["a", "d"]
-SOURCE: Mapping[Arm, Source] = {"a": "images", "d": "ocr_text"}
+#: B and C are the fine-tuned and untuned small models, which read the page images as A does.
+Arm = Literal["a", "b", "c", "d"]
+SOURCE: Mapping[Arm, Source] = {"a": "images", "b": "images", "c": "images", "d": "ocr_text"}
 
 #: Output budget per corpus: a FARA record is a handful of short fields; a DeepForm order
 #: can list dozens of line items and a receipt a dozen menu rows. The gateway's pre-call
@@ -53,7 +54,12 @@ NIST_MAX_TOKENS = 3072
 #: count against maxOutputTokens: on dev at 1,024 tokens, 128 of 380 FARA answers were cut off
 #: mid-record (2026-10-17). Every model runs at its vendor's default reasoning; this only gives
 #: the answer room after it. Claude does not reason unless asked.
-REASONING_HEADROOM: Mapping[Vendor, int] = {"anthropic": 0, "openai": 0, "google": 4096}
+REASONING_HEADROOM: Mapping[Vendor, int] = {
+    "anthropic": 0,
+    "openai": 0,
+    "google": 4096,
+    "selfhosted": 0,
+}
 
 
 def max_tokens_for(corpus: str, vendor: Vendor) -> int:
@@ -66,6 +72,7 @@ BATCH_BYTES: Mapping[Vendor, int] = {
     "anthropic": 100_000_000,
     "openai": 100_000_000,
     "google": 15_000_000,
+    "selfhosted": 0,  # no batches: a self-hosted server is read call by call
 }
 BATCH_DOCS = 1000
 
@@ -196,7 +203,7 @@ def check_inputs(
 def request_for(
     root: Path, spec: RunSpec, prompt: Prompt, entries: Sequence[PageEntry]
 ) -> ChatRequest:
-    if spec.arm == "a":
+    if spec.arm in {"a", "b", "c"}:
         return build_request(
             spec.vendor,
             spec.model,

@@ -25,7 +25,8 @@ from boundary import BatchHandle, ChatRequest, ChatResponse
 from PIL import Image
 from pydantic import BaseModel, ConfigDict
 
-Vendor = Literal["anthropic", "openai", "google"]
+#: "selfhosted" is a vLLM server on a rented GPU (legible/serve.py), which takes OpenAI's shape.
+Vendor = Literal["anthropic", "openai", "google", "selfhosted"]
 LONG_EDGE = 1568
 DATA_CLASS = "public"
 
@@ -79,7 +80,7 @@ def image_block(vendor: Vendor, png: bytes) -> dict[str, Any]:
                 "type": "image",
                 "source": {"type": "base64", "media_type": "image/png", "data": data},
             }
-        case "openai":
+        case "openai" | "selfhosted":
             return {
                 "type": "image_url",
                 "image_url": {"url": f"data:image/png;base64,{data}", "detail": "high"},
@@ -254,3 +255,40 @@ def run_sync(
         run.add_reads([to_read(doc_id, response)])
         added += 1
     return added
+
+
+def run_concurrent(
+    gateway: Any,
+    requests: Mapping[str, ChatRequest],
+    run: RunDir,
+    *,
+    purpose: str,
+    run_id: str,
+    concurrency: int,
+) -> tuple[int, float]:
+    """Calls kept `concurrency` in flight, for a self-hosted server that batches on its own
+    (vLLM) and has no batch endpoint. Each read is stored as it arrives, so a stopped run
+    resumes. Returns (reads added, wall seconds), the throughput a self-hosted page is
+    costed from."""
+    import asyncio
+    import time
+
+    have = run.reads()
+    todo = [(d, r) for d, r in requests.items() if d not in have]
+
+    async def go() -> int:
+        gate = asyncio.Semaphore(concurrency)
+
+        async def one(doc_id: str, request: ChatRequest) -> None:
+            async with gate:
+                response = await gateway.achat(
+                    request, purpose=purpose, run_id=run_id, data_class=DATA_CLASS
+                )
+            run.add_reads([to_read(doc_id, response)])
+
+        await asyncio.gather(*(one(d, r) for d, r in todo))
+        return len(todo)
+
+    start = time.perf_counter()
+    added = asyncio.run(go())
+    return added, time.perf_counter() - start

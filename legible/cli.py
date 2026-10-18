@@ -715,28 +715,36 @@ app.add_typer(read_app, name="read")
 GATEWAY_CONFIG = Path("boundary.yaml")
 
 
-def _route(name: str) -> tuple[str, str]:
-    """(vendor, model) for a route in boundary.yaml, the one place models are named."""
+def _route(name: str, config: Path = GATEWAY_CONFIG) -> tuple[str, str]:
+    """(vendor, model) for a route in the gateway configuration, the one place models are
+    named (boundary.yaml, or the served one legible/serve.py writes for arms B and C)."""
     import yaml
 
-    routes = yaml.safe_load(GATEWAY_CONFIG.read_text(encoding="utf-8"))["routes"]
+    routes = yaml.safe_load(config.read_text(encoding="utf-8"))["routes"]
     if name not in routes:
-        raise typer.BadParameter(f"no route {name!r} in {GATEWAY_CONFIG}")
+        raise typer.BadParameter(f"no route {name!r} in {config}")
     return routes[name]["provider"], routes[name]["model"]
 
 
 def _read_run(
-    arm: str, corpus: str, part: str, level: int, route: str, prompt_version: int
+    arm: str,
+    corpus: str,
+    part: str,
+    level: int,
+    route: str,
+    prompt_version: int,
+    config: Path = GATEWAY_CONFIG,
+    split: str | None = None,
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
     from legible.arms.read_run import RunSpec, max_tokens_for, prompt_for, require_dev, run_dir
 
-    if arm not in {"a", "d"}:
-        raise typer.BadParameter("arm is a (page images) or d (OCR text)")
+    if arm not in {"a", "b", "c", "d"}:
+        raise typer.BadParameter("arm is a, b or c (page images) or d (OCR text)")
     if part not in {"dev", "test", *SUBSETS} and not (
         part == "curve" and corpus.startswith("nist")
     ):
         raise typer.BadParameter("part is dev, test, a subset, or curve for NIST")
-    vendor, model = _route(route)
+    vendor, model = _route(route, config)
     spec = RunSpec(
         arm=arm,
         corpus=corpus,
@@ -749,8 +757,18 @@ def _read_run(
         max_tokens=max_tokens_for(corpus, vendor),  # type: ignore[arg-type]
     )
     prompt = prompt_for(corpus, prompt_version, spec.arm)
-    require_dev(data_root(), spec, sorted(part_docs(corpus, "dev")), prompt)
-    return spec, prompt, sorted(part_docs(corpus, part)), run_dir(data_root(), spec)
+    dev, docs = sorted(part_docs(corpus, "dev")), sorted(part_docs(corpus, part))
+    if split is not None:
+        # A model trained on one split file's training part reads that file's own dev and
+        # test documents and no others.
+        from legible.data.vrdu import DIRECTORY, read_split
+
+        split_path = data_root() / "raw" / "vrdu" / DIRECTORY[corpus] / "few_shot-splits"  # type: ignore[index]
+        sp = read_split(corpus, split_path / f"{split}.json")  # type: ignore[arg-type]
+        dev = sorted(set(dev) & set(sp.valid))
+        docs = sorted(set(docs) & set(sp.valid if part == "dev" else sp.test))
+    require_dev(data_root(), spec, dev, prompt)
+    return spec, prompt, docs, run_dir(data_root(), spec)
 
 
 @read_app.command("submit")
@@ -762,7 +780,16 @@ def read_submit(
     route: str = typer.Option("quality", help="A route in boundary.yaml."),
     prompt_version: int = typer.Option(1, min=1),
     limit: int | None = typer.Option(None, help="Dev only: at most this many documents."),
+    split: str | None = typer.Option(
+        None,
+        help="VRDU only: just this split file's part (its name without .json), for a model "
+        "trained on that file's training part.",
+    ),
     sync: bool = typer.Option(False, help="One call per document instead of batches."),
+    concurrency: int = typer.Option(
+        0, help="Self-hosted: this many calls in flight (arms B and C), timed for throughput."
+    ),
+    gateway_config: Path = typer.Option(GATEWAY_CONFIG, help="The gateway configuration."),
 ) -> None:
     """Send every document of a part not yet read or submitted, through the gateway."""
     from boundary import Gateway
@@ -771,16 +798,39 @@ def read_submit(
     from legible.arms.read_run import open_run, requests_for, submit
     from legible.data.render import read_manifest
 
-    spec, prompt, docs, path = _read_run(arm, corpus, part, level, route, prompt_version)
+    spec, prompt, docs, path = _read_run(
+        arm, corpus, part, level, route, prompt_version, gateway_config, split
+    )
     if limit is not None:
         if part != "dev":
             raise typer.BadParameter("a test run reads every test document, once")
         docs = docs[:limit]
+
     pages: dict[str, list[PageEntry]] = {}
     for e in read_manifest(manifest(corpus)):
         pages.setdefault(e.doc_id, []).append(e)
     run = open_run(path, spec, prompt)
-    gateway = Gateway.from_config(GATEWAY_CONFIG, project="legible")
+    gateway = Gateway.from_config(gateway_config, project="legible")
+    if concurrency:
+        from legible.arms.frontier import run_concurrent
+
+        have = set(run.reads())
+        requests = requests_for(
+            data_root(), spec, prompt, [d for d in docs if d not in have], pages
+        )
+        n, seconds = run_concurrent(
+            gateway,
+            requests,
+            run,
+            purpose=spec.purpose,
+            run_id=spec.run_id,
+            concurrency=concurrency,
+        )
+        # The wall time of this pass beside the run, for the throughput a page is costed at.
+        with (path / "throughput.jsonl").open("a", encoding="utf-8", newline="\n") as f:
+            f.write(json.dumps({"reads": n, "seconds": seconds, "concurrency": concurrency}) + "\n")
+        typer.echo(f"{spec.run_id}: {n} documents in {seconds:.0f} s at {concurrency} in flight")
+        return
     if sync:
         have = set(run.reads()) | {d for ids in run.batches().values() for d in ids}
         requests = requests_for(
@@ -957,6 +1007,87 @@ def train_run(
         store=CheckpointStore(out, syncer, keep=2),
     )
     typer.echo(describe(record))
+
+
+serve_app = typer.Typer(no_args_is_help=True, help="Arms B and C behind vLLM.")
+app.add_typer(serve_app, name="serve")
+
+
+@serve_app.command("merge")
+def serve_merge(run_id: str = typer.Argument(..., help="A finished run under models/.")) -> None:
+    """Merge a run's adapter into its bf16 base, checked on its first training example."""
+    from PIL import Image
+
+    from legible.schema.corpora import SCHEMAS
+    from legible.serve import merge
+    from legible.train.dataset import read_training_set
+    from legible.train.vision import Collator, load_processor, read_record
+
+    out = data_root() / "models" / run_id
+    record = read_record(out)
+    header = record.datasets[0]
+    _, rows = read_training_set(
+        data_root() / "train" / f"{header.split_file}.jsonl", SCHEMAS[header.corpus]
+    )
+    processor = load_processor(record.config)
+
+    def load_page(rel: str) -> object:
+        with Image.open(data_root() / "pages" / rel) as img:
+            return img.convert("RGB")
+
+    check = Collator(processor, load_page, record.config.max_seq_len).example(
+        (header.instruction, next(rows))
+    )
+    done = merge(out / "adapter", data_root() / "merged" / run_id, check)
+    typer.echo(done.model_dump_json())
+
+
+@serve_app.command("argv")
+def serve_argv(
+    model: str = typer.Argument(..., help="A merged run id, or `2b-it` / `4b-it` for arm C."),
+    max_images: int = typer.Option(12),
+    visual_tokens: int = typer.Option(1120),
+    port: int = typer.Option(8000),
+) -> None:
+    """Print the `vllm serve` command line for a model, one argument a line."""
+    from legible.serve import vllm_argv
+    from legible.train.recipe import BASES
+
+    if model.endswith("-it"):
+        base = BASES[model.removesuffix("-it")]  # type: ignore[index]
+        argv = vllm_argv(
+            base.instruct_repo,
+            model,
+            visual_tokens=visual_tokens,
+            max_images=max_images,
+            port=port,
+            revision=base.instruct_revision,
+        )
+    else:
+        argv = vllm_argv(
+            str(data_root() / "merged" / model),
+            model,
+            visual_tokens=visual_tokens,
+            max_images=max_images,
+            port=port,
+        )
+    typer.echo("\n".join(argv))
+
+
+@serve_app.command("config")
+def serve_config(
+    served_name: str = typer.Argument(...),
+    out: Path = typer.Option(Path("boundary-served.yaml")),
+    port: int = typer.Option(8000),
+) -> None:
+    """Write the gateway configuration with the served model as a route of its own name."""
+    import yaml
+
+    from legible.serve import gateway_config
+
+    base = yaml.safe_load(GATEWAY_CONFIG.read_text(encoding="utf-8"))
+    out.write_text(yaml.safe_dump(gateway_config(base, served_name, port)), encoding="utf-8")
+    typer.echo(f"{out}: route {served_name}")
 
 
 def main() -> None:

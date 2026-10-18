@@ -128,7 +128,9 @@ follow_imports = "skip"
 
 # The training stack is installed on the GPU machine only, so it is absent where mypy runs.
 [[tool.mypy.overrides]]
-module = ["torch", "torch.*", "transformers", "transformers.*", "peft", "peft.*"]
+module = [
+  "torch", "torch.*", "transformers", "transformers.*", "peft", "peft.*", "huggingface_hub", "huggingface_hub.*",
+]
 ignore_missing_imports = true
 follow_imports = "skip"
 
