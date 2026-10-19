@@ -377,6 +377,13 @@ def review_table(rows: Sequence[tuple[str, Any]]) -> list[str]:
         if r is None:
             out.append(f"| {label} | not yet measured | | |")
             continue
-        reached = "yes" if math.isfinite(r.threshold.value) else "no: every field reviewed"
-        out.append(f"| {label} | {pct(r.review_rate)} | {pct(r.accepted_accuracy)} | {reached} |")
+        reached = math.isfinite(r.threshold.value)
+        accepted = pct(r.accepted_accuracy) if reached else "none accepted"
+        dev = (
+            f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev"
+            if reached
+            else "no: fields the two reads agree on are right less than 99% of the time on "
+            "dev, so every field goes to a person"
+        )
+        out.append(f"| {label} | {pct(r.review_rate)} | {accepted} | {dev} |")
     return [*out, ""]

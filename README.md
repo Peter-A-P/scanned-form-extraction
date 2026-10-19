@@ -128,9 +128,9 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
 |---|---|---|---|
-| FARA, unseen templates | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
-| DeepForm, unseen templates | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
-| CORD | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
+| FARA, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
+| DeepForm, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
+| CORD | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
 | NIST | not yet measured | | |
 
 Arms B and C read through vLLM on an RTX 3090, held to the schema's JSON, and are costed at the GPU's US$0.50 an hour over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
