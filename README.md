@@ -31,7 +31,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 14.2% (13.0 to 15.4) | 0.0% (0.0 to 0.0) | 0.2% (0.1 to 0.4) | US$0.02 (0.02 to 0.02) | 900 |
 | B, Gemma 4 E2B fine-tuned on the image | 69.0% (67.2 to 70.7) | 29.6% (26.6 to 32.6) | 5.9% (5.2 to 6.6) | US$0.06 (0.06 to 0.06) | 900 |
 | B, Gemma 4 E4B fine-tuned on the image | 66.8% (65.3 to 68.3) | 14.3% (12.1 to 16.6) | 13.2% (12.3 to 14.2) | US$0.07 (0.07 to 0.08) | 900 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 62.2% (60.7 to 63.7) | 10.7% (8.7 to 12.8) | 8.4% (7.6 to 9.3) | US$0.06 (0.06 to 0.06) | 900 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **DeepForm ad-buy forms, templates never seen in training (headline)**
@@ -46,7 +46,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 13.7% (9.9 to 18.3) | 1.3% (0.0 to 3.1) | 0.8% (0.6 to 1.0) | US$0.05 (0.04 to 0.05) | 159 |
 | B, Gemma 4 E2B fine-tuned on the image | 55.3% (48.5 to 62.0) | 1.3% (0.0 to 3.1) | 8.0% (6.0 to 10.3) | US$0.19 (0.17 to 0.21) | 159 |
 | B, Gemma 4 E4B fine-tuned on the image | 59.6% (53.7 to 65.3) | 3.1% (0.6 to 6.3) | 7.6% (5.4 to 10.3) | US$0.19 (0.17 to 0.20) | 159 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 20.4% (17.1 to 23.9) | 0.0% (0.0 to 0.0) | 8.2% (5.8 to 11.0) | US$0.13 (0.12 to 0.14) | 159 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **CORD receipts, test set**
@@ -61,7 +61,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 15.8% (11.9 to 19.8) | 0.0% (0.0 to 0.0) | 0.8% (0.1 to 1.9) | US$0.09 (0.04 to 0.15) | 100 |
 | B, Gemma 4 E2B fine-tuned on the image | 75.2% (67.9 to 82.0) | 38.0% (29.0 to 48.0) | 1.0% (0.4 to 1.8) | US$0.11 (0.11 to 0.11) | 100 |
 | B, Gemma 4 E4B fine-tuned on the image | 77.6% (71.5 to 83.3) | 30.0% (21.0 to 39.0) | 0.9% (0.4 to 1.5) | US$0.16 (0.16 to 0.16) | 100 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 40.7% (36.8 to 44.6) | 0.0% (0.0 to 0.0) | 9.8% (8.1 to 11.6) | US$0.14 (0.14 to 0.14) | 100 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **NIST tax forms, 500 test faces**
@@ -76,7 +76,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 16.0% (14.6 to 17.4) | 0.0% (0.0 to 0.0) | 15.2% (14.1 to 16.3) | US$0.04 (0.04 to 0.05) | 500 |
 | B, Gemma 4 E2B fine-tuned on the image | 73.6% (70.4 to 76.7) | 27.6% (23.8 to 31.6) | 1.4% (1.0 to 1.8) | US$0.40 (0.38 to 0.42) | 500 |
 | B, Gemma 4 E4B fine-tuned on the image | 74.2% (70.9 to 77.2) | 24.8% (21.0 to 28.6) | 3.3% (2.7 to 4.0) | US$0.64 (0.60 to 0.67) | 500 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 15.0% (13.7 to 16.4) | 0.0% (0.0 to 0.0) | 27.9% (25.3 to 30.4) | US$0.41 (0.39 to 0.43) | 500 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **FARA, templates seen in training (the gap beside the headline)**
@@ -91,7 +91,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 36.2% (33.6 to 38.9) | 1.0% (0.0 to 2.3) | 3.5% (2.6 to 4.4) | US$0.03 (0.02 to 0.03) | 300 |
 | B, Gemma 4 E2B fine-tuned on the image | 75.7% (73.0 to 78.3) | 35.3% (30.0 to 40.7) | 7.8% (6.5 to 9.1) | US$0.06 (0.06 to 0.06) | 300 |
 | B, Gemma 4 E4B fine-tuned on the image | 72.2% (69.7 to 74.7) | 22.7% (18.0 to 27.3) | 11.4% (10.0 to 12.9) | US$0.07 (0.07 to 0.08) | 300 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 56.2% (53.8 to 58.7) | 5.0% (2.7 to 7.7) | 10.6% (9.1 to 12.1) | US$0.06 (0.06 to 0.06) | 300 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **DeepForm, templates seen in training (the gap beside the headline)**
@@ -106,7 +106,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 11.5% (8.9 to 14.4) | 0.7% (0.0 to 1.7) | 0.9% (0.7 to 1.1) | US$0.05 (0.04 to 0.05) | 300 |
 | B, Gemma 4 E2B fine-tuned on the image | 60.2% (55.5 to 64.7) | 4.0% (2.0 to 6.3) | 7.2% (5.6 to 9.0) | US$0.17 (0.16 to 0.19) | 300 |
 | B, Gemma 4 E4B fine-tuned on the image | 58.2% (53.0 to 63.2) | 6.3% (3.7 to 9.3) | 3.9% (2.7 to 5.3) | US$0.20 (0.18 to 0.21) | 300 |
-| C, Gemma 4 E2B untuned on the image | not yet measured |  |  |  | 0 |
+| C, Gemma 4 E2B untuned on the image | 19.2% (16.8 to 21.9) | 0.0% (0.0 to 0.0) | 8.4% (6.6 to 10.4) | US$0.13 (0.12 to 0.14) | 300 |
 | C, Gemma 4 E4B untuned on the image | not yet measured |  |  |  | 0 |
 
 **NIST, the 300 curve pages at each degradation level** (fields correct; what each level does to OCR is in [docs/degradation.md](docs/degradation.md))
@@ -121,7 +121,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
 | B, Gemma 4 E2B fine-tuned on the image | 74.9% (71.3 to 78.3) | 75.4% (72.0 to 78.8) | 73.9% (69.9 to 77.8) | 72.1% (68.4 to 75.6) | 68.7% (64.9 to 72.4) |
 | B, Gemma 4 E4B fine-tuned on the image | 74.9% (70.9 to 78.6) | 75.6% (72.1 to 78.8) | 77.5% (74.5 to 80.3) | 75.1% (71.5 to 78.5) | 72.6% (69.4 to 75.7) |
-| C, Gemma 4 E2B untuned on the image |  |  |  |  |  |
+| C, Gemma 4 E2B untuned on the image | 14.5% (12.9 to 16.2) | 13.3% (11.8 to 14.8) | 13.4% (12.0 to 15.0) | 13.6% (12.2 to 15.1) | 12.3% (11.0 to 13.7) |
 | C, Gemma 4 E4B untuned on the image |  |  |  |  |  |
 
 **Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the OCR text.** A field is accepted when the two reads agree; the threshold is chosen on dev and applied once to test (legible/review.py, legible/agreement.py).
