@@ -29,7 +29,13 @@ from typing import Any, Final
 
 from pydantic import BaseModel, ConfigDict
 
-MIN_AGREEMENT: Final = 0.99
+#: The share of answer positions where the merged model must predict the adapter's token.
+#: 0.99 at first, 06's bar; then 0.975. The adapters are trained against the 4-bit base and
+#: merged into the bf16 one, so near ties flip on rounding: sound merges here agreed on
+#: 0.989 and 0.983 of short answers (a 4B DeepForm and a 4B FARA, 2026-10-19), and 06 saw
+#: 98 to 99% on merges whose answers matched on every token. Each merge's agreement is
+#: recorded in its merge.json.
+MIN_AGREEMENT: Final = 0.975
 PROCESSOR_FILES: Final = ("processor_config.json",)
 PROVIDER: Final = "selfhosted"
 
