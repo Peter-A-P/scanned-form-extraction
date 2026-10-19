@@ -23,11 +23,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 78.8% (77.5 to 80.0) | 31.4% (28.4 to 34.4) | 8.9% (8.1 to 9.7) | US$2.96 (2.95 to 2.97) | 900 |
 | A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
 | A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | 70.0% (68.3 to 71.8) | 22.3% (19.6 to 25.1) | 6.9% (6.2 to 7.7) | US$1.60 (1.58 to 1.62) | 900 |
 | E, OCR plus rules | 14.2% (13.0 to 15.4) | 0.0% (0.0 to 0.0) | 0.2% (0.1 to 0.4) | US$0.02 (0.02 to 0.02) | 900 |
 | B, Gemma 4 E2B fine-tuned on the image | 69.0% (67.2 to 70.7) | 29.6% (26.6 to 32.6) | 5.9% (5.2 to 6.6) | US$0.06 (0.06 to 0.06) | 900 |
 | B, Gemma 4 E4B fine-tuned on the image | 66.8% (65.3 to 68.3) | 14.3% (12.1 to 16.6) | 13.2% (12.3 to 14.2) | US$0.07 (0.07 to 0.08) | 900 |
@@ -38,11 +38,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 69.8% (65.4 to 74.2) | 0.6% (0.0 to 1.9) | 10.0% (7.7 to 12.4) | US$5.19 (4.94 to 5.45) | 159 |
 | A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
 | A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | 69.8% (65.1 to 74.4) | 1.3% (0.0 to 3.1) | 9.3% (7.2 to 11.7) | US$4.68 (4.37 to 5.01) | 159 |
 | E, OCR plus rules | 13.7% (9.9 to 18.3) | 1.3% (0.0 to 3.1) | 0.8% (0.6 to 1.0) | US$0.05 (0.04 to 0.05) | 159 |
 | B, Gemma 4 E2B fine-tuned on the image | 55.3% (48.5 to 62.0) | 1.3% (0.0 to 3.1) | 8.0% (6.0 to 10.3) | US$0.19 (0.17 to 0.21) | 159 |
 | B, Gemma 4 E4B fine-tuned on the image | 59.6% (53.7 to 65.3) | 3.1% (0.6 to 6.3) | 7.6% (5.4 to 10.3) | US$0.19 (0.17 to 0.20) | 159 |
@@ -53,11 +53,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 84.0% (77.8 to 89.2) | 47.0% (37.0 to 57.0) | 3.4% (2.3 to 4.6) | US$5.27 (5.06 to 5.50) | 100 |
 | A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
 | A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | 36.2% (29.8 to 42.7) | 1.0% (0.0 to 3.0) | 2.0% (1.2 to 3.0) | US$5.97 (5.03 to 7.14) | 100 |
 | E, OCR plus rules | 15.8% (11.9 to 19.8) | 0.0% (0.0 to 0.0) | 0.8% (0.1 to 1.9) | US$0.09 (0.04 to 0.15) | 100 |
 | B, Gemma 4 E2B fine-tuned on the image | 75.2% (67.9 to 82.0) | 38.0% (29.0 to 48.0) | 1.0% (0.4 to 1.8) | US$0.11 (0.11 to 0.11) | 100 |
 | B, Gemma 4 E4B fine-tuned on the image | 77.6% (71.5 to 83.3) | 30.0% (21.0 to 39.0) | 0.9% (0.4 to 1.5) | US$0.16 (0.16 to 0.16) | 100 |
@@ -83,11 +83,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 74.2% (71.9 to 76.4) | 24.3% (19.7 to 29.0) | 12.6% (11.2 to 14.1) | US$2.97 (2.96 to 2.99) | 300 |
 | A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
 | A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | 64.8% (61.7 to 67.8) | 16.7% (12.7 to 21.0) | 8.5% (7.2 to 9.8) | US$1.64 (1.61 to 1.68) | 300 |
 | E, OCR plus rules | 36.2% (33.6 to 38.9) | 1.0% (0.0 to 2.3) | 3.5% (2.6 to 4.4) | US$0.03 (0.02 to 0.03) | 300 |
 | B, Gemma 4 E2B fine-tuned on the image | 75.7% (73.0 to 78.3) | 35.3% (30.0 to 40.7) | 7.8% (6.5 to 9.1) | US$0.06 (0.06 to 0.06) | 300 |
 | B, Gemma 4 E4B fine-tuned on the image | 72.2% (69.7 to 74.7) | 22.7% (18.0 to 27.3) | 11.4% (10.0 to 12.9) | US$0.07 (0.07 to 0.08) | 300 |
@@ -98,11 +98,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 71.8% (68.5 to 75.1) | 0.7% (0.0 to 1.7) | 8.4% (6.9 to 10.0) | US$5.14 (4.94 to 5.35) | 300 |
 | A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
 | A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| D, Claude Sonnet 5.5 on the OCR text | 71.6% (68.1 to 75.0) | 0.7% (0.0 to 1.7) | 8.2% (6.7 to 9.9) | US$4.63 (4.40 to 4.87) | 300 |
 | E, OCR plus rules | 11.5% (8.9 to 14.4) | 0.7% (0.0 to 1.7) | 0.9% (0.7 to 1.1) | US$0.05 (0.04 to 0.05) | 300 |
 | B, Gemma 4 E2B fine-tuned on the image | 60.2% (55.5 to 64.7) | 4.0% (2.0 to 6.3) | 7.2% (5.6 to 9.0) | US$0.17 (0.16 to 0.19) | 300 |
 | B, Gemma 4 E4B fine-tuned on the image | 58.2% (53.0 to 63.2) | 6.3% (3.7 to 9.3) | 3.9% (2.7 to 5.3) | US$0.20 (0.18 to 0.21) | 300 |
@@ -128,9 +128,9 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
 |---|---|---|---|
-| FARA, unseen templates | not yet measured | | |
-| DeepForm, unseen templates | not yet measured | | |
-| CORD | not yet measured | | |
+| FARA, unseen templates | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
+| DeepForm, unseen templates | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
+| CORD | 100.0% (100.0 to 100.0) | nan% (nan to nan) | no: every field reviewed |
 | NIST | not yet measured | | |
 
 Arms B and C read through vLLM on an RTX 3090, held to the schema's JSON, and are costed at the GPU's US$0.50 an hour over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
