@@ -421,7 +421,13 @@ def review_table(rows: Sequence[tuple[str, Any]], miss: str = AGREEMENT_MISS) ->
             out.append(f"| {label} | not yet measured | | |")
             continue
         reached = math.isfinite(r.threshold.value)
-        accepted = pct(r.accepted_accuracy) if reached else "none accepted"
+        if not reached:
+            accepted = "none accepted"
+        elif math.isnan(r.accepted_accuracy.point):
+            # The dev threshold let a handful of fields through on dev and none on test.
+            accepted = "none accepted on test"
+        else:
+            accepted = pct(r.accepted_accuracy)
         dev = f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev" if reached else miss
         out.append(f"| {label} | {pct(r.review_rate)} | {accepted} | {dev} |")
     return [*out, ""]

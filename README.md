@@ -68,11 +68,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Fields correct (95% CI) | Every field right | Invented fields | Cost per 1,000 pages | Documents |
 |---|---|---|---|---|---:|
-| A, Claude Sonnet 5.5 on the image | not yet measured |  |  |  | 0 |
-| A, Claude Haiku 5.5 on the image | not yet measured |  |  |  | 0 |
+| A, Claude Sonnet 5.5 on the image | 86.7% (84.8 to 88.4) | 46.2% (42.0 to 50.4) | 0.7% (0.6 to 1.0) | US$16.38 (15.63 to 17.19) | 500 |
+| A, Claude Haiku 5.5 on the image | 84.5% (82.3 to 86.4) | 36.8% (32.6 to 41.0) | 0.5% (0.3 to 0.7) | US$1.12 (1.08 to 1.17) | 500 |
 | A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
-| A, Gemini 3.8 Flash on the image | not yet measured |  |  |  | 0 |
-| D, Claude Sonnet 5.5 on the OCR text | not yet measured |  |  |  | 0 |
+| A, Gemini 3.8 Flash on the image | 80.1% (76.2 to 83.7) | 46.2% (41.8 to 50.6) | 0.6% (0.4 to 0.8) | US$12.48 (11.85 to 13.16) | 500 |
+| D, Claude Sonnet 5.5 on the OCR text | 38.7% (36.2 to 41.1) | 1.2% (0.4 to 2.2) | 2.3% (1.9 to 2.7) | US$16.02 (15.26 to 16.82) | 500 |
 | E, OCR plus rules | 16.0% (14.6 to 17.4) | 0.0% (0.0 to 0.0) | 15.2% (14.1 to 16.3) | US$0.04 (0.04 to 0.05) | 500 |
 | B, Gemma 4 E2B fine-tuned on the image | 73.6% (70.4 to 76.7) | 27.6% (23.8 to 31.6) | 1.4% (1.0 to 1.8) | US$0.40 (0.38 to 0.42) | 500 |
 | B, Gemma 4 E4B fine-tuned on the image | 74.2% (70.9 to 77.2) | 24.8% (21.0 to 28.6) | 3.3% (2.7 to 4.0) | US$0.64 (0.60 to 0.67) | 500 |
@@ -113,11 +113,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Level 0 | Level 1 | Level 2 | Level 3 | Level 4 |
 |---|---|---|---|---|---|
-| A, Claude Sonnet 5.5 on the image |  |  |  |  |  |
-| A, Claude Haiku 5.5 on the image |  |  |  |  |  |
+| A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) |  |  |  |  |
+| A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) |  |  |  |  |
 | A, GPT-6.1 Sol on the image |  |  |  |  |  |
-| A, Gemini 3.8 Flash on the image |  |  |  |  |  |
-| D, Claude Sonnet 5.5 on the OCR text |  |  |  |  |  |
+| A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) |  |  |  |  |
+| D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) |  |  |  |  |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
 | B, Gemma 4 E2B fine-tuned on the image | 74.9% (71.3 to 78.3) | 75.4% (72.0 to 78.8) | 73.9% (69.9 to 77.8) | 72.1% (68.4 to 75.6) | 68.7% (64.9 to 72.4) |
 | B, Gemma 4 E4B fine-tuned on the image | 74.9% (70.9 to 78.6) | 75.6% (72.1 to 78.8) | 77.5% (74.5 to 80.3) | 75.1% (71.5 to 78.5) | 72.6% (69.4 to 75.7) |
@@ -161,25 +161,25 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | FARA, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
 | DeepForm, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
 | CORD | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
-| NIST | not yet measured | | |
+| NIST | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
 
 **Review at 99%: Gemma 4 E2B fine-tuned (seed 0), each field's confidence the lowest probability among the tokens of its value.** Read a second time with log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev read and applied once to its test read (legible/tokenconf.py).
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
 |---|---|---|---|
-| FARA, unseen templates | not yet measured | | |
-| DeepForm, unseen templates | not yet measured | | |
-| CORD | not yet measured | | |
-| NIST | not yet measured | | |
+| FARA, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
+| DeepForm, unseen templates | 100.0% (100.0 to 100.0) | none accepted on test | yes, 100.0% on dev |
+| CORD | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
+| NIST | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 
 **Review at 99%: Gemma 4 E4B fine-tuned (seed 0), each field's confidence the lowest probability among the tokens of its value.** Read a second time with log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev read and applied once to its test read (legible/tokenconf.py).
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
 |---|---|---|---|
-| FARA, unseen templates | not yet measured | | |
-| DeepForm, unseen templates | not yet measured | | |
-| CORD | not yet measured | | |
-| NIST | not yet measured | | |
+| FARA, unseen templates | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
+| DeepForm, unseen templates | 99.8% (99.5 to 99.9) | 82.8% (50.0 to 100.0) | yes, 100.0% on dev |
+| CORD | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
+| NIST | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 
 Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
 <!-- results:end -->

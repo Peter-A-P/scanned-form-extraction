@@ -78,3 +78,22 @@ def test_threshold_from_dev_is_applied_to_test_unchanged() -> None:
     assert r.threshold.value == pytest.approx(0.9)
     assert r.review_rate.point == 0
     assert r.accepted_accuracy.point == pytest.approx(0.9)
+
+
+def test_the_table_says_when_a_dev_threshold_accepts_nothing_on_test() -> None:
+    import math
+
+    from legible.report import review_table
+    from legible.review import ReviewResult, Threshold
+    from legible.stats import Interval
+
+    nothing = Interval(point=math.nan, low=math.nan, high=math.nan, n=10)
+    r = ReviewResult(
+        threshold=Threshold(
+            target=0.99, value=0.9999, dev_accepted_accuracy=1.0, dev_review_rate=0.99
+        ),
+        review_rate=Interval(point=1.0, low=1.0, high=1.0, n=10),
+        accepted_accuracy=nothing,
+    )
+    row = review_table([("DeepForm", r)])[2]
+    assert "none accepted on test" in row and "nan" not in row
