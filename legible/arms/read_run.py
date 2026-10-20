@@ -104,6 +104,9 @@ class RunSpec(BaseModel):
     structured: bool = False
     #: The sampling temperature sent, or None for the vendor's default (`temperature_for`).
     temperature: float | None = None
+    #: Whether a self-hosted read asked for its tokens' log-probabilities, the fine-tuned
+    #: arm's confidence (`legible.tokenconf`). Such a run is kept apart from the plain one.
+    logprobs: bool = False
 
     @property
     def purpose(self) -> str:
@@ -113,7 +116,7 @@ class RunSpec(BaseModel):
     def run_id(self) -> str:
         return (
             f"{self.purpose}-{self.route}-{self.corpus}-{self.part}"
-            f"-level{self.level}-p{self.prompt_version}"
+            f"-level{self.level}-p{self.prompt_version}" + ("-logprobs" if self.logprobs else "")
         )
 
 
@@ -130,7 +133,7 @@ def run_dir(root: Path, spec: RunSpec) -> Path:
         root
         / "runs"
         / spec.purpose
-        / spec.route
+        / (f"{spec.route}@logprobs" if spec.logprobs else spec.route)
         / f"p{spec.prompt_version}"
         / f"level{spec.level}"
         / spec.corpus
@@ -227,15 +230,14 @@ def structured_for(vendor: Vendor) -> bool:
 
 
 def _extra(spec: RunSpec) -> dict[str, Any]:
-    if not spec.structured:
-        return {}
-    schema = SCHEMAS[spec.corpus].json_schema()
-    return {
-        "response_format": {
+    out: dict[str, Any] = {"logprobs": True} if spec.logprobs else {}
+    if spec.structured:
+        schema = SCHEMAS[spec.corpus].json_schema()
+        out["response_format"] = {
             "type": "json_schema",
             "json_schema": {"name": spec.corpus, "schema": schema, "strict": True},
         }
-    }
+    return out
 
 
 def temperature_for(vendor: Vendor) -> float | None:

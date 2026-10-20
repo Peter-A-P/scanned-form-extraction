@@ -142,6 +142,25 @@ class Read(BaseModel):
     latency_ms: float | None
     ledger_id: int | None
     model_returned: str | None
+    #: A self-hosted read asked for log-probabilities: each generated token as (UTF-8 bytes,
+    #: natural-log probability), in order (`legible.tokenconf`). None when not asked.
+    tokens: list[tuple[int, float]] | None = None
+
+
+def answer_tokens(raw: Any) -> list[tuple[int, float]] | None:
+    """The answer's tokens from an OpenAI-shaped body with `logprobs`, or None."""
+    try:
+        content = raw["choices"][0]["logprobs"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    if not isinstance(content, list):
+        return None
+    out: list[tuple[int, float]] = []
+    for t in content:
+        b = t.get("bytes")
+        n = len(b) if isinstance(b, list) else len(str(t.get("token", "")).encode("utf-8"))
+        out.append((n, float(t["logprob"])))
+    return out
 
 
 def to_read(doc_id: str, response: ChatResponse) -> Read:
@@ -157,6 +176,7 @@ def to_read(doc_id: str, response: ChatResponse) -> Read:
         latency_ms=response.latency_ms,
         ledger_id=response.ledger_id,
         model_returned=response.model_returned,
+        tokens=answer_tokens(response.raw),
     )
 
 

@@ -3,6 +3,8 @@
 #
 #   bash ops/serve-eval.sh RUN_ID     # arm B: a fine-tune, merged and served, reads its splits
 #   bash ops/serve-eval.sh 2b-it      # arm C: an untuned instruction model reads every corpus
+#   LOGPROBS=1 bash ops/serve-eval.sh RUN_ID   # its level-0 dev and test again, with each
+#                                              # token's log-probability (the confidence)
 #
 # A fine-tune's adapter is fetched from the volume if this pod did not train it. vLLM lives in
 # its own environment (/root/vllm-env), because it brings its own torch. Reads go through the
@@ -45,6 +47,13 @@ else
   reads=$(legible serve reads "$dataset")
 fi
 
+logprobs=()
+if [ "${LOGPROBS:-0}" = 1 ]; then
+  # The confidence reads: level 0 dev and test only, kept apart from the plain reads.
+  reads=$(echo "$reads" | awk '$4 == 0 && ($3 == "dev" || $3 == "test")')
+  logprobs=(--logprobs)
+fi
+
 mapfile -t argv <<< "$args"
 # vLLM's kernels compile on first use with the ninja its environment installs, found on PATH.
 PATH="/root/vllm-env/bin:$PATH" "/root/vllm-env/bin/${argv[0]}" "${argv[@]:1}"   > "/root/vllm-$model.log" 2>&1 &
@@ -64,7 +73,7 @@ for pass in 1 2; do
     extra=()
     [ "$split" != "-" ] && extra=(--split "$split")
     legible read submit "$corpus" --arm "$arm" --route "$model" --part "$part" --level "$level" \
-      --gateway-config boundary-served.yaml --concurrency 8 "${extra[@]}"
+      --gateway-config boundary-served.yaml --concurrency 8 "${extra[@]}" "${logprobs[@]}"
   done <<< "$reads"
 done
 echo "EVALDONE $model"

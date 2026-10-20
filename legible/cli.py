@@ -779,6 +779,7 @@ def _read_run(
     prompt_version: int,
     config: Path = GATEWAY_CONFIG,
     split: str | None = None,
+    logprobs: bool = False,
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
     from legible.arms.read_run import (
         RunSpec,
@@ -797,6 +798,8 @@ def _read_run(
     ):
         raise typer.BadParameter("part is dev, test, a subset, or curve for NIST")
     vendor, model = _route(route, config)
+    if logprobs and vendor != "selfhosted":
+        raise typer.BadParameter("log-probabilities are asked of a self-hosted server only")
     spec = RunSpec(
         arm=arm,
         corpus=corpus,
@@ -809,6 +812,7 @@ def _read_run(
         max_tokens=max_tokens_for(corpus, vendor, part),  # type: ignore[arg-type]
         structured=structured_for(vendor),  # type: ignore[arg-type]
         temperature=temperature_for(vendor),  # type: ignore[arg-type]
+        logprobs=logprobs,
     )
     prompt = prompt_for(corpus, prompt_version, spec.arm)
     dev, docs = sorted(part_docs(corpus, "dev")), sorted(part_docs(corpus, part))
@@ -844,6 +848,11 @@ def read_submit(
         0, help="Self-hosted: this many calls in flight (arms B and C), timed for throughput."
     ),
     gateway_config: Path = typer.Option(GATEWAY_CONFIG, help="The gateway configuration."),
+    logprobs: bool = typer.Option(
+        False,
+        help="Self-hosted: keep each answer token's log-probability, the fine-tuned arm's "
+        "confidence; such a run is kept apart from the plain one.",
+    ),
 ) -> None:
     """Send every document of a part not yet read or submitted, through the gateway."""
     from boundary import Gateway
@@ -853,7 +862,7 @@ def read_submit(
     from legible.data.render import read_manifest
 
     spec, prompt, docs, path = _read_run(
-        arm, corpus, part, level, route, prompt_version, gateway_config, split
+        arm, corpus, part, level, route, prompt_version, gateway_config, split, logprobs
     )
     if limit is not None:
         if part != "dev":
@@ -1130,6 +1139,21 @@ def serve_argv(
             port=port,
         )
     typer.echo("\n".join(argv))
+
+
+@serve_app.command("headline")
+def serve_headline() -> None:
+    """The run ids of the seed-0 fine-tunes behind the headline tables and the review rate
+    (FARA and DeepForm unseen templates, CORD, NIST), one a line, both sizes."""
+    from legible.report import TABLE_SETS
+    from legible.train.recipe import chosen
+
+    tables = ("fara-unseen", "deepform-unseen", "cord", "nist")
+    typer.echo(
+        "\n".join(
+            chosen(size, ds).run_id for size in ("2b", "4b") for t in tables for ds in TABLE_SETS[t]
+        )
+    )
 
 
 @serve_app.command("reads")

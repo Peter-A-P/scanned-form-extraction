@@ -177,3 +177,18 @@ def test_nist_budget_grows_past_dev_for_the_frontier_only() -> None:
     assert max_tokens_for("nist_1040_1", "google", "test") == 8192 + 4096
     assert max_tokens_for("nist_1040_1", "selfhosted", "test") == 3072
     assert max_tokens_for("fara", "anthropic", "test") == MAX_TOKENS["fara"]
+
+
+def test_a_logprobs_run_is_kept_apart_and_asks_for_them(tmp_path: Path) -> None:
+    from legible.arms.read_run import _extra, run_dir
+
+    plain = SPEC.model_copy(update={"arm": "b", "vendor": "selfhosted", "route": "m"})
+    conf = plain.model_copy(update={"logprobs": True})
+    assert run_dir(tmp_path, plain) != run_dir(tmp_path, conf)
+    assert "m@logprobs" in run_dir(tmp_path, conf).parts
+    assert conf.run_id.endswith("-logprobs") and not plain.run_id.endswith("-logprobs")
+    assert _extra(conf) == {"logprobs": True}
+    assert _extra(plain) == {}
+    # A run begun before the field existed reads back as a plain run.
+    legacy = plain.model_dump_json(exclude={"logprobs"})
+    assert RunSpec.model_validate_json(legacy) == plain
