@@ -124,6 +124,36 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | C, Gemma 4 E2B untuned on the image | 14.5% (12.9 to 16.2) | 13.3% (11.8 to 14.8) | 13.4% (12.0 to 15.0) | 13.6% (12.2 to 15.1) | 12.3% (11.0 to 13.7) |
 | C, Gemma 4 E4B untuned on the image | 16.0% (14.0 to 18.0) | 16.2% (14.2 to 18.4) | 16.8% (14.6 to 19.0) | 15.9% (13.8 to 18.1) | 14.4% (12.4 to 16.4) |
 
+**FARA, the 39 unseen-template test documents of the VRDU curve subset at levels 0, 2 and 4** (fields correct; real scans beside the NIST curve)
+
+| Arm | Level 0 | Level 2 | Level 4 |
+|---|---|---|---|
+| A, Claude Sonnet 5.5 on the image | 72.9% (65.5 to 79.8) |  |  |
+| A, Claude Haiku 5.5 on the image | 68.6% (60.5 to 76.4) |  |  |
+| A, GPT-6.1 Sol on the image | 65.7% (56.9 to 74.2) |  |  |
+| A, Gemini 3.8 Flash on the image | 72.9% (65.5 to 80.0) |  |  |
+| D, Claude Sonnet 5.5 on the OCR text | 62.6% (52.6 to 72.0) |  |  |
+| E, OCR plus rules | 10.3% (5.2 to 16.0) |  |  |
+| B, Gemma 4 E2B fine-tuned on the image | 61.7% (52.8 to 70.3) | 60.2% (51.8 to 68.4) | 56.9% (47.9 to 65.7) |
+| B, Gemma 4 E4B fine-tuned on the image | 56.5% (48.5 to 64.9) | 57.5% (49.6 to 65.4) | 57.0% (49.8 to 64.8) |
+| C, Gemma 4 E2B untuned on the image | 53.0% (45.9 to 60.1) | 55.1% (47.8 to 62.2) | 55.9% (48.6 to 63.0) |
+| C, Gemma 4 E4B untuned on the image | 61.1% (52.6 to 69.6) | 62.0% (53.3 to 70.6) | 63.9% (55.1 to 72.7) |
+
+**DeepForm, the 30 unseen-template test documents of the VRDU curve subset at levels 0, 2 and 4** (fields correct; real scans beside the NIST curve)
+
+| Arm | Level 0 | Level 2 | Level 4 |
+|---|---|---|---|
+| A, Claude Sonnet 5.5 on the image | 78.2% (68.4 to 85.2) |  |  |
+| A, Claude Haiku 5.5 on the image | 69.6% (56.9 to 80.2) |  |  |
+| A, GPT-6.1 Sol on the image |  |  |  |
+| A, Gemini 3.8 Flash on the image | 62.5% (41.5 to 81.6) |  |  |
+| D, Claude Sonnet 5.5 on the OCR text | 78.8% (69.9 to 85.4) |  |  |
+| E, OCR plus rules | 13.8% (6.6 to 25.1) |  |  |
+| B, Gemma 4 E2B fine-tuned on the image | 66.4% (52.2 to 77.7) | 61.3% (46.5 to 73.4) | 57.1% (43.1 to 69.1) |
+| B, Gemma 4 E4B fine-tuned on the image | 67.7% (53.3 to 79.1) | 64.0% (49.2 to 75.5) | 63.0% (47.8 to 75.6) |
+| C, Gemma 4 E2B untuned on the image | 19.0% (11.1 to 28.6) | 24.7% (16.8 to 33.4) | 27.0% (19.5 to 35.2) |
+| C, Gemma 4 E4B untuned on the image | 52.8% (44.1 to 61.6) | 49.5% (40.6 to 59.1) | 51.8% (44.0 to 59.0) |
+
 **Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the OCR text.** A field is accepted when the two reads agree; the threshold is chosen on dev and applied once to test (legible/review.py, legible/agreement.py).
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |

@@ -483,6 +483,29 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         "",
         *curve(range(5), cells),
     ]
+    for c, name in (("fara", "FARA"), ("deepform", "DeepForm")):
+        sub = sorted(part_docs(c, "vrdu_curve"))
+        files = [f for f in headline_split_files(c, "unseen") if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+        vcells: dict[str, dict[int, Row]] = {}
+        for a in ARMS:
+            vcells[a.label] = {}
+            for lv in (0, 2, 4):
+                # Level 0 is the subset's share of the test reads; 2 and 4 the subset itself.
+                part = "test" if lv == 0 else "vrdu_curve"
+                rules = (
+                    [e_dir / "level0" / c / f"{Path(f).stem}-test.jsonl" for f in files]
+                    if lv == 0
+                    else [e_dir / f"level{lv}" / c / "vrdu_curve.jsonl"]
+                )
+                found = answers_for(root, a, [c], part, lv, rules, f"{c}-unseen")
+                if found is not None:
+                    vcells[a.label][lv] = row(a.label, sub, truth, found)
+        body += [
+            f"**{name}, the {len(sub)} unseen-template test documents of the VRDU curve subset "
+            "at levels 0, 2 and 4** (fields correct; real scans beside the NIST curve)",
+            "",
+            *curve((0, 2, 4), vcells),
+        ]
     from legible.report import agreed_grades, review_table
     from legible.review import review
 
