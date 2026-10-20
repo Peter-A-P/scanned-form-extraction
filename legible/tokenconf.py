@@ -5,7 +5,8 @@ of the answer they wrote (PLAN.md section 2.6). Each field's confidence is the l
 probability inside the span of its value in the answer's JSON: a field is as sure as its least
 sure token, so one guessed digit in an amount marks the amount. A value written as `null` is
 scored the same way, by the tokens of `null`. A field the answer leaves out has no confidence
-and goes to review, as does every field of an answer whose tokens do not spell its text.
+and goes to review, as does every field of an answer whose tokens are fewer bytes than its
+text. Tokens past the text's end (the end-of-turn token vLLM lists) are ignored.
 
 The keys are the ones `legible.agreement.confidences` gives: a scalar's name, and
 `group[j].field` for the j-th row of a repeated group.
@@ -166,7 +167,9 @@ def confidences(
     for n, _ in tokens:
         total += n
         ends.append(total)
-    if total != len(text.encode("utf-8")):
+    # The server lists the end-of-turn token too, which the answer's text leaves out: the
+    # tokens may run past the text's end, never stop short of it.
+    if total < len(text.encode("utf-8")):
         return {}
     spans = value_spans(text)
     if spans is None:

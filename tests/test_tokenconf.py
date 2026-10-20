@@ -50,6 +50,12 @@ def test_tokens_that_do_not_spell_the_answer_give_nothing() -> None:
     assert confidences(SCHEMAS["fara"], None, toks) == {}
 
 
+def test_an_end_of_turn_token_past_the_text_is_ignored() -> None:
+    text, toks = tokens_of([('{"file_date":"', 0.99), ("2019", 0.5), ('"}', 0.99)])
+    toks.append((7, math.log(0.01)))  # "<turn|>", listed but not in the text
+    assert confidences(SCHEMAS["fara"], text, toks)["file_date"] == pytest.approx(0.5)
+
+
 def test_unparseable_json_gives_nothing() -> None:
     text, toks = tokens_of([('{"file_date":"2019', 0.9)])
     assert confidences(SCHEMAS["fara"], text, toks) == {}
