@@ -1115,7 +1115,9 @@ def serve_reads(
 ) -> None:
     """The reads a model trained on this set owes: one `corpus split part level` a line
     ("-" for no split file), dev before test. A VRDU model reads its own split file's dev
-    and test documents; CORD's its test set; NIST's the twenty faces' dev, test and curve."""
+    and test documents, and the seed-0 unseen-template model its test documents in the VRDU
+    curve subset at levels 2 and 4; CORD's its test set; NIST's the twenty faces' dev, test
+    and curve."""
     from legible.data.vrdu import headline_split_files, read_split
 
     lines: list[str] = []
@@ -1129,6 +1131,9 @@ def serve_reads(
                 if f"{corpus}-{level}{template}-s{sp.seed}" == dataset:
                     stem = Path(f).stem
                     lines += [f"{corpus} {stem} dev 0", f"{corpus} {stem} test 0"]
+                    if level == "unseen" and sp.seed == 0:
+                        # The headline model also reads its share of the VRDU curve subset.
+                        lines += [f"{corpus} {stem} vrdu_curve {lv}" for lv in (2, 4)]
     elif dataset == "cord":
         lines += ["cord - dev 0", "cord - test 0"]
     elif dataset == "nist":

@@ -28,6 +28,7 @@ if [[ "$model" == *-it ]]; then
   size="${model%-it}"
   args=$(legible serve argv "$model")
   reads=$( { for c in fara deepform cord; do echo "$c - dev 0"; echo "$c - test 0"; done;
+             for c in fara deepform; do echo "$c - vrdu_curve 2"; echo "$c - vrdu_curve 4"; done;
              legible serve reads nist; } )
 else
   arm=b
