@@ -530,8 +530,10 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
             ]
         ),
-        "Arms B and C read through vLLM on an RTX 3090, held to the schema's JSON, and are "
-        "costed at the GPU's US$0.50 an hour over the measured wall time of each read pass. "
+        "Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held "
+        "to the schema's grammar, the fine-tunes left their trained format: docs/training.md), "
+        "and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured "
+        "wall time of each read pass. "
         "B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are "
         "the training variance. Not yet measured: latency, which batch reads do not give.",
     ]
