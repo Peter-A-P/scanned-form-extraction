@@ -46,8 +46,10 @@ SOURCE: Mapping[Arm, Source] = {"a": "images", "b": "images", "c": "images", "d"
 #: needs.
 MAX_TOKENS: Mapping[str, int] = {"fara": 1024, "deepform": 8192, "cord": 2048}
 #: Every NIST face (`nist_<face>`): the longest training record, Schedule D page 1 with every
-#: key, is 6,030 characters of JSON, about 2,000 tokens.
-NIST_MAX_TOKENS = 3072
+#: key, is 6,030 characters of JSON, about 2,000 tokens. 3,072 was the dev budget, and every
+#: answer that did not parse on dev had been cut off at it (the vendors spell a field out in
+#: more tokens than the fine-tunes do), so the test and curve reads get 8,192.
+NIST_MAX_TOKENS = 8192
 
 #: Added to the output budget for a vendor whose model reasons by default and counts the
 #: reasoning inside the same cap. Gemini 3.8 Flash thinks before it answers and its thoughts

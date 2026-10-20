@@ -59,3 +59,9 @@ Two settings came out of dev:
   default reasoning; the cut-off run is archived, not deleted, and the table is the rerun.
 - **OpenAI's batch window.** Six of GPT-6.1 Sol's 380 FARA requests never came back within the
   24-hour window (`batch_missing` in the ledger) and are graded as unread.
+- **NIST's output budget.** On NIST dev, at 3,072 output tokens, the fields came out at 92.1%
+  for GPT-6.1 Sol, 83.6% for Sonnet 5.5, 64.3% for Haiku 5.5, 63.8% for Gemini 3.8 Flash and
+  38.8% for Sonnet on the OCR text, and every answer that did not parse had been cut off at
+  the budget: the vendors write a face's fields out in more tokens than the fine-tunes do. The
+  test and curve reads get 8,192 (`NIST_MAX_TOKENS`); the prompt is the one dev used, so the
+  test read differs from dev only in where an answer may stop.
