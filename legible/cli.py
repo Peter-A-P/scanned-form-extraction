@@ -806,7 +806,7 @@ def _read_run(
         vendor=vendor,
         model=model,
         prompt_version=prompt_version,
-        max_tokens=max_tokens_for(corpus, vendor),  # type: ignore[arg-type]
+        max_tokens=max_tokens_for(corpus, vendor, part),  # type: ignore[arg-type]
         structured=structured_for(vendor),  # type: ignore[arg-type]
         temperature=temperature_for(vendor),  # type: ignore[arg-type]
     )

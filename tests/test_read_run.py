@@ -166,3 +166,14 @@ def test_an_arm_d_run_does_not_resume_as_arm_a(tmp_path: Path) -> None:
     open_run(path, SPEC, prompt_for("cord", 1))
     with pytest.raises(RunMismatch, match="begun as"):
         open_run(path, SPEC.model_copy(update={"arm": "a"}), prompt_for("cord", 1))
+
+
+def test_nist_budget_grows_past_dev_for_the_frontier_only() -> None:
+    from legible.arms.read_run import max_tokens_for
+
+    assert max_tokens_for("nist_1040_1", "anthropic", "dev") == 3072
+    assert max_tokens_for("nist_1040_1", "anthropic", "test") == 8192
+    assert max_tokens_for("nist_1040_1", "openai", "curve") == 8192
+    assert max_tokens_for("nist_1040_1", "google", "test") == 8192 + 4096
+    assert max_tokens_for("nist_1040_1", "selfhosted", "test") == 3072
+    assert max_tokens_for("fara", "anthropic", "test") == MAX_TOKENS["fara"]

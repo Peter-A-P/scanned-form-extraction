@@ -63,5 +63,7 @@ Two settings came out of dev:
   for GPT-6.1 Sol, 83.6% for Sonnet 5.5, 64.3% for Haiku 5.5, 63.8% for Gemini 3.8 Flash and
   38.8% for Sonnet on the OCR text, and every answer that did not parse had been cut off at
   the budget: the vendors write a face's fields out in more tokens than the fine-tunes do. The
-  test and curve reads get 8,192 (`NIST_MAX_TOKENS`); the prompt is the one dev used, so the
-  test read differs from dev only in where an answer may stop.
+  frontier's test, curve and subset reads get 8,192 (`NIST_FRONTIER_TEST_MAX_TOKENS`); the
+  prompt is the one dev used, so the test read differs from dev only in where an answer may
+  stop. The dev runs stand as read, at 3,072, and the self-hosted models, whose answers fit,
+  read every part at 3,072.

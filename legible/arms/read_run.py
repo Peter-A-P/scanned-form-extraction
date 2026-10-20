@@ -47,9 +47,11 @@ SOURCE: Mapping[Arm, Source] = {"a": "images", "b": "images", "c": "images", "d"
 MAX_TOKENS: Mapping[str, int] = {"fara": 1024, "deepform": 8192, "cord": 2048}
 #: Every NIST face (`nist_<face>`): the longest training record, Schedule D page 1 with every
 #: key, is 6,030 characters of JSON, about 2,000 tokens. 3,072 was the dev budget, and every
-#: answer that did not parse on dev had been cut off at it (the vendors spell a field out in
-#: more tokens than the fine-tunes do), so the test and curve reads get 8,192.
-NIST_MAX_TOKENS = 8192
+#: frontier answer that did not parse on dev had been cut off at it (the vendors spell a field
+#: out in more tokens than the fine-tunes do), so the frontier's reads past dev (test, curve,
+#: subsets) get 8,192. The self-hosted models read every part at 3,072, as they were run.
+NIST_MAX_TOKENS = 3072
+NIST_FRONTIER_TEST_MAX_TOKENS = 8192
 
 #: Added to the output budget for a vendor whose model reasons by default and counts the
 #: reasoning inside the same cap. Gemini 3.8 Flash thinks before it answers and its thoughts
@@ -64,8 +66,13 @@ REASONING_HEADROOM: Mapping[Vendor, int] = {
 }
 
 
-def max_tokens_for(corpus: str, vendor: Vendor) -> int:
-    base = NIST_MAX_TOKENS if corpus.startswith("nist_") else MAX_TOKENS[corpus]
+def max_tokens_for(corpus: str, vendor: Vendor, part: str = "dev") -> int:
+    if not corpus.startswith("nist_"):
+        base = MAX_TOKENS[corpus]
+    elif part != "dev" and vendor != "selfhosted":
+        base = NIST_FRONTIER_TEST_MAX_TOKENS
+    else:
+        base = NIST_MAX_TOKENS
     return base + REASONING_HEADROOM[vendor]
 
 
