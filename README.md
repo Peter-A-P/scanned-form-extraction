@@ -163,6 +163,24 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | CORD | 100.0% (100.0 to 100.0) | none accepted | no: fields the two reads agree on are right less than 99% of the time on dev, so every field goes to a person |
 | NIST | not yet measured | | |
 
+**Review at 99%: Gemma 4 E2B fine-tuned (seed 0), each field's confidence the lowest probability among the tokens of its value.** Read a second time with log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev read and applied once to its test read (legible/tokenconf.py).
+
+| Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
+|---|---|---|---|
+| FARA, unseen templates | not yet measured | | |
+| DeepForm, unseen templates | not yet measured | | |
+| CORD | not yet measured | | |
+| NIST | not yet measured | | |
+
+**Review at 99%: Gemma 4 E4B fine-tuned (seed 0), each field's confidence the lowest probability among the tokens of its value.** Read a second time with log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev read and applied once to its test read (legible/tokenconf.py).
+
+| Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |
+|---|---|---|---|
+| FARA, unseen templates | not yet measured | | |
+| DeepForm, unseen templates | not yet measured | | |
+| CORD | not yet measured | | |
+| NIST | not yet measured | | |
+
 Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
 <!-- results:end -->
 

@@ -553,6 +553,80 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
             ]
         ),
+    ]
+    from legible.report import TABLE_SETS, TOKEN_MISS, token_grades
+    from legible.train.recipe import chosen
+
+    def token_review(
+        size: Literal["2b", "4b"], table: str, corpora: list[str], dev: list[str], test: list[str]
+    ) -> object:
+        parts = {}
+        for part, ids in (("dev", dev), ("test", test)):
+            dirs = [
+                root
+                / "runs"
+                / "arm-b"
+                / f"{chosen(size, ds).run_id}@logprobs"
+                / "p1"
+                / "level0"
+                / c
+                / part
+                for ds in TABLE_SETS[table]
+                for c in corpora
+            ]
+            graded = token_grades(ids, truth, dirs)
+            if graded is None:
+                return None
+            parts[part] = graded
+        return review(parts["dev"], parts["test"])
+
+    sizes: tuple[tuple[Literal["2b", "4b"], str], ...] = (("2b", "E2B"), ("4b", "E4B"))
+    for size, name in sizes:
+        body += [
+            f"**Review at 99%: Gemma 4 {name} fine-tuned (seed 0), each field's confidence the "
+            "lowest probability among the tokens of its value.** Read a second time with "
+            "log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev "
+            "read and applied once to its test read (legible/tokenconf.py).",
+            "",
+            *review_table(
+                [
+                    (
+                        "FARA, unseen templates",
+                        token_review(
+                            size,
+                            "fara-unseen",
+                            ["fara"],
+                            vrdu_ids("fara", "unseen", "valid"),
+                            vrdu_ids("fara", "unseen", "test"),
+                        ),
+                    ),
+                    (
+                        "DeepForm, unseen templates",
+                        token_review(
+                            size,
+                            "deepform-unseen",
+                            ["deepform"],
+                            vrdu_ids("deepform", "unseen", "valid"),
+                            vrdu_ids("deepform", "unseen", "test"),
+                        ),
+                    ),
+                    (
+                        "CORD",
+                        token_review(
+                            size, "cord", ["cord"], sorted(part_docs("cord", "dev")), cord_test
+                        ),
+                    ),
+                    (
+                        "NIST",
+                        token_review(
+                            size, "nist", nist_faces, sorted(part_docs("nist", "dev")), nist_test
+                        ),
+                    ),
+                ],
+                TOKEN_MISS,
+            ),
+        ]
+    body += [
         "Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held "
         "to the schema's grammar, the fine-tunes left their trained format: docs/training.md), "
         "and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured "

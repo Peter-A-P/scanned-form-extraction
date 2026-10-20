@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 
@@ -111,3 +112,52 @@ def test_answer_tokens_reads_an_openai_shaped_body() -> None:
     assert answer_tokens(raw) == [(1, -0.1), (2, -0.2), (1, -0.3)]
     assert answer_tokens({"choices": [{"message": {}}]}) is None
     assert answer_tokens(None) is None
+
+
+def test_a_logprobs_run_is_graded_with_its_token_confidences(tmp_path: Path) -> None:
+    from legible.arms.frontier import Read, RunDir
+    from legible.report import Truth, token_grades
+    from legible.schema import Record
+    from tests.schemas import ORDER
+
+    text, toks = tokens_of(
+        [
+            ('{"advertiser":"', 0.99),
+            ("Smith", 0.9),
+            ('","contract_num":"', 0.99),
+            ("1", 0.2),
+            ('2345"}', 0.99),
+        ]
+    )
+    run = RunDir(tmp_path / "run")
+    (tmp_path / "run" / "run.json").write_text("{}", encoding="utf-8")
+    common = dict(status="200", cost_usd=None, input_tokens=1, output_tokens=1)
+    run.add_reads(
+        [
+            Read(
+                doc_id="d",
+                text=text,
+                tokens=toks,
+                latency_ms=None,
+                ledger_id=None,
+                model_returned=None,
+                **common,
+            )
+        ]
+    )
+    truth: Record = {
+        "advertiser": "Smith",
+        "agency": None,
+        "contract_num": "99999",
+        "flight_from": None,
+        "gross_amount": "$400.00",
+        "product": None,
+        "line_item": [],
+    }
+    grades = token_grades(["d", "missing"], {"d": Truth(ORDER, truth, {}, None, 1)}, [run.path])
+    assert grades is not None and len(grades) == 1
+    by_path = {o.path: o for o in grades[0].outcomes}
+    assert by_path["advertiser"].confidence == pytest.approx(0.9)
+    assert by_path["contract_num"].confidence == pytest.approx(0.2)
+    assert by_path["gross_amount"].confidence is None  # left out of the answer: to review
+    assert token_grades(["d"], {}, [tmp_path / "nowhere"]) is None

@@ -29,7 +29,7 @@ from legible.arms.frontier import Read, RunDir
 from legible.arms.read_run import outputs
 from legible.arms.rules_run import answer, read_run
 from legible.bench.cost import Costed, GpuPrice, PriceKind, ledger_cost, ocr_usd_per_page
-from legible.grade import DocGrade, grade_document, summarise
+from legible.grade import DocGrade, grade_document, parse_output, summarise
 from legible.schema import CorpusSchema, Record
 from legible.stats import Interval
 
@@ -364,7 +364,50 @@ def agreed_grades(
     return out
 
 
-def review_table(rows: Sequence[tuple[str, Any]]) -> list[str]:
+def token_grades(
+    doc_ids: Sequence[str], truth: Mapping[str, Truth], dirs: Sequence[Path]
+) -> list[DocGrade] | None:
+    """A self-hosted read taken with log-probabilities, graded with each field's token
+    confidence (`legible.tokenconf`); None when no such read exists yet."""
+    from legible.tokenconf import confidences
+
+    reads: dict[str, Read] = {}
+    for path in dirs:
+        if (path / "run.json").exists():
+            reads.update(RunDir(path).reads())
+    if not reads:
+        return None
+    out = []
+    for d in doc_ids:
+        r = reads.get(d)
+        if r is None:
+            continue
+        schema = truth[d].schema
+        out.append(
+            grade_document(
+                schema,
+                d,
+                truth[d].record,
+                parse_output(r.text) if r.text is not None else None,
+                page_text=truth[d].text,
+                alternatives=truth[d].alternatives,
+                confidences=confidences(schema, r.text, r.tokens),
+            )
+        )
+    return out
+
+
+AGREEMENT_MISS = (
+    "no: fields the two reads agree on are right less than 99% of the time on dev, so every "
+    "field goes to a person"
+)
+TOKEN_MISS = (
+    "no: at no token probability are the fields above it right 99% of the time on dev, so "
+    "every field goes to a person"
+)
+
+
+def review_table(rows: Sequence[tuple[str, Any]], miss: str = AGREEMENT_MISS) -> list[str]:
     """Rows of (corpus label, ReviewResult or None)."""
     import math
 
@@ -379,11 +422,6 @@ def review_table(rows: Sequence[tuple[str, Any]]) -> list[str]:
             continue
         reached = math.isfinite(r.threshold.value)
         accepted = pct(r.accepted_accuracy) if reached else "none accepted"
-        dev = (
-            f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev"
-            if reached
-            else "no: fields the two reads agree on are right less than 99% of the time on "
-            "dev, so every field goes to a person"
-        )
+        dev = f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev" if reached else miss
         out.append(f"| {label} | {pct(r.review_rate)} | {accepted} | {dev} |")
     return [*out, ""]
