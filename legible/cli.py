@@ -1149,10 +1149,9 @@ def serve_headline() -> None:
     from legible.train.recipe import chosen
 
     tables = ("fara-unseen", "deepform-unseen", "cord", "nist")
+    sizes: tuple[Literal["2b", "4b"], ...] = ("2b", "4b")
     typer.echo(
-        "\n".join(
-            chosen(size, ds).run_id for size in ("2b", "4b") for t in tables for ds in TABLE_SETS[t]
-        )
+        "\n".join(chosen(s, ds).run_id for s in sizes for t in tables for ds in TABLE_SETS[t])
     )
 
 
