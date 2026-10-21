@@ -33,7 +33,12 @@ def page_image(root: Path, entry: PageEntry, level: int) -> Path:
     if not dest.exists():
         dest.parent.mkdir(parents=True, exist_ok=True)
         with Image.open(source) as img:
-            dest.write_bytes(to_png(degrade(img, f"{entry.corpus}/{entry.path}", level)))
+            data = to_png(degrade(img, f"{entry.corpus}/{entry.path}", level))
+        # Written beside and renamed into place, so a process stopped mid-write leaves no
+        # truncated page behind for the next read to send (2026-10-21, one NIST page).
+        part = dest.with_name(dest.name + ".part")
+        part.write_bytes(data)
+        part.replace(dest)
     return dest
 
 
