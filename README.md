@@ -70,7 +70,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 |---|---|---|---|---|---:|
 | A, Claude Sonnet 5.5 on the image | 86.7% (84.8 to 88.4) | 46.2% (42.0 to 50.4) | 0.7% (0.6 to 1.0) | US$16.38 (15.63 to 17.19) | 500 |
 | A, Claude Haiku 5.5 on the image | 84.5% (82.3 to 86.4) | 36.8% (32.6 to 41.0) | 0.5% (0.3 to 0.7) | US$1.12 (1.08 to 1.17) | 500 |
-| A, GPT-6.1 Sol on the image | not yet measured |  |  |  | 0 |
+| A, GPT-6.1 Sol on the image | 94.9% (94.0 to 95.6) | 50.2% (45.8 to 54.6) | 0.4% (0.3 to 0.5) | US$15.33 (14.69 to 16.00) | 500 |
 | A, Gemini 3.8 Flash on the image | 80.1% (76.2 to 83.7) | 46.2% (41.8 to 50.6) | 0.6% (0.4 to 0.8) | US$12.48 (11.85 to 13.16) | 500 |
 | D, Claude Sonnet 5.5 on the OCR text | 38.7% (36.2 to 41.1) | 1.2% (0.4 to 2.2) | 2.3% (1.9 to 2.7) | US$16.02 (15.26 to 16.82) | 500 |
 | E, OCR plus rules | 16.0% (14.6 to 17.4) | 0.0% (0.0 to 0.0) | 15.2% (14.1 to 16.3) | US$0.04 (0.04 to 0.05) | 500 |
@@ -115,7 +115,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 |---|---|---|---|---|---|
 | A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) |  |  |  |  |
 | A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) |  |  |  |  |
-| A, GPT-6.1 Sol on the image |  |  |  |  |  |
+| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) |  |  |  |  |
 | A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) |  |  |  |  |
 | D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) |  |  |  |  |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
