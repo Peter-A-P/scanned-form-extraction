@@ -10,10 +10,13 @@
 # Monthly 190 from 110, and the portfolio 750 from 670, on 2026-10-20, approved by Peter: the
 # NIST frontier reads, with answers allowed 8,192 tokens, need about US$95 past the US$82.55
 # October had billed (PLAN.md section 7).
+# Monthly 215 from 190, and the portfolio 775 from 750, on 2026-10-22, approved by Peter: the
+# NIST curve came in above its estimate, and the repeat, VRDU-curve and Opus 5.5 ceiling
+# subsets need about US$25 more to finish in October.
 version: 1
-portfolio_monthly_usd: 750
+portfolio_monthly_usd: 775
 projects:
   legible:
-    monthly_usd: 190
+    monthly_usd: 215
     per_run_usd: 25
     daily_usd: 40
