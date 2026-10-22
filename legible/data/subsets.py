@@ -1,6 +1,6 @@
 """The three test subsets the plan names, drawn once and committed (`manifests/subsets.json`).
 
-- **ceiling**: about 600 pages the most expensive model (Claude Fable 5.1) reads, to show how
+- **ceiling**: about 600 pages the top Anthropic tier (Claude Opus 5.5) reads, to show how
   far above the quality model the frontier goes (PLAN.md section 7).
 - **repeat**: about 200 pages the quality model reads a second time, so a difference between
   arms can be set against how much one arm differs from itself (the noise floor).

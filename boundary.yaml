@@ -30,7 +30,7 @@ routes:
     model: claude-haiku-5-5
   ceiling:
     provider: anthropic
-    model: claude-fable-5-1
+    model: claude-opus-5-5
   openai:
     provider: openai
     model: gpt-6.1-sol
