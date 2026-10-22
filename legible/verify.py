@@ -35,6 +35,9 @@ class SumRule(BaseModel):
     parts: tuple[str, ...]
     total: str
     tolerance: float = 0.005
+    #: Parts that must be filled in for the rule to apply: a receipt that prints no subtotal
+    #: says nothing about how its total was reached.
+    requires: tuple[str, ...] = ()
 
 
 class PatternRule(BaseModel):
@@ -71,20 +74,49 @@ def _spec(schema: CorpusSchema, path: str) -> FieldSpec:
     raise KeyError(f"{schema.corpus} has no field {path!r}")
 
 
+#: The kinds a sum may read. NIST's amounts are codes, because the form prints dollars and
+#: cents in separate boxes ("5140  00", "36237  -"); `parse_box_amount` reads them.
+SUMMABLE = {FieldKind.PRICE, FieldKind.NUMBER, FieldKind.CODE}
+
+
 def check_rules(schema: CorpusSchema, rules: Sequence[Rule]) -> None:
     """Refuse a rule that names a field the schema does not, or a sum over a non-number."""
     for rule in rules:
         paths = (*rule.parts, rule.total) if isinstance(rule, SumRule) else (rule.field,)
         for p in paths:
             spec = _spec(schema, p)
-            if isinstance(rule, SumRule) and spec.kind not in {FieldKind.PRICE, FieldKind.NUMBER}:
+            if isinstance(rule, SumRule) and spec.kind not in SUMMABLE:
                 raise ValueError(f"rule {rule.name} sums {p}, which is {spec.kind}")
+
+
+_BOXES = re.compile(r"(\d+)(?:\s+(\d\d|-))?")
+
+
+def parse_box_amount(value: str) -> float | None:
+    """An amount a tax form prints in a dollars box and a cents box, as NIST SD2's answers
+    keep it: "5140  00" is 5140.00, "36237  -" is 36237, "$5019  -" has a dollar sign, and
+    "-2343  14" or "(4238  16)" is negative. Commas separate thousands."""
+    s = value.strip().replace("$", "").replace(",", "")
+    negative = False
+    if s.startswith("(") and s.endswith(")"):
+        negative, s = True, s[1:-1].strip()
+    if s.startswith("-"):
+        negative, s = True, s[1:].strip()
+    m = _BOXES.fullmatch(s)
+    if m is None:
+        return None
+    cents = m.group(2)
+    number = float(m.group(1)) + (int(cents) / 100 if cents and cents != "-" else 0.0)
+    return -number if negative else number
 
 
 def _number(schema: CorpusSchema, path: str, value: object) -> float | None:
     if not isinstance(value, str) or not value.strip():
         return None
-    return parse_number(value, _spec(schema, path).decimal_mark)
+    spec = _spec(schema, path)
+    if spec.kind is FieldKind.CODE:
+        return parse_box_amount(value)
+    return parse_number(value, spec.decimal_mark)
 
 
 def _sum_part(schema: CorpusSchema, record: Mapping[str, Any], path: str) -> float | None:
@@ -109,14 +141,32 @@ def _sum_part(schema: CorpusSchema, record: Mapping[str, Any], path: str) -> flo
     return total
 
 
+def _filled(record: Mapping[str, Any], path: str) -> bool:
+    head, _, tail = path.partition(".")
+    value = record.get(head)
+    if not tail:
+        return isinstance(value, str) and bool(value.strip())
+    return isinstance(value, list) and any(
+        isinstance(i, Mapping) and isinstance(i.get(tail), str) and i[tail].strip() for i in value
+    )
+
+
+def applies(rule: Rule, record: Mapping[str, Any]) -> bool:
+    """Whether a rule says anything about this record: a sum whose total (and every part it
+    requires) is filled in, a pattern or date field with a value."""
+    if isinstance(rule, SumRule):
+        return _filled(record, rule.total) and all(_filled(record, p) for p in rule.requires)
+    return _filled(record, rule.field)
+
+
 def flagged(schema: CorpusSchema, rules: Sequence[Rule], record: Mapping[str, Any]) -> set[str]:
     """The field paths a predicted record's failing rules flag."""
     out: set[str] = set()
     for rule in rules:
         if isinstance(rule, SumRule):
-            raw_total = record.get(rule.total)
-            if raw_total is None or (isinstance(raw_total, str) and not raw_total.strip()):
+            if not applies(rule, record):
                 continue
+            raw_total = record.get(rule.total)
             total = _number(schema, rule.total, raw_total)
             parts = [_sum_part(schema, record, p) for p in rule.parts]
             if (
@@ -153,24 +203,51 @@ class CatchRate(BaseModel):
 
     catch_rate: Interval
     false_alarm_rate: Interval
+    #: The catch rate among the wrong fields some rule reads: what the rules do where they
+    #: look, apart from how much of the form they cover. None when no reads were given.
+    reach_catch_rate: Interval | None = None
+
+
+def read_by(rules: Sequence[Rule]) -> set[str]:
+    """Every field path a set of rules reads."""
+    out: set[str] = set()
+    for rule in rules:
+        out.update((*rule.parts, rule.total) if isinstance(rule, SumRule) else (rule.field,))
+    return out
 
 
 def catch_rate(
-    grades: Sequence[DocGrade], flags: Mapping[str, set[str]], *, seed: int = 0
+    grades: Sequence[DocGrade],
+    flags: Mapping[str, set[str]],
+    *,
+    reads: Mapping[str, set[str]] | None = None,
+    seed: int = 0,
 ) -> CatchRate:
     """Share of wrong fields flagged, and of right fields flagged, over documents.
-    `flags` maps document id to the paths `flagged` returned for its prediction."""
+    `flags` maps document id to the paths `flagged` returned for its prediction; `reads`,
+    if given, maps it to the paths its rules read, for the catch rate where they look."""
     caught: list[float] = []
     wrong: list[float] = []
     alarms: list[float] = []
     right: list[float] = []
+    reach_caught: list[float] = []
+    reach_wrong: list[float] = []
     for g in grades:
         f = flags.get(g.doc_id, set())
         caught.append(float(sum(not o.correct and o.path in f for o in g.outcomes)))
         wrong.append(float(sum(not o.correct for o in g.outcomes)))
         alarms.append(float(sum(o.correct and o.path in f for o in g.outcomes)))
         right.append(float(sum(o.correct for o in g.outcomes)))
+        if reads is not None:
+            r = reads.get(g.doc_id, set())
+            reach_caught.append(
+                float(sum(not o.correct and o.path in f and o.path in r for o in g.outcomes))
+            )
+            reach_wrong.append(float(sum(not o.correct and o.path in r for o in g.outcomes)))
     return CatchRate(
         catch_rate=ratio_ci(caught, wrong, seed=seed),
         false_alarm_rate=ratio_ci(alarms, right, seed=seed),
+        reach_catch_rate=ratio_ci(reach_caught, reach_wrong, seed=seed)
+        if reads is not None
+        else None,
     )

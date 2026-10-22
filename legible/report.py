@@ -282,6 +282,47 @@ def curve(levels: Sequence[int], cells: Mapping[str, Mapping[int, Row]]) -> list
     return [*out, ""]
 
 
+def verifier_cell(
+    doc_ids: Sequence[str], truth: Mapping[str, Truth], answers: Answers | None
+) -> str:
+    """The verifier over one arm's reads, as a table cell: the share of wrong fields a kept
+    rule flags, the same among the wrong fields some rule reads, and the share of right
+    fields flagged."""
+    from legible.verify import catch_rate, flagged, read_by
+    from legible.verify_rules import RULES
+
+    if answers is None:
+        return "not yet measured"
+    grades: list[DocGrade] = []
+    flags: dict[str, set[str]] = {}
+    reads: dict[str, set[str]] = {}
+    for d in doc_ids:
+        if d not in answers.outputs:
+            continue
+        schema = truth[d].schema
+        out = answers.outputs[d]
+        grades.append(
+            grade_document(
+                schema,
+                d,
+                truth[d].record,
+                out,
+                page_text=truth[d].text,
+                alternatives=truth[d].alternatives,
+            )
+        )
+        rules = RULES.get(schema.corpus, ())
+        flags[d] = flagged(schema, rules, out) if isinstance(out, Mapping) and rules else set()
+        reads[d] = read_by(rules)
+    if not grades:
+        return "not yet measured"
+    c = catch_rate(grades, flags, reads=reads)
+    return (
+        f"{pct(c.catch_rate)}; where a rule looks {pct(c.reach_catch_rate)}; "
+        f"false alarms {pct(c.false_alarm_rate)}"
+    )
+
+
 def splice(readme: str, body: Sequence[str]) -> str:
     """The README with the text between the result markers replaced."""
     if START not in readme or END not in readme:

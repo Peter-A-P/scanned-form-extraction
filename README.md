@@ -113,11 +113,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Level 0 | Level 1 | Level 2 | Level 3 | Level 4 |
 |---|---|---|---|---|---|
-| A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) |  |  |  |  |
-| A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) |  |  |  |  |
-| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) |  |  |  |  |
-| A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) |  |  |  |  |
-| D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) |  |  |  |  |
+| A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) | 86.9% (84.8 to 88.9) | 86.5% (84.1 to 88.8) | 87.0% (84.9 to 89.0) |  |
+| A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) | 85.8% (83.7 to 87.7) | 84.7% (82.4 to 86.9) | 84.5% (82.1 to 86.7) |  |
+| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 92.9% (88.2 to 97.6) |  |
+| A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) | 76.8% (71.5 to 82.0) | 80.9% (76.0 to 85.6) | 77.2% (71.8 to 82.2) |  |
+| D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) | 10.4% (8.9 to 11.9) | 8.3% (7.0 to 9.7) | 4.5% (3.7 to 5.4) |  |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
 | B, Gemma 4 E2B fine-tuned on the image | 74.9% (71.3 to 78.3) | 75.4% (72.0 to 78.8) | 73.9% (69.9 to 77.8) | 72.1% (68.4 to 75.6) | 68.7% (64.9 to 72.4) |
 | B, Gemma 4 E4B fine-tuned on the image | 74.9% (70.9 to 78.6) | 75.6% (72.1 to 78.8) | 77.5% (74.5 to 80.3) | 75.1% (71.5 to 78.5) | 72.6% (69.4 to 75.7) |
@@ -153,6 +153,21 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 67.7% (53.3 to 79.1) | 64.0% (49.2 to 75.5) | 63.0% (47.8 to 75.6) |
 | C, Gemma 4 E2B untuned on the image | 19.0% (11.1 to 28.6) | 24.7% (16.8 to 33.4) | 27.0% (19.5 to 35.2) |
 | C, Gemma 4 E4B untuned on the image | 52.8% (44.1 to 61.6) | 49.5% (40.6 to 59.1) | 51.8% (44.0 to 59.0) |
+
+**The verifier on test: the share of wrong fields its rules flag, over every field and over the fields a rule reads, and the share of right fields flagged** (legible/verify_rules.py; each rule kept only where the training truth obeys it on 99% of documents, docs/verify-rules.md). FARA has one rule, a registration number's digits; NIST the 1988 forms' sums. No rule held for DeepForm's dates or CORD's arithmetic, so neither has a verifier.
+
+| Arm | FARA, unseen templates | NIST |
+|---|---|---|
+| A, Claude Sonnet 5.5 on the image | 0.0% (0.0 to 0.0); where a rule looks 0.0% (0.0 to 0.0); false alarms 0.4% (0.2 to 0.6) | 1.9% (0.6 to 3.4); where a rule looks 12.2% (3.9 to 24.3); false alarms 0.3% (0.0 to 0.6) |
+| A, Claude Haiku 5.5 on the image | 0.3% (0.0 to 0.6); where a rule looks 11.1% (0.0 to 25.0); false alarms 0.4% (0.2 to 0.6) | 5.4% (2.6 to 8.6); where a rule looks 64.4% (41.5 to 83.5); false alarms 4.9% (3.5 to 6.4) |
+| A, GPT-6.1 Sol on the image | 0.1% (0.0 to 0.2); where a rule looks 6.2% (0.0 to 21.1); false alarms 0.4% (0.2 to 0.7) | 3.2% (1.6 to 5.1); where a rule looks 27.0% (12.4 to 57.7); false alarms 5.6% (4.1 to 7.1) |
+| A, Gemini 3.8 Flash on the image | 0.0% (0.0 to 0.0); where a rule looks 0.0% (0.0 to 0.0); false alarms 0.4% (0.2 to 0.6) | 0.0% (0.0 to 0.0); where a rule looks 0.0% (0.0 to 0.0); false alarms 0.6% (0.2 to 1.0) |
+| D, Claude Sonnet 5.5 on the OCR text | 0.9% (0.5 to 1.5); where a rule looks 10.3% (5.4 to 15.9); false alarms 0.4% (0.2 to 0.7) | 9.6% (8.1 to 11.3); where a rule looks 58.3% (52.3 to 64.5); false alarms 10.0% (8.0 to 12.1) |
+| E, OCR plus rules | 0.0% (0.0 to 0.0); where a rule looks 0.0% (0.0 to 0.0); false alarms 0.0% (0.0 to 0.0) | 8.6% (7.4 to 9.8); where a rule looks 47.6% (43.7 to 51.7); false alarms 10.9% (8.5 to 13.6) |
+| B, Gemma 4 E2B fine-tuned on the image | 0.5% (0.1 to 0.9); where a rule looks 21.2% (7.7 to 35.7); false alarms 0.2% (0.1 to 0.4) | 3.6% (2.3 to 5.2); where a rule looks 62.6% (47.4 to 77.1); false alarms 2.0% (1.3 to 2.8) |
+| B, Gemma 4 E4B fine-tuned on the image | 0.3% (0.1 to 0.6); where a rule looks 13.9% (3.2 to 26.3); false alarms 0.5% (0.3 to 0.8) | 1.5% (0.8 to 2.2); where a rule looks 21.7% (12.8 to 33.8); false alarms 1.2% (0.6 to 1.8) |
+| C, Gemma 4 E2B untuned on the image | 0.2% (0.1 to 0.4); where a rule looks 16.0% (3.6 to 32.0); false alarms 0.5% (0.3 to 0.8) | 15.1% (12.9 to 17.4); where a rule looks 70.1% (64.8 to 74.8); false alarms 8.3% (6.2 to 10.6) |
+| C, Gemma 4 E4B untuned on the image | 0.4% (0.1 to 0.8); where a rule looks 23.1% (7.7 to 40.9); false alarms 0.4% (0.2 to 0.6) | 13.2% (11.0 to 15.5); where a rule looks 63.4% (57.7 to 68.6); false alarms 6.2% (4.4 to 8.1) |
 
 **Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the OCR text.** A field is accepted when the two reads agree; the threshold is chosen on dev and applied once to test (legible/review.py, legible/agreement.py).
 

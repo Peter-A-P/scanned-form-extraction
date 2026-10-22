@@ -18,6 +18,7 @@ from legible.degrade import LEVELS, degrade, to_png
 if TYPE_CHECKING:
     from legible.arms.read_run import RunSpec
     from legible.prompt import Prompt
+    from legible.report import Truth
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -353,27 +354,16 @@ def calibrate_levels(
     typer.echo("\n".join(lines))
 
 
-@app.command("report")
-def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
-    """Grade every arm's stored test reads and write the README's result tables."""
+def _truths() -> dict[str, Truth]:
+    """Every document's truth, by document id, across the four corpora."""
     from legible.data import nist
     from legible.data.cord import read_shard
     from legible.data.fetch import load_checksums
-    from legible.data.vrdu import headline_split_files, read_dataset, read_split
-    from legible.report import (
-        ARMS,
-        PRICE_LIST_DATE,
-        Row,
-        Truth,
-        answers_for,
-        curve,
-        row,
-        splice,
-        table,
-    )
-    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+    from legible.data.vrdu import read_dataset
+    from legible.report import Truth
+    from legible.schema.corpora import SCHEMAS
 
-    root, raw = data_root(), data_root() / "raw"
+    raw = data_root() / "raw"
     truth: dict[str, Truth] = {}
     for c in ("fara", "deepform"):
         for d in read_dataset(c, raw / "vrdu"):
@@ -384,6 +374,27 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     zip_path, md5s = nist.fetch_sd2(raw / "nist")
     for nd, _ in nist.read_sd2(zip_path, md5s, None):
         truth[nd.doc_id] = Truth(SCHEMAS[nd.corpus], nd.truth, {}, None, 1)
+    return truth
+
+
+@app.command("report")
+def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
+    """Grade every arm's stored test reads and write the README's result tables."""
+    from legible.data.vrdu import headline_split_files, read_split
+    from legible.report import (
+        ARMS,
+        PRICE_LIST_DATE,
+        Row,
+        answers_for,
+        curve,
+        row,
+        splice,
+        table,
+    )
+    from legible.schema.corpora import NIST_SCHEMAS
+
+    root, raw = data_root(), data_root() / "raw"
+    truth = _truths()
 
     e_dir = root / "runs" / "arm-e"
 
@@ -506,6 +517,31 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
             "",
             *curve((0, 2, 4), vcells),
         ]
+    from legible.report import verifier_cell
+
+    fara_files = [f for f in headline_split_files("fara", "unseen") if f.endswith("SD_0.json")]
+    fara_test = sorted({d for f in fara_files for d in read_split("fara", raw / "vrdu" / f).test})
+    fara_rules = [e_dir / "level0" / "fara" / f"{Path(f).stem}-test.jsonl" for f in fara_files]
+    nist_rules = [e_dir / "level0" / "nist" / "test.jsonl"]
+    body += [
+        "**The verifier on test: the share of wrong fields its rules flag, over every field and "
+        "over the fields a rule reads, and the share of right fields flagged** "
+        "(legible/verify_rules.py; each rule kept only where the training truth obeys it on 99% "
+        "of documents, docs/verify-rules.md). FARA has one rule, a registration number's "
+        "digits; NIST the 1988 forms' sums. No rule held for DeepForm's dates or CORD's "
+        "arithmetic, so neither has a verifier.",
+        "",
+        "| Arm | FARA, unseen templates | NIST |",
+        "|---|---|---|",
+    ]
+    for a in ARMS:
+        fa = answers_for(root, a, ["fara"], "test", 0, fara_rules, "fara-unseen")
+        na = answers_for(root, a, nist_faces, "test", 0, nist_rules, "nist")
+        body.append(
+            f"| {a.label} | {verifier_cell(fara_test, truth, fa)} "
+            f"| {verifier_cell(nist_test, truth, na)} |"
+        )
+    body.append("")
     from legible.report import agreed_grades, review_table
     from legible.review import review
 
@@ -1283,3 +1319,53 @@ def serve_config(
 
 def main() -> None:
     app()
+
+
+verify_app = typer.Typer(
+    no_args_is_help=True, help="The verifier's rules (legible/verify_rules.py)."
+)
+app.add_typer(verify_app, name="verify")
+
+
+@verify_app.command("hold")
+def verify_hold(
+    out: Path = typer.Option(Path("docs/verify-rules.md"), help="Where the table is written."),
+) -> None:
+    """How often each rule holds on the training split's own truth. A rule the truth breaks
+    would flag right fields, so a rule is kept only if it holds on 99% of the documents it
+    applies to (a sum with its total filled in, a date or pattern field with a value)."""
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+    from legible.verify import applies, check_rules, flagged
+    from legible.verify_rules import REJECTED, RULES
+
+    truth = _truths()
+    schemas = {**SCHEMAS, **NIST_SCHEMAS}
+    train = (
+        part_docs("fara", "train") | part_docs("deepform", "train") | part_docs("cord", "train")
+    ) | part_docs("nist", "train")
+    lines = [
+        "# The verifier's rules against the training truth",
+        "",
+        "Written by `legible verify hold`; do not edit. Each rule in `legible/verify_rules.py`, "
+        "how many training documents it applies to, and on how many the corpus's own answers "
+        "satisfy it. A rule is kept at 99% or more.",
+        "",
+        "| Corpus | Rule | Applies to | Holds on | Run |",
+        "|---|---|---:|---:|---|",
+    ]
+    measured = [(c, r, "yes") for c, rs in RULES.items() for r in rs] + [
+        (c, r, "no: below 99%") for c, rs in REJECTED.items() for r in rs
+    ]
+    for corpus, rules, kept in [(c, (r,), k) for c, r, k in measured]:
+        schema = schemas[corpus]
+        check_rules(schema, rules)
+        docs = [d for d in sorted(train) if d in truth and truth[d].schema.corpus == corpus]
+        for rule in rules:
+            applying = [d for d in docs if applies(rule, truth[d].record)]
+            holds = sum(1 for d in applying if not flagged(schema, (rule,), truth[d].record))
+            share = f"{100 * holds / len(applying):.1f}%" if applying else "none apply"
+            lines.append(
+                f"| {corpus} | {rule.name} | {len(applying)} | {holds} ({share}) | {kept} |"
+            )
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    typer.echo("\n".join(lines))

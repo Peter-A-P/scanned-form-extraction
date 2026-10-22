@@ -83,3 +83,59 @@ def test_catch_rate_counts_wrong_fields_flagged() -> None:
     assert c.false_alarm_rate.point == pytest.approx(
         2 / 8
     )  # subtotal and tax, right but flagged, of eight right
+
+
+def test_box_amounts_read_as_the_tax_forms_print_them() -> None:
+    from legible.verify import parse_box_amount
+
+    assert parse_box_amount("5140  00") == 5140.0
+    assert parse_box_amount("789  69") == pytest.approx(789.69)
+    assert parse_box_amount("36237  -") == 36237.0
+    assert parse_box_amount("$5019  -") == 5019.0
+    assert parse_box_amount("-2343  14") == pytest.approx(-2343.14)
+    assert parse_box_amount("($884    )") == -884.0
+    assert parse_box_amount("2,978") == 2978.0
+    assert parse_box_amount("12 345") is None  # three digits after a gap are not cents
+    assert parse_box_amount("five") is None
+
+
+def test_a_rule_needing_a_subtotal_says_nothing_without_one() -> None:
+    from legible.verify import applies
+
+    rule = SumRule(
+        name="t",
+        parts=("subtotal_price", "tax_price"),
+        total="total_price",
+        requires=("subtotal_price",),
+    )
+    no_subtotal = {"tax_price": "3.500", "total_price": "99.000"}
+    assert not applies(rule, no_subtotal)
+    assert flagged(RECEIPT, (rule,), no_subtotal) == set()
+    assert flagged(RECEIPT, (rule,), dict(GOOD, total_price="99.000")) == {
+        "subtotal_price",
+        "tax_price",
+        "total_price",
+    }
+
+
+def test_the_catch_rate_where_a_rule_looks_ignores_fields_no_rule_reads() -> None:
+    from legible.verify import read_by
+
+    pred = dict(GOOD, total_price="36.500", menu=[{"nm": "Nasi Gorang", "price": "25.000"}])
+    g = grade_document(RECEIPT, "r", GOOD, pred)
+    flags = {"r": flagged(RECEIPT, RULES[1:], pred)}
+    c = catch_rate([g], flags, reads={"r": read_by(RULES[1:])})
+    # Wrong: total_price (flagged), the misread item name and the missing item (no rule
+    # reads them). Over every field one in three is caught; where the rule looks, all.
+    assert c.reach_catch_rate is not None and c.reach_catch_rate.point == 1.0
+    assert c.catch_rate.point < 1.0
+
+
+def test_every_rule_names_fields_its_corpus_has() -> None:
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+    from legible.verify_rules import REJECTED, RULES
+
+    schemas = {**SCHEMAS, **NIST_SCHEMAS}
+    for table in (RULES, REJECTED):
+        for corpus, rules in table.items():
+            check_rules(schemas[corpus], rules)
