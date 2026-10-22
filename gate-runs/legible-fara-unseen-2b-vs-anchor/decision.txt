@@ -1,0 +1,23 @@
+## Gate: BLOCK
+
+Spec `legible-fara-unseen` (4b078174933e5110).
+
+Baseline `A, Claude Haiku 5.5 on the image`, candidate `B, Gemma 4 E2B fine-tuned on the image`.
+
+| Suite | Paired items | Baseline | Candidate | Difference | Margin | Holm p | Verdict |
+|---|---:|---|---|---|---:|---:|---|
+| file_date | 898 | 79.3% (76.7 to 82.0) | 76.2% (73.4 to 79.0) | -3.0% (-4.8 to -1.2) | -3% | 1.000 | block |
+| foreign_principle_name | 763 | 52.8% (49.3 to 56.5) | 45.9% (42.2 to 49.4) | -6.8% (-11.9 to -1.6) | -3% | 1.000 | block |
+| registrant_name | 898 | 83.4% (81.0 to 85.7) | 66.7% (63.7 to 69.7) | -16.6% (-19.5 to -13.9) | -3% | 1.000 | block |
+| registration_num | 898 | 97.2% (96.1 to 98.2) | 96.3% (95.0 to 97.6) | -0.9% (-2.0 to +0.3) | -3% | 0.007 | pass |
+| signer_name | 882 | 72.3% (69.4 to 75.3) | 58.7% (55.5 to 62.0) | -13.5% (-16.1 to -10.9) | -3% | 1.000 | block |
+| signer_title | 564 | 60.8% (56.9 to 64.9) | 82.4% (79.1 to 85.5) | +21.6% (+16.7 to +27.0) | -3% | 0.000 | pass |
+
+Difference is candidate minus baseline, paired by item, with its 95% bootstrap interval. A suite passes when the whole interval sits above the margin after Holm's adjustment across the decided suites; an under-powered suite warns and is not decided.
+
+**Reasons**
+
+- file_date: cannot rule out a 3% drop: -3.0% (-4.8% to -1.2%) over 898 items, 49 worse and 22 better (p 0.523, Holm 1.000)
+- foreign_principle_name: cannot rule out a 3% drop: -6.8% (-11.9% to -1.6%) over 763 items, 225 worse and 173 better (p 0.927, Holm 1.000)
+- registrant_name: cannot rule out a 3% drop: -16.6% (-19.5% to -13.9%) over 898 items, 171 worse and 22 better (p 1.000, Holm 1.000)
+- signer_name: cannot rule out a 3% drop: -13.5% (-16.1% to -10.9%) over 882 items, 135 worse and 16 better (p 1.000, Holm 1.000)

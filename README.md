@@ -169,6 +169,23 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | C, Gemma 4 E2B untuned on the image | 0.2% (0.1 to 0.4); where a rule looks 16.0% (3.6 to 32.0); false alarms 0.5% (0.3 to 0.8) | 15.1% (12.9 to 17.4); where a rule looks 70.1% (64.8 to 74.8); false alarms 8.3% (6.2 to 10.6) |
 | C, Gemma 4 E4B untuned on the image | 0.4% (0.1 to 0.8); where a rule looks 23.1% (7.7 to 40.9); false alarms 0.4% (0.2 to 0.6) | 13.2% (11.0 to 15.5); where a rule looks 63.4% (57.7 to 68.6); false alarms 6.2% (4.4 to 8.1) |
 
+**Non-inferiority through the 03 gate** (docs/gate.md): the fine-tune with the better dev accuracy against the frontier vision model with the best, and against the cost anchor, one suite per field, one outcome per document, a 3-point margin, Holm's adjustment across the decided fields. A field the test set holds too few documents of to resolve 3 points is under-powered and not decided.
+
+| Corpus | Candidate | Against | Verdict | Fields: pass, block, under-powered | Worst blocking fields (difference, 95% CI) |
+|---|---|---|---|---|---|
+| FARA, unseen templates | B, Gemma 4 E2B fine-tuned on the image | A, Gemini 3.8 Flash on the image | **block** | 0, 6, 0 | `registrant_name` -26.9% (-30.0 to -23.8); `foreign_principle_name` -16.4% (-21.2 to -11.5) |
+| FARA, unseen templates | B, Gemma 4 E2B fine-tuned on the image | A, Claude Haiku 5.5 on the image | **block** | 2, 4, 0 | `registrant_name` -16.6% (-19.5 to -13.9); `signer_name` -13.5% (-16.1 to -10.9) |
+| FARA, mixed templates | B, Gemma 4 E2B fine-tuned on the image | A, Gemini 3.8 Flash on the image | **block** | 1, 4, 1 | `registrant_name` -8.0% (-11.4 to -5.0); `registration_num` -3.0% (-5.0 to -0.7) |
+| FARA, mixed templates | B, Gemma 4 E2B fine-tuned on the image | A, Claude Haiku 5.5 on the image | **block** | 4, 1, 1 | `signer_name` +1.7% (-3.4 to +7.2) |
+| DeepForm, unseen templates | B, Gemma 4 E4B fine-tuned on the image | A, GPT-6.1 Sol on the image | **block** | 0, 10, 4 | `line_item-channel` -32.2% (-41.8 to -22.6); `line_item-sub_amount` -25.0% (-33.6 to -16.4) |
+| DeepForm, unseen templates | B, Gemma 4 E4B fine-tuned on the image | A, Claude Haiku 5.5 on the image | **block** | 0, 9, 5 | `line_item-channel` -29.6% (-38.8 to -19.7); `contract_num` -23.3% (-30.2 to -15.7) |
+| DeepForm, mixed templates | B, Gemma 4 E4B fine-tuned on the image | A, GPT-6.1 Sol on the image | **block** | 1, 13, 0 | `line_item-channel` -32.8% (-39.6 to -26.1); `contract_num` -27.9% (-33.8 to -22.1) |
+| DeepForm, mixed templates | B, Gemma 4 E4B fine-tuned on the image | A, Claude Haiku 5.5 on the image | **block** | 1, 13, 0 | `line_item-channel` -30.5% (-37.3 to -23.7); `contract_num` -27.1% (-33.1 to -21.4) |
+| CORD | B, Gemma 4 E4B fine-tuned on the image | A, Gemini 3.8 Flash on the image | no decision: every field under-powered at 3 points | 0, 0, 30 | none |
+| CORD | B, Gemma 4 E4B fine-tuned on the image | A, Claude Haiku 5.5 on the image | no decision: every field under-powered at 3 points | 0, 0, 30 | none |
+| NIST | B, Gemma 4 E4B fine-tuned on the image | A, GPT-6.1 Sol on the image | no decision: every field under-powered at 3 points | 0, 0, 1113 | none |
+| NIST | B, Gemma 4 E4B fine-tuned on the image | A, Claude Haiku 5.5 on the image | no decision: every field under-powered at 3 points | 0, 0, 1113 | none |
+
 **Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the OCR text.** A field is accepted when the two reads agree; the threshold is chosen on dev and applied once to test (legible/review.py, legible/agreement.py).
 
 | Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | Reached 99% on dev |

@@ -20,6 +20,7 @@ The tables:
 from __future__ import annotations
 
 import datetime as dt
+import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -323,6 +324,72 @@ def verifier_cell(
     )
 
 
+@dataclass(frozen=True)
+class GateResult:
+    """One gate decision as `gate compare` wrote it (`gate-runs/<name>/decision.txt`)."""
+
+    name: str
+    verdict: str
+    baseline: str
+    candidate: str
+    #: Suite verdicts: pass, block or warn (under-powered, not decided).
+    counts: Mapping[str, int]
+    #: The blocking suites, worst first: (suite, difference with its interval).
+    blocks: Sequence[tuple[str, str]]
+
+
+_GATE_SIDES = re.compile(r"Baseline `(?P<b>[^`]+)`, candidate `(?P<c>[^`]+)`")
+
+
+def read_gate(path: Path) -> GateResult:
+    """Parse a decision the gate wrote. The gate's report is the record; this only reads it."""
+    text = path.read_text(encoding="utf-8")
+    head = re.search(r"^## Gate: (\w+)", text, re.MULTILINE)
+    sides = _GATE_SIDES.search(text)
+    if head is None or sides is None:
+        raise ValueError(f"{path} is not a gate decision")
+    counts: dict[str, int] = {}
+    blocks: list[tuple[float, str, str]] = []
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) != 8 or cells[0] in {"Suite", "---"} or cells[0].startswith("---"):
+            continue
+        verdict = cells[7]
+        counts[verdict] = counts.get(verdict, 0) + 1
+        if verdict == "block":
+            m = re.match(r"([+-]?[\d.]+)%", cells[4])
+            blocks.append((float(m.group(1)) if m else 0.0, cells[0], cells[4]))
+    blocks.sort()
+    return GateResult(
+        name=path.parent.name,
+        verdict=head.group(1),
+        baseline=sides.group("b"),
+        candidate=sides.group("c"),
+        counts=counts,
+        blocks=[(s, d) for _, s, d in blocks],
+    )
+
+
+def gate_table(results: Sequence[GateResult], corpus_label: Mapping[str, str]) -> list[str]:
+    """The README's gate table: a pass with no suite decided says so rather than "pass"."""
+    out = [
+        "| Corpus | Candidate | Against | Verdict | Fields: pass, block, under-powered | "
+        "Worst blocking fields (difference, 95% CI) |",
+        "|---|---|---|---|---|---|",
+    ]
+    for r in results:
+        decided = r.counts.get("pass", 0) + r.counts.get("block", 0)
+        if r.verdict == "PASS" and decided == 0:
+            verdict = "no decision: every field under-powered at 3 points"
+        else:
+            verdict = f"**{r.verdict.lower()}**"
+        worst = "; ".join(f"`{s}` {d}" for s, d in r.blocks[:2]) or "none"
+        corpus = next((v for k, v in corpus_label.items() if r.name.startswith(k)), r.name)
+        counts = f"{r.counts.get('pass', 0)}, {r.counts.get('block', 0)}, {r.counts.get('warn', 0)}"
+        out.append(f"| {corpus} | {r.candidate} | {r.baseline} | {verdict} | {counts} | {worst} |")
+    return [*out, ""]
+
+
 def splice(readme: str, body: Sequence[str]) -> str:
     """The README with the text between the result markers replaced."""
     if START not in readme or END not in readme:
@@ -342,6 +409,27 @@ def run_dirs(root: Path, arm: Arm, corpora: Sequence[str], part: str, level: int
     ]
 
 
+def arm_dirs(
+    root: Path, arm: Arm, corpora: Sequence[str], part: str, level: int, table: str = ""
+) -> list[Path]:
+    """The run directories an arm's reads of some corpora live in (not arm E's, whose
+    answers are rules files). Arm B's are the models trained for the table's split."""
+    if arm.arm in {"b", "c"}:
+        from legible.train.recipe import chosen
+
+        routes = (
+            [chosen(arm.size, ds).run_id for ds in TABLE_SETS.get(table, ())]  # type: ignore[arg-type]
+            if arm.arm == "b"
+            else [str(arm.route)]
+        )
+        return [
+            root / "runs" / f"arm-{arm.arm}" / r / "p1" / f"level{level}" / c / part
+            for r in routes
+            for c in corpora
+        ]
+    return run_dirs(root, arm, corpora, part, level)
+
+
 def answers_for(
     root: Path,
     arm: Arm,
@@ -357,22 +445,11 @@ def answers_for(
     ocr = rules_answers(rules_files)
     if arm.arm == "e":
         return ocr if ocr.outputs else None
+    dirs = arm_dirs(root, arm, corpora, part, level, table)
     if arm.arm in {"b", "c"}:
-        from legible.train.recipe import chosen
-
-        routes = (
-            [chosen(arm.size, ds).run_id for ds in TABLE_SETS.get(table, ())]  # type: ignore[arg-type]
-            if arm.arm == "b"
-            else [str(arm.route)]
-        )
-        dirs = [
-            root / "runs" / f"arm-{arm.arm}" / r / "p1" / f"level{level}" / c / part
-            for r in routes
-            for c in corpora
-        ]
         found = selfhosted_answers(dirs)
         return found if found.outputs else None
-    found = frontier_answers(run_dirs(root, arm, corpora, part, level))
+    found = frontier_answers(dirs)
     if not found.outputs:
         return None
     return with_ocr_cost(found, ocr.ocr_seconds) if arm.arm == "d" else found

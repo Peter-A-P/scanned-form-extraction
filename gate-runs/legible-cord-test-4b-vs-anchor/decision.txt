@@ -1,0 +1,45 @@
+## Gate: PASS
+
+Spec `legible-cord-test` (85c4886cf43e965c).
+
+Baseline `A, Claude Haiku 5.5 on the image`, candidate `B, Gemma 4 E4B fine-tuned on the image`.
+
+| Suite | Paired items | Baseline | Candidate | Difference | Margin | Holm p | Verdict |
+|---|---:|---|---|---|---:|---:|---|
+| menu-nm | 100 | 73.0% (64.0 to 82.0) | 72.0% (63.0 to 81.0) | -1.0% (-10.0 to +9.0) | -3% | not decided | warn |
+| menu-num | 12 | 58.3% (33.3 to 83.3) | 75.0% (50.0 to 100.0) | +16.7% (-25.0 to +58.3) | -3% | not decided | warn |
+| menu-unitprice | 44 | 79.5% (68.2 to 90.9) | 75.0% (61.4 to 86.4) | -4.5% (-18.2 to +9.1) | -3% | not decided | warn |
+| menu-cnt | 90 | 86.7% (80.0 to 93.3) | 83.3% (75.6 to 91.1) | -3.3% (-11.1 to +4.4) | -3% | not decided | warn |
+| menu-discountprice | 8 | 37.5% (12.5 to 75.0) | 12.5% (0.0 to 37.5) | -25.0% (-75.0 to +25.0) | -3% | not decided | warn |
+| menu-price | 100 | 91.0% (85.0 to 96.0) | 81.0% (73.0 to 88.0) | -10.0% (-17.0 to -4.0) | -3% | not decided | warn |
+| menu-itemsubtotal | 5 | 0.0% (0.0 to 38.2) | 40.0% (0.0 to 80.0) | +40.0% (-40.0 to +80.0) | -3% | not decided | warn |
+| menu-vatyn | 1 | 0.0% (0.0 to 85.5) | 100.0% (14.2 to 100.0) | +100.0% (-100.0 to +100.0) | -3% | not decided | warn |
+| menu-etc | 14 | 7.1% (0.0 to 21.4) | 85.7% (64.3 to 100.0) | +78.6% (+42.9 to +100.0) | -3% | not decided | warn |
+| sub_item-nm | 17 | 35.3% (11.8 to 58.8) | 5.9% (0.0 to 17.6) | -29.4% (-58.8 to -5.9) | -3% | not decided | warn |
+| sub_item-unitprice | 0 | n/a | n/a | n/a | -3% | not decided | warn |
+| sub_item-cnt | 8 | 62.5% (25.0 to 87.5) | 0.0% (0.0 to 26.7) | -62.5% (-87.5 to +0.0) | -3% | not decided | warn |
+| sub_item-price | 12 | 50.0% (25.0 to 75.0) | 8.3% (0.0 to 25.0) | -41.7% (-75.0 to -8.3) | -3% | not decided | warn |
+| sub_item-etc | 2 | 0.0% (0.0 to 67.2) | 100.0% (32.8 to 100.0) | +100.0% (-100.0 to +100.0) | -3% | not decided | warn |
+| void_menu-nm | 0 | n/a | n/a | n/a | -3% | not decided | warn |
+| void_menu-price | 0 | n/a | n/a | n/a | -3% | not decided | warn |
+| subtotal_price | 67 | 89.6% (82.1 to 95.5) | 85.1% (76.1 to 92.5) | -4.5% (-13.4 to +4.5) | -3% | not decided | warn |
+| discount_price | 8 | 75.0% (37.5 to 100.0) | 75.0% (37.5 to 100.0) | +0.0% (-37.5 to +37.5) | -3% | not decided | warn |
+| service_price | 12 | 100.0% (81.2 to 100.0) | 91.7% (75.0 to 100.0) | -8.3% (-25.0 to +16.7) | -3% | not decided | warn |
+| othersvc_price | 1 | 0.0% (0.0 to 85.5) | 100.0% (14.2 to 100.0) | +100.0% (-100.0 to +100.0) | -3% | not decided | warn |
+| tax_price | 43 | 90.7% (81.4 to 97.7) | 81.4% (69.8 to 93.0) | -9.3% (-20.9 to +0.0) | -3% | not decided | warn |
+| subtotal_etc | 24 | 0.0% (0.0 to 9.9) | 70.8% (50.0 to 87.5) | +70.8% (+41.7 to +87.5) | -3% | not decided | warn |
+| total_price | 99 | 94.9% (89.9 to 99.0) | 92.9% (87.9 to 97.0) | -2.0% (-8.1 to +4.0) | -3% | not decided | warn |
+| total_etc | 23 | 0.0% (0.0 to 10.3) | 82.6% (65.2 to 95.7) | +82.6% (+52.2 to +95.7) | -3% | not decided | warn |
+| cashprice | 67 | 95.5% (89.6 to 100.0) | 98.5% (95.5 to 100.0) | +3.0% (-3.0 to +7.5) | -3% | not decided | warn |
+| changeprice | 57 | 98.2% (94.7 to 100.0) | 93.0% (86.0 to 98.2) | -5.3% (-10.5 to +1.8) | -3% | not decided | warn |
+| creditcardprice | 16 | 81.2% (62.5 to 100.0) | 87.5% (68.8 to 100.0) | +6.2% (-18.8 to +31.2) | -3% | not decided | warn |
+| emoneyprice | 5 | 80.0% (40.0 to 100.0) | 0.0% (0.0 to 38.2) | -80.0% (-100.0 to -20.0) | -3% | not decided | warn |
+| menutype_cnt | 22 | 27.3% (9.1 to 45.5) | 68.2% (45.5 to 86.4) | +40.9% (+4.5 to +72.7) | -3% | not decided | warn |
+| menuqty_cnt | 38 | 65.8% (50.0 to 81.6) | 65.8% (50.0 to 81.6) | +0.0% (-23.7 to +23.7) | -3% | not decided | warn |
+
+Difference is candidate minus baseline, paired by item, with its 95% bootstrap interval. A suite passes when the whole interval sits above the margin after Holm's adjustment across the decided suites; an under-powered suite warns and is not decided.
+
+**Reasons**
+
+- pass: 0 of 30 suites decided, none inferior
+- under-powered, not decided: menu-nm, menu-num, menu-unitprice, menu-cnt, menu-discountprice, menu-price, menu-itemsubtotal, menu-vatyn, menu-etc, sub_item-nm, sub_item-unitprice, sub_item-cnt, sub_item-price, sub_item-etc, void_menu-nm, void_menu-price, subtotal_price, discount_price, service_price, othersvc_price, tax_price, subtotal_etc, total_price, total_etc, cashprice, changeprice, creditcardprice, emoneyprice, menutype_cnt, menuqty_cnt

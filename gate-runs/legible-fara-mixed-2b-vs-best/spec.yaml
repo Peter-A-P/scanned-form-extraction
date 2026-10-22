@@ -1,0 +1,32 @@
+# The 03 gate's spec for fara mixed: B, Gemma 4 E2B fine-tuned on the image against A, Gemini 3.8 Flash on the image, the best on dev. Written by `legible gate export`; do not edit.
+version: 1
+name: legible-fara-mixed
+delta_points: 3.0
+alpha: 0.05
+resamples: 2000
+seed: 0
+suites:
+- key: file_date
+  source:
+    kind: outcomes_file
+    block: file_date
+- key: foreign_principle_name
+  source:
+    kind: outcomes_file
+    block: foreign_principle_name
+- key: registrant_name
+  source:
+    kind: outcomes_file
+    block: registrant_name
+- key: registration_num
+  source:
+    kind: outcomes_file
+    block: registration_num
+- key: signer_name
+  source:
+    kind: outcomes_file
+    block: signer_name
+- key: signer_title
+  source:
+    kind: outcomes_file
+    block: signer_title

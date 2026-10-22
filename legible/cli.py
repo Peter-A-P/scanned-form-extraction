@@ -542,6 +542,40 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
             f"| {verifier_cell(nist_test, truth, na)} |"
         )
     body.append("")
+    from legible.report import gate_table, read_gate
+
+    gate_dir = Path("gate-runs")
+    order = [f"legible-{c}-{lv}" for c, levels in GATE_RUNS.items() for lv in levels]
+    decisions = sorted(
+        (read_gate(p) for p in gate_dir.glob("*/decision.txt")),
+        key=lambda r: (
+            next((i for i, o in enumerate(order) if r.name.startswith(o + "-")), 99),
+            r.name.endswith("anchor"),
+        ),
+    )
+    body += [
+        "**Non-inferiority through the 03 gate** (docs/gate.md): the fine-tune with the better "
+        "dev accuracy against the frontier vision model with the best, and against the cost "
+        "anchor, one suite per field, one outcome per document, a 3-point margin, Holm's "
+        "adjustment across the decided fields. A field the test set holds too few documents of "
+        "to resolve 3 points is under-powered and not decided.",
+        "",
+        *(
+            gate_table(
+                decisions,
+                {
+                    "legible-fara-unseen": "FARA, unseen templates",
+                    "legible-fara-mixed": "FARA, mixed templates",
+                    "legible-deepform-unseen": "DeepForm, unseen templates",
+                    "legible-deepform-mixed": "DeepForm, mixed templates",
+                    "legible-cord-test": "CORD",
+                    "legible-nist-test": "NIST",
+                },
+            )
+            if decisions
+            else ["Not yet run.", ""]
+        ),
+    ]
     from legible.report import agreed_grades, review_table
     from legible.review import review
 
@@ -711,6 +745,167 @@ def gate_specs(
             )
             (out / f"{name}.yaml").write_text(header + body, encoding="utf-8", newline="\n")
             typer.echo(f"{name}: {len(spec(schema, name=name)['suites'])} suites")
+
+
+def _gate_parts(corpus: str, level: str) -> tuple[list[str], str, list[str], list[str]]:
+    """(corpora read, the report's table key, dev documents, test documents) for one gate
+    comparison. NIST's twenty faces are read as twenty corpora and gated as one."""
+    from legible.data.vrdu import headline_split_files, read_split
+    from legible.schema.corpora import NIST_SCHEMAS
+
+    if corpus == "nist":
+        return (
+            sorted(NIST_SCHEMAS),
+            "nist",
+            sorted(part_docs("nist", "dev")),
+            sorted(part_docs("nist", "test")),
+        )
+    if corpus == "cord":
+        return ["cord"], "cord", sorted(part_docs("cord", "dev")), sorted(part_docs("cord", "test"))
+    raw = data_root() / "raw" / "vrdu"
+    files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+    splits = [read_split(corpus, raw / f) for f in files]  # type: ignore[arg-type]
+    return (
+        [corpus],
+        f"{corpus}-{level}",
+        sorted({d for sp in splits for d in sp.valid}),
+        sorted({d for sp in splits for d in sp.test}),
+    )
+
+
+#: Every comparison the gate decides, NIST's twenty faces as one.
+GATE_RUNS: dict[str, tuple[str, ...]] = {**GATE_LEVELS, "nist": ("test",)}
+
+
+@gate_app.command("export")
+def gate_export(
+    out: Path = typer.Option(Path("gate-runs"), help="One directory per comparison under it."),
+) -> None:
+    """Write the gate's spec and both sides for every corpus: the fine-tune and the frontier
+    vision model with the best field accuracy on dev, the fine-tune also against the cost
+    anchor. Run the gate on each directory afterwards (docs/gate.md)."""
+    import json
+    import statistics
+
+    import yaml
+
+    from legible.arms.frontier import Read, RunDir
+    from legible.gate import SideMeta, export, spec, spec_name, suite_key
+    from legible.grade import DocGrade, grade_document, summarise
+    from legible.report import ARMS, Arm, answers_for, arm_dirs
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+
+    root = data_root()
+    truth = _truths()
+    schemas = {**SCHEMAS, **NIST_SCHEMAS}
+    frontier = [a for a in ARMS if a.arm == "a"]
+    tuned = [a for a in ARMS if a.arm == "b"]
+    anchor = next(a for a in ARMS if a.route == "anchor")
+
+    def side(
+        arm: Arm, corpora: list[str], table: str, part: str, docs: list[str]
+    ) -> tuple[dict[str, list[DocGrade]], dict[str, list[str]], SideMeta]:
+        """Grades and failed documents per corpus, and what the side cost."""
+        answers = answers_for(root, arm, corpora, part, 0, [], table)
+        reads: dict[str, Read] = {}
+        dirs = arm_dirs(root, arm, corpora, part, 0, table)
+        for d in dirs:
+            if (d / "run.json").exists():
+                reads.update(RunDir(d).reads())
+        grades: dict[str, list[DocGrade]] = {}
+        failed: dict[str, list[str]] = {}
+        for doc in docs:
+            c = truth[doc].schema.corpus
+            r = reads.get(doc)
+            if r is None or r.text is None or answers is None or doc not in answers.outputs:
+                failed.setdefault(c, []).append(doc)
+                continue
+            grades.setdefault(c, []).append(
+                grade_document(
+                    truth[doc].schema,
+                    doc,
+                    truth[doc].record,
+                    answers.outputs[doc],
+                    page_text=truth[doc].text,
+                    alternatives=truth[doc].alternatives,
+                )
+            )
+        latencies = [r.latency_ms for r in reads.values() if r.latency_ms is not None]
+        cost = sum((answers.usd.get(d, 0.0) for d in docs), 0.0) if answers else 0.0
+        meta = SideMeta(
+            label=arm.label,
+            run_id=f"{arm.arm}-{arm.route or arm.size}-{table}-{part}",
+            directory=str(dirs[0].parent.parent.relative_to(root).as_posix()) if dirs else "",
+            calls=sum(1 for d in docs if d in reads),
+            # A batch read's latency is the batch's, not the page's (docs/models.md).
+            latency_p50_ms=statistics.median(latencies) if latencies and arm.arm != "a" else 0.0,
+            cost_usd=round(cost, 4),
+            uncosted_calls=0,
+        )
+        return grades, failed, meta
+
+    def dev_accuracy(arm: Arm, corpora: list[str], table: str, dev: list[str]) -> float:
+        grades, _, _ = side(arm, corpora, table, "dev", dev)
+        flat = [g for gs in grades.values() for g in gs]
+        return summarise(flat).accuracy.point if flat else -1.0
+
+    for corpus, levels in GATE_RUNS.items():
+        for level in levels:
+            corpora, table, dev, test = _gate_parts(corpus, level)
+            best_a = max(frontier, key=lambda a: dev_accuracy(a, corpora, table, dev))
+            best_b = max(tuned, key=lambda a: dev_accuracy(a, corpora, table, dev))
+            baselines = [best_a] if best_a == anchor else [best_a, anchor]
+            name = (
+                f"legible-nist-{level}" if corpus == "nist" else spec_name(schemas[corpus], level)
+            )
+            for base in baselines:
+                b_grades, b_failed, b_meta = side(base, corpora, table, "test", test)
+                c_grades, c_failed, c_meta = side(best_b, corpora, table, "test", test)
+                faces = sorted(set(b_grades) | set(c_grades) | set(b_failed) | set(c_failed))
+                suites: list[dict[str, object]] = []
+                sides: tuple[dict[str, object], dict[str, object]] = ({}, {})
+                for face in faces:
+                    s, sb, sc = export(
+                        schemas[face],
+                        b_grades.get(face, []),
+                        c_grades.get(face, []),
+                        baseline_meta=b_meta,
+                        candidate_meta=c_meta,
+                        baseline_failed=b_failed.get(face, []),
+                        candidate_failed=c_failed.get(face, []),
+                        name=name,
+                    )
+                    # NIST's faces share line numbers, so each face's suites carry its name.
+                    prefix = f"{suite_key(face)}-" if corpus == "nist" else ""
+                    for su in s["suites"]:
+                        k = prefix + su["key"]
+                        suites.append({"key": k, "source": {"kind": "outcomes_file", "block": k}})
+                    for target, got in zip(sides, (sb, sc), strict=True):
+                        target.setdefault("label", got["label"])
+                        target.setdefault("source", got["source"])
+                        merged = target.setdefault("suites", {})
+                        assert isinstance(merged, dict)
+                        for k, v in got["suites"].items():
+                            merged[prefix + k] = {**v, "suite": prefix + k}
+                body = spec(schemas[faces[0]], name=name)
+                body["suites"] = suites
+                d = out / f"{name}-{best_b.size}-vs-{'anchor' if base == anchor else 'best'}"
+                d.mkdir(parents=True, exist_ok=True)
+                header = (
+                    f"# The 03 gate's spec for {corpus} {level}: {best_b.label} against "
+                    f"{base.label}, the best on dev. Written by `legible gate export`; do not "
+                    "edit.\n"
+                )
+                (d / "spec.yaml").write_text(
+                    header + yaml.safe_dump(body, sort_keys=False), encoding="utf-8", newline="\n"
+                )
+                for fname, content in zip(("baseline.json", "candidate.json"), sides, strict=True):
+                    (d / fname).write_text(
+                        json.dumps(content, indent=1, sort_keys=True) + "\n",
+                        encoding="utf-8",
+                        newline="\n",
+                    )
+                typer.echo(f"{d}: {best_b.label} against {base.label}, {len(suites)} suites")
 
 
 ocr_app = typer.Typer(no_args_is_help=True, help="Tesseract over a corpus's pages.")

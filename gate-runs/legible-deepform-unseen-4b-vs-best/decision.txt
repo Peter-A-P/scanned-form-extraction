@@ -1,0 +1,38 @@
+## Gate: BLOCK
+
+Spec `legible-deepform-unseen` (8b6dfafddcac9c8d).
+
+Baseline `A, GPT-6.1 Sol on the image`, candidate `B, Gemma 4 E4B fine-tuned on the image`.
+
+| Suite | Paired items | Baseline | Candidate | Difference | Margin | Holm p | Verdict |
+|---|---:|---|---|---|---:|---:|---|
+| advertiser | 153 | 94.1% (90.2 to 97.4) | 81.1% (74.8 to 86.8) | -13.7% (-20.3 to -7.2) | -3% | 1.000 | block |
+| agency | 150 | 40.7% (32.7 to 48.7) | 85.5% (79.6 to 90.8) | +44.7% (+33.3 to +56.0) | -3% | not decided | warn |
+| contract_num | 153 | 96.1% (92.8 to 98.7) | 71.7% (64.2 to 78.6) | -24.8% (-32.0 to -17.6) | -3% | 1.000 | block |
+| flight_from | 153 | 73.9% (66.7 to 80.4) | 64.8% (57.2 to 72.3) | -9.8% (-16.3 to -2.6) | -3% | 1.000 | block |
+| flight_to | 153 | 73.9% (66.7 to 80.4) | 68.6% (61.0 to 75.5) | -5.9% (-12.4 to +0.7) | -3% | 1.000 | block |
+| gross_amount | 153 | 97.4% (94.1 to 99.3) | 83.6% (78.0 to 89.3) | -14.4% (-20.3 to -8.5) | -3% | 1.000 | block |
+| product | 151 | 93.4% (89.4 to 97.4) | 80.3% (73.9 to 86.0) | -13.9% (-19.9 to -7.9) | -3% | 1.000 | block |
+| property | 153 | 86.3% (80.4 to 91.5) | 69.2% (61.6 to 76.1) | -17.6% (-24.8 to -11.1) | -3% | 1.000 | block |
+| tv_address | 146 | 83.6% (77.4 to 89.0) | 60.9% (53.0 to 68.9) | -23.3% (-31.5 to -15.1) | -3% | 1.000 | block |
+| line_item-channel | 146 | 67.1% (58.9 to 74.7) | 35.5% (28.3 to 43.4) | -32.2% (-41.8 to -22.6) | -3% | 1.000 | block |
+| line_item-program_desc | 153 | 36.6% (28.8 to 44.4) | 26.4% (19.5 to 34.0) | -9.8% (-17.0 to -3.3) | -3% | not decided | warn |
+| line_item-program_start_date | 153 | 45.1% (37.3 to 52.9) | 27.7% (20.8 to 35.2) | -18.3% (-25.5 to -11.8) | -3% | not decided | warn |
+| line_item-program_end_date | 144 | 50.0% (41.7 to 58.3) | 26.0% (19.3 to 33.3) | -24.3% (-31.9 to -16.0) | -3% | not decided | warn |
+| line_item-sub_amount | 152 | 63.8% (55.9 to 71.7) | 38.0% (30.4 to 45.6) | -25.0% (-33.6 to -16.4) | -3% | 1.000 | block |
+
+Difference is candidate minus baseline, paired by item, with its 95% bootstrap interval. A suite passes when the whole interval sits above the margin after Holm's adjustment across the decided suites; an under-powered suite warns and is not decided.
+
+**Reasons**
+
+- advertiser: cannot rule out a 3% drop: -13.7% (-20.3% to -7.2%) over 153 items, 24 worse and 3 better (p 1.000, Holm 1.000)
+- contract_num: cannot rule out a 3% drop: -24.8% (-32.0% to -17.6%) over 153 items, 40 worse and 2 better (p 1.000, Holm 1.000)
+- flight_from: cannot rule out a 3% drop: -9.8% (-16.3% to -2.6%) over 153 items, 22 worse and 7 better (p 0.974, Holm 1.000)
+- flight_to: cannot rule out a 3% drop: -5.9% (-12.4% to +0.7%) over 153 items, 16 worse and 7 better (p 0.827, Holm 1.000)
+- gross_amount: cannot rule out a 3% drop: -14.4% (-20.3% to -8.5%) over 153 items, 24 worse and 2 better (p 1.000, Holm 1.000)
+- product: cannot rule out a 3% drop: -13.9% (-19.9% to -7.9%) over 151 items, 23 worse and 2 better (p 1.000, Holm 1.000)
+- property: cannot rule out a 3% drop: -17.6% (-24.8% to -11.1%) over 153 items, 31 worse and 4 better (p 1.000, Holm 1.000)
+- tv_address: cannot rule out a 3% drop: -23.3% (-31.5% to -15.1%) over 146 items, 40 worse and 6 better (p 1.000, Holm 1.000)
+- line_item-channel: cannot rule out a 3% drop: -32.2% (-41.8% to -22.6%) over 146 items, 58 worse and 11 better (p 1.000, Holm 1.000)
+- line_item-sub_amount: cannot rule out a 3% drop: -25.0% (-33.6% to -16.4%) over 152 items, 46 worse and 8 better (p 1.000, Holm 1.000)
+- under-powered, not decided: agency, line_item-program_desc, line_item-program_start_date, line_item-program_end_date
