@@ -4,7 +4,7 @@ This repository is Forms That Read Themselves, package `legible`: measuring
 how well a frontier vision model, a fine-tuned small vision model, OCR with rules and OCR text
 with a language model read scanned forms, on three public corpora with known answers, and what
 each costs a thousand pages. The plan is in [PLAN.md](PLAN.md); the diagrams in
-[docs/architecture.md](docs/architecture.md). Status: building since 2026-10-16; nothing measured yet.
+[docs/architecture.md](docs/architecture.md). Status: building since 2026-10-16; every arm measured on every test set, the NIST curve and the repeat, VRDU-curve and ceiling subsets still reading (2026-10-22).
 
 ## Read first
 

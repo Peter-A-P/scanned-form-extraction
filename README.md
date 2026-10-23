@@ -14,6 +14,39 @@ wrong with confidence intervals, what each approach costs per thousand pages, ho
 a form design it has never seen and on a bad scan, and the number a director wants: at 99
 percent accuracy, how many fields still need a person.
 
+## What it found
+
+- **The frontier vision models read best, everywhere.** On form designs never seen in
+  training, Gemini 3.8 Flash gets 80.6% of FARA's fields right and GPT-6.1 Sol 71.4% of
+  DeepForm's; on receipts GPT-6.1 Sol gets 88.1%, and on the printed tax forms 94.9%.
+- **The fine-tuned 2B and 4B cost a twenty-fifth to a fiftieth as much per page and read 10 to
+  21 points worse.** On FARA's unseen templates the 2B gets 69.0% at US$0.06 a thousand pages,
+  against Sonnet 5.5's 78.8% at US$2.96. Project 03's gate blocks them on FARA and DeepForm,
+  and cannot decide on CORD or NIST, where too few documents hold each field.
+- **The fine-tunes are the ones a new form design hurts.** On FARA templates it saw in
+  training the 2B gets 75.7%; on templates it did not, 69.0%. Sonnet 5.5 gets 74.2% and 78.8%:
+  no worse on the unseen ones.
+- **A bad scan barely moves a vision model and breaks the OCR pipelines.** On NIST's curve
+  pages Sonnet 5.5 reads 87.9% at level 0 and 87.0% at level 3; Sonnet on the OCR text of the
+  same pages falls from 37.4% to 4.5%, and OCR plus rules from 16.2% to 2.3%.
+- **The cheapest frontier model is close on clean, printed forms.** Claude Haiku 5.5 reads
+  84.5% of the tax forms' fields against Sonnet's 86.7%, at US$1.12 a thousand pages against
+  US$16.38.
+
+## The honest limitation
+
+The number a director wants is the one this cannot give yet: **at 99% accuracy, every field
+still goes to a person**, for every arm on every corpus. Neither confidence tried separates
+right fields from wrong ones well enough. The frontier arm's, whether its image read and its
+OCR-text read agree, is right less than 99% of the time even where they agree; the fine-tune's
+own token probability is confidently wrong ([docs/rejected.md](docs/rejected.md)). So the
+tables say how much typing each pipeline saves a checker, not how much of the checking it
+replaces. Beside that: the corpora are public and old (FARA registrations from the 1960s on,
+NIST's synthesised 1988 tax forms); CORD's 100 receipts and NIST's 500 pages spread over twenty
+form faces are too few for the gate to decide field by field at three points; and the review
+rate's fine-tuned rows come from a second read of the test sets, with log-probabilities,
+decided after the first (PLAN.md 2.6).
+
 ## Result
 
 <!-- results:start -->
@@ -115,7 +148,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 |---|---|---|---|---|---|
 | A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) | 86.9% (84.8 to 88.9) | 86.5% (84.1 to 88.8) | 87.0% (84.9 to 89.0) |  |
 | A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) | 85.8% (83.7 to 87.7) | 84.7% (82.4 to 86.9) | 84.5% (82.1 to 86.7) |  |
-| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 92.9% (88.2 to 97.6) |  |
+| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 96.8% (95.3 to 98.1) |  |
 | A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) | 76.8% (71.5 to 82.0) | 80.9% (76.0 to 85.6) | 77.2% (71.8 to 82.2) |  |
 | D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) | 10.4% (8.9 to 11.9) | 8.3% (7.0 to 9.7) | 4.5% (3.7 to 5.4) |  |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
@@ -215,6 +248,12 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
 <!-- results:end -->
+
+## Tried and rejected
+
+Two approaches the plan relied on were measured and dropped: the fine-tune's own token
+probability as the signal for what a person must check, and holding the fine-tunes to the
+schema's grammar. The evidence is in [docs/rejected.md](docs/rejected.md).
 
 ## What this does not do
 
