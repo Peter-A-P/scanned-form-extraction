@@ -20,8 +20,9 @@ percent accuracy, how many fields still need a person.
   training, Gemini 3.8 Flash gets 80.6% of FARA's fields right and GPT-6.1 Sol 71.4% of
   DeepForm's; on receipts GPT-6.1 Sol gets 88.1%, and on the printed tax forms 94.9%.
 - **The fine-tuned 2B and 4B cost a twenty-fifth to a fiftieth as much per page and read 10 to
-  21 points worse.** On FARA's unseen templates the 2B gets 69.0% at US$0.06 a thousand pages,
-  against Sonnet 5.5's 78.8% at US$2.96. Project 03's gate blocks them on FARA and DeepForm,
+  21 points worse than the best frontier model on each corpus.** On FARA's unseen templates
+  the 2B gets 69.0% at US$0.06 a thousand pages, against Gemini's 80.6% at US$1.65 and Sonnet
+  5.5's 78.8% at US$2.96. Project 03's gate blocks them on FARA and DeepForm,
   and cannot decide on CORD or NIST, where too few documents hold each field.
 - **The fine-tunes are the ones a new form design hurts.** On FARA templates it saw in
   training the 2B gets 75.7%; on templates it did not, 69.0%. Sonnet 5.5 gets 74.2% and 78.8%:
