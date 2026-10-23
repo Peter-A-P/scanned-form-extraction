@@ -1085,6 +1085,7 @@ def _read_run(
     config: Path = GATEWAY_CONFIG,
     split: str | None = None,
     logprobs: bool = False,
+    require: bool = True,
 ) -> tuple[RunSpec, Prompt, list[str], Path]:
     from legible.arms.read_run import (
         RunSpec,
@@ -1130,7 +1131,8 @@ def _read_run(
         sp = read_split(corpus, split_path / f"{split}.json")  # type: ignore[arg-type]
         dev = sorted(set(dev) & set(sp.valid))
         docs = sorted(set(docs) & set(sp.valid if part == "dev" else sp.test))
-    require_dev(data_root(), spec, dev, prompt)
+    if require:
+        require_dev(data_root(), spec, dev, prompt)
     return spec, prompt, docs, run_dir(data_root(), spec)
 
 
@@ -1469,6 +1471,11 @@ def serve_reads(
     and test documents, and the seed-0 unseen-template model its test documents in the VRDU
     curve subset at levels 2 and 4; CORD's its test set; NIST's the twenty faces' dev, test
     and curve."""
+    typer.echo("\n".join(_owed_reads(dataset)))
+
+
+def _owed_reads(dataset: str) -> list[str]:
+    """`serve reads`, as a list."""
     from legible.data.vrdu import headline_split_files, read_split
 
     lines: list[str] = []
@@ -1493,7 +1500,7 @@ def serve_reads(
         lines += [f"{c} - curve {lv}" for lv in (1, 2, 3, 4) for c in faces]
     if not lines:
         raise typer.BadParameter(f"no reads known for {dataset}")
-    typer.echo("\n".join(lines))
+    return lines
 
 
 @serve_app.command("config")
@@ -1510,6 +1517,89 @@ def serve_config(
     base = yaml.safe_load(GATEWAY_CONFIG.read_text(encoding="utf-8"))
     out.write_text(yaml.safe_dump(gateway_config(base, served_name, port)), encoding="utf-8")
     typer.echo(f"{out}: route {served_name}")
+
+
+bench_app = typer.Typer(
+    no_args_is_help=True, help="The load test of a served model: latency and throughput."
+)
+app.add_typer(bench_app, name="bench")
+
+
+@bench_app.command("run")
+def bench_run(
+    model: str = typer.Argument(..., help="The served route: a fine-tune's run id."),
+    gpu: str = typer.Option(..., help="The card, as the provider names it."),
+    usd_per_hour: float = typer.Option(..., help="The rate the provider returned for the pod."),
+    checked: str = typer.Option(..., help="The date that rate was read, YYYY-MM-DD."),
+    provider: str = typer.Option("RunPod Secure Cloud"),
+    source: str = typer.Option("RunPod API costPerHr at pod creation"),
+    gateway_config: Path = typer.Option(Path("boundary-served.yaml")),
+    levels: str = typer.Option("1,8,32", help="Reads in flight, comma-separated."),
+    warmup: float = typer.Option(30.0, help="Seconds at the start of each level discarded."),
+) -> None:
+    """Load-test a served fine-tune on its own test documents at level 0: the requests its
+    accuracy reads sent, cycled in order, at each concurrency in turn (legible/bench/run.py).
+    The record is rewritten to data/bench/<model>/bench.json after every level."""
+    import datetime as dt
+
+    from boundary import ChatRequest, Gateway
+
+    from legible.arms.read_run import request_for
+    from legible.bench.client import LevelResult
+    from legible.bench.cost import GpuPrice, PriceKind
+    from legible.bench.run import pages_per_second, sweep
+    from legible.data.render import read_manifest
+
+    record = json.loads((data_root() / "models" / model / "run.json").read_text("utf-8"))
+    requests: list[tuple[ChatRequest, int]] = []
+    corpora: set[str] = set()
+    for line in _owed_reads(record["config"]["dataset"]):
+        corpus, split, part, level = line.split()
+        if part != "test" or level != "0":
+            continue
+        spec, prompt, docs, _ = _read_run(
+            "b", corpus, "test", 0, model, 1, gateway_config,
+            None if split == "-" else split, require=False,
+        )  # fmt: skip
+        pages: dict[str, list[PageEntry]] = {}
+        for e in read_manifest(manifest(corpus)):
+            pages.setdefault(e.doc_id, []).append(e)
+        corpora.add(corpus.split("_")[0])
+        requests += [
+            (request_for(data_root(), spec, prompt, pages[d]), len(pages[d])) for d in docs
+        ]
+    price = GpuPrice(
+        gpu=gpu,
+        provider=provider,
+        kind=PriceKind.ON_DEMAND,
+        usd_per_hour=usd_per_hour,
+        checked=dt.date.fromisoformat(checked),
+        source=source,
+    )
+
+    def said(level: LevelResult) -> None:
+        s = level.summary
+        if s is None:
+            typer.echo(f"{model} c={level.concurrency}: every read failed")
+            return
+        rate = pages_per_second(level, warmup_seconds=warmup)
+        typer.echo(
+            f"{model} c={level.concurrency}: e2e p50 {s.e2e_p50_ms}, p99 {s.e2e_p99_ms}, "
+            f"{rate:.3f} pages/s, {s.errors} errors, {level.retried} retried"
+        )
+
+    done = sweep(
+        Gateway.from_config(gateway_config, project="legible"),
+        requests,
+        model=model,
+        corpus="+".join(sorted(corpora)),
+        price=price,
+        out_dir=data_root() / "bench" / model,
+        levels=[int(x) for x in levels.split(",")],
+        warmup_seconds=warmup,
+        on_level=said,
+    )
+    typer.echo(f"{model}: {len(done.levels)} levels over {done.documents} documents")
 
 
 def main() -> None:
