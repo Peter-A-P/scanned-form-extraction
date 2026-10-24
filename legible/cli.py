@@ -18,7 +18,7 @@ from legible.degrade import LEVELS, degrade, to_png
 if TYPE_CHECKING:
     from legible.arms.read_run import RunSpec
     from legible.prompt import Prompt
-    from legible.report import Truth
+    from legible.report import Results, Truth
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -377,31 +377,56 @@ def _truths() -> dict[str, Truth]:
     return truth
 
 
-@app.command("report")
-def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
-    """Grade every arm's stored test reads and write the README's result tables."""
+def _vrdu_ids(corpus: str, level: str, attr: str) -> list[str]:
+    """A VRDU corpus's documents of one part (`valid` or `test`) over its seed-0 split files
+    at a template level: FARA's three held-out templates pooled."""
     from legible.data.vrdu import headline_split_files, read_split
+
+    raw = data_root() / "raw" / "vrdu"
+    files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+    splits = [read_split(corpus, raw / f) for f in files]  # type: ignore[arg-type]
+    return sorted({d for sp in splits for d in getattr(sp, attr)})
+
+
+def _vrdu_rules(corpus: str, level: str) -> list[Path]:
+    """Arm E's level-0 test runs of a VRDU corpus, one per seed-0 split file."""
+    from legible.data.vrdu import headline_split_files
+
+    files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
+    return [
+        data_root() / "runs" / "arm-e" / "level0" / corpus / f"{Path(f).stem}-test.jsonl"
+        for f in files
+    ]
+
+
+def _results(truth: dict[str, Truth]) -> Results:
+    """Every arm graded on the stored runs, for the README's tables and the demo site: the
+    headline and template-gap tables, the degradation curves and the review rates."""
     from legible.report import (
+        AGREEMENT_MISS,
         ARMS,
-        PRICE_LIST_DATE,
+        TABLE_SETS,
+        TOKEN_MISS,
+        Curve,
+        Results,
+        ReviewTable,
         Row,
+        Table,
+        agreed_grades,
         answers_for,
-        curve,
         row,
-        splice,
-        table,
+        token_grades,
     )
+    from legible.review import review
     from legible.schema.corpora import NIST_SCHEMAS
+    from legible.train.recipe import chosen
 
-    root, raw = data_root(), data_root() / "raw"
-    truth = _truths()
-
+    root = data_root()
     e_dir = root / "runs" / "arm-e"
 
     def vrdu_rows(corpus: str, level: str) -> list[Row]:
-        files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
-        docs = sorted({d for f in files for d in read_split(corpus, raw / "vrdu" / f).test})  # type: ignore[arg-type]
-        rules = [e_dir / "level0" / corpus / f"{Path(f).stem}-test.jsonl" for f in files]
+        docs = _vrdu_ids(corpus, level, "test")
+        rules = _vrdu_rules(corpus, level)
         return [
             row(
                 a.label,
@@ -415,69 +440,70 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     nist_faces = sorted(NIST_SCHEMAS)
     nist_test = sorted(part_docs("nist", "test"))
     cord_test = sorted(part_docs("cord", "test"))
-    body = [
-        "Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's own "
-        "matchers, one grader for every arm; intervals are 95% bootstrap over documents. "
-        f"Frontier cost is the gateway ledger's at the {PRICE_LIST_DATE} price list, batch "
-        "rate; OCR is costed at US$0.03 per vCPU-hour (RunPod, 2026-10-17). Written by "
-        "`legible report`; do not edit.",
-        "",
+    tables = [
+        Table(
+            "fara-unseen",
+            "FARA registration forms, templates never seen in training (headline)",
+            vrdu_rows("fara", "unseen"),
+        ),
+        Table(
+            "deepform-unseen",
+            "DeepForm ad-buy forms, templates never seen in training (headline)",
+            vrdu_rows("deepform", "unseen"),
+        ),
+        Table(
+            "cord",
+            "CORD receipts, test set",
+            [
+                row(
+                    a.label,
+                    cord_test,
+                    truth,
+                    answers_for(
+                        root,
+                        a,
+                        ["cord"],
+                        "test",
+                        0,
+                        [e_dir / "level0" / "cord" / "test.jsonl"],
+                        "cord",
+                    ),
+                )
+                for a in ARMS
+            ],
+        ),
+        Table(
+            "nist",
+            "NIST tax forms, 500 test faces",
+            [
+                row(
+                    a.label,
+                    nist_test,
+                    truth,
+                    answers_for(
+                        root,
+                        a,
+                        nist_faces,
+                        "test",
+                        0,
+                        [e_dir / "level0" / "nist" / "test.jsonl"],
+                        "nist",
+                    ),
+                )
+                for a in ARMS
+            ],
+        ),
+        Table(
+            "fara-mixed",
+            "FARA, templates seen in training (the gap beside the headline)",
+            vrdu_rows("fara", "mixed"),
+        ),
+        Table(
+            "deepform-mixed",
+            "DeepForm, templates seen in training (the gap beside the headline)",
+            vrdu_rows("deepform", "mixed"),
+        ),
     ]
-    body += table(
-        "FARA registration forms, templates never seen in training (headline)",
-        vrdu_rows("fara", "unseen"),
-    )
-    body += table(
-        "DeepForm ad-buy forms, templates never seen in training (headline)",
-        vrdu_rows("deepform", "unseen"),
-    )
-    body += table(
-        "CORD receipts, test set",
-        [
-            row(
-                a.label,
-                cord_test,
-                truth,
-                answers_for(
-                    root,
-                    a,
-                    ["cord"],
-                    "test",
-                    0,
-                    [e_dir / "level0" / "cord" / "test.jsonl"],
-                    "cord",
-                ),
-            )
-            for a in ARMS
-        ],
-    )
-    body += table(
-        "NIST tax forms, 500 test faces",
-        [
-            row(
-                a.label,
-                nist_test,
-                truth,
-                answers_for(
-                    root,
-                    a,
-                    nist_faces,
-                    "test",
-                    0,
-                    [e_dir / "level0" / "nist" / "test.jsonl"],
-                    "nist",
-                ),
-            )
-            for a in ARMS
-        ],
-    )
-    body += table(
-        "FARA, templates seen in training (the gap beside the headline)", vrdu_rows("fara", "mixed")
-    )
-    body += table(
-        "DeepForm, templates seen in training (the gap beside the headline)",
-        vrdu_rows("deepform", "mixed"),
-    )
     curve_docs = sorted(part_docs("nist", "curve"))
     cells: dict[str, dict[int, Row]] = {}
     for a in ARMS:
@@ -488,15 +514,19 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
             found = answers_for(root, a, nist_faces, part, lv, rules, "nist")
             if found is not None:
                 cells[a.label][lv] = row(a.label, curve_docs, truth, found)
-    body += [
-        "**NIST, the 300 curve pages at each degradation level** (fields correct; what each "
-        "level does to OCR is in [docs/degradation.md](docs/degradation.md))",
-        "",
-        *curve(range(5), cells),
+    curves = [
+        Curve(
+            "nist",
+            "NIST, the 300 curve pages at each degradation level",
+            "(fields correct; what each level does to OCR is in "
+            "[docs/degradation.md](docs/degradation.md))",
+            (0, 1, 2, 3, 4),
+            len(curve_docs),
+            cells,
+        )
     ]
     for c, name in (("fara", "FARA"), ("deepform", "DeepForm")):
         sub = sorted(part_docs(c, "vrdu_curve"))
-        files = [f for f in headline_split_files(c, "unseen") if f.endswith("SD_0.json")]  # type: ignore[arg-type]
         vcells: dict[str, dict[int, Row]] = {}
         for a in ARMS:
             vcells[a.label] = {}
@@ -504,24 +534,176 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 # Level 0 is the subset's share of the test reads; 2 and 4 the subset itself.
                 part = "test" if lv == 0 else "vrdu_curve"
                 rules = (
-                    [e_dir / "level0" / c / f"{Path(f).stem}-test.jsonl" for f in files]
+                    _vrdu_rules(c, "unseen")
                     if lv == 0
                     else [e_dir / f"level{lv}" / c / "vrdu_curve.jsonl"]
                 )
                 found = answers_for(root, a, [c], part, lv, rules, f"{c}-unseen")
                 if found is not None:
                     vcells[a.label][lv] = row(a.label, sub, truth, found)
-        body += [
-            f"**{name}, the {len(sub)} unseen-template test documents of the VRDU curve subset "
-            "at levels 0, 2 and 4** (fields correct; real scans beside the NIST curve)",
-            "",
-            *curve((0, 2, 4), vcells),
-        ]
-    from legible.report import verifier_cell
+        curves.append(
+            Curve(
+                c,
+                f"{name}, the {len(sub)} unseen-template test documents of the VRDU curve "
+                "subset at levels 0, 2 and 4",
+                "(fields correct; real scans beside the NIST curve)",
+                (0, 2, 4),
+                len(sub),
+                vcells,
+            )
+        )
 
-    fara_files = [f for f in headline_split_files("fara", "unseen") if f.endswith("SD_0.json")]
-    fara_test = sorted({d for f in fara_files for d in read_split("fara", raw / "vrdu" / f).test})
-    fara_rules = [e_dir / "level0" / "fara" / f"{Path(f).stem}-test.jsonl" for f in fara_files]
+    sonnet_a, sonnet_d = ARMS[0], ARMS[4]
+
+    def review_for(corpora: list[str], dev: list[str], test: list[str]) -> object:
+        parts = {}
+        for part, ids in (("dev", dev), ("test", test)):
+            va = answers_for(root, sonnet_a, corpora, part, 0, [])
+            vd = answers_for(root, sonnet_d, corpora, part, 0, [])
+            if va is None or vd is None:
+                return None
+            parts[part] = agreed_grades(ids, truth, va, vd)
+        return review(parts["dev"], parts["test"])
+
+    reviews = [
+        ReviewTable(
+            "Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on "
+            "the OCR text.",
+            "A field is accepted when the two reads agree; the threshold is chosen on dev and "
+            "applied once to test (legible/review.py, legible/agreement.py).",
+            [
+                (
+                    "FARA, unseen templates",
+                    review_for(
+                        ["fara"],
+                        _vrdu_ids("fara", "unseen", "valid"),
+                        _vrdu_ids("fara", "unseen", "test"),
+                    ),
+                ),
+                (
+                    "DeepForm, unseen templates",
+                    review_for(
+                        ["deepform"],
+                        _vrdu_ids("deepform", "unseen", "valid"),
+                        _vrdu_ids("deepform", "unseen", "test"),
+                    ),
+                ),
+                ("CORD", review_for(["cord"], sorted(part_docs("cord", "dev")), cord_test)),
+                ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
+            ],
+            AGREEMENT_MISS,
+        )
+    ]
+
+    def token_review(
+        size: Literal["2b", "4b"], table: str, corpora: list[str], dev: list[str], test: list[str]
+    ) -> object:
+        parts = {}
+        for part, ids in (("dev", dev), ("test", test)):
+            dirs = [
+                root
+                / "runs"
+                / "arm-b"
+                / f"{chosen(size, ds).run_id}@logprobs"
+                / "p1"
+                / "level0"
+                / c
+                / part
+                for ds in TABLE_SETS[table]
+                for c in corpora
+            ]
+            graded = token_grades(ids, truth, dirs)
+            if graded is None:
+                return None
+            parts[part] = graded
+        return review(parts["dev"], parts["test"])
+
+    sizes: tuple[tuple[Literal["2b", "4b"], str], ...] = (("2b", "E2B"), ("4b", "E4B"))
+    for size, name in sizes:
+        reviews.append(
+            ReviewTable(
+                f"Review at 99%: Gemma 4 {name} fine-tuned (seed 0), each field's confidence "
+                "the lowest probability among the tokens of its value.",
+                "Read a second time with log-probabilities for this table (PLAN.md 2.6); the "
+                "threshold is chosen on that dev read and applied once to its test read "
+                "(legible/tokenconf.py).",
+                [
+                    (
+                        "FARA, unseen templates",
+                        token_review(
+                            size,
+                            "fara-unseen",
+                            ["fara"],
+                            _vrdu_ids("fara", "unseen", "valid"),
+                            _vrdu_ids("fara", "unseen", "test"),
+                        ),
+                    ),
+                    (
+                        "DeepForm, unseen templates",
+                        token_review(
+                            size,
+                            "deepform-unseen",
+                            ["deepform"],
+                            _vrdu_ids("deepform", "unseen", "valid"),
+                            _vrdu_ids("deepform", "unseen", "test"),
+                        ),
+                    ),
+                    (
+                        "CORD",
+                        token_review(
+                            size, "cord", ["cord"], sorted(part_docs("cord", "dev")), cord_test
+                        ),
+                    ),
+                    (
+                        "NIST",
+                        token_review(
+                            size, "nist", nist_faces, sorted(part_docs("nist", "dev")), nist_test
+                        ),
+                    ),
+                ],
+                TOKEN_MISS,
+            )
+        )
+    return Results(tables=tables, curves=curves, reviews=reviews)
+
+
+@app.command("report")
+def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
+    """Grade every arm's stored test reads and write the README's result tables."""
+    from legible.report import (
+        ARMS,
+        PRICE_LIST_DATE,
+        answers_for,
+        curve,
+        gate_table,
+        read_gate,
+        review_table,
+        splice,
+        table,
+        verifier_cell,
+    )
+    from legible.schema.corpora import NIST_SCHEMAS
+
+    root = data_root()
+    truth = _truths()
+    results = _results(truth)
+    body = [
+        "Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's own "
+        "matchers, one grader for every arm; intervals are 95% bootstrap over documents. "
+        f"Frontier cost is the gateway ledger's at the {PRICE_LIST_DATE} price list, batch "
+        "rate; OCR is costed at US$0.03 per vCPU-hour (RunPod, 2026-10-17). Written by "
+        "`legible report`; do not edit.",
+        "",
+    ]
+    for t in results.tables:
+        body += table(t.title, t.rows)
+    for cv in results.curves:
+        body += [f"**{cv.title}** {cv.note}", "", *curve(cv.levels, cv.cells)]
+    e_dir = root / "runs" / "arm-e"
+    nist_faces = sorted(NIST_SCHEMAS)
+    nist_test = sorted(part_docs("nist", "test"))
+    fara_test = _vrdu_ids("fara", "unseen", "test")
+    fara_rules = _vrdu_rules("fara", "unseen")
     nist_rules = [e_dir / "level0" / "nist" / "test.jsonl"]
     body += [
         "**The verifier on test: the share of wrong fields its rules flag, over every field and "
@@ -542,8 +724,6 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
             f"| {verifier_cell(nist_test, truth, na)} |"
         )
     body.append("")
-    from legible.report import gate_table, read_gate
-
     gate_dir = Path("gate-runs")
     order = [f"legible-{c}-{lv}" for c, levels in GATE_RUNS.items() for lv in levels]
     decisions = sorted(
@@ -576,126 +756,8 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
             else ["Not yet run.", ""]
         ),
     ]
-    from legible.report import agreed_grades, review_table
-    from legible.review import review
-
-    sonnet_a, sonnet_d = ARMS[0], ARMS[4]
-
-    def review_for(corpora: list[str], dev: list[str], test: list[str]) -> object:
-        parts = {}
-        for part, ids in (("dev", dev), ("test", test)):
-            va = answers_for(root, sonnet_a, corpora, part, 0, [])
-            vd = answers_for(root, sonnet_d, corpora, part, 0, [])
-            if va is None or vd is None:
-                return None
-            parts[part] = agreed_grades(ids, truth, va, vd)
-        return review(parts["dev"], parts["test"])
-
-    def vrdu_ids(corpus: str, level: str, attr: str) -> list[str]:
-        files = [f for f in headline_split_files(corpus, level) if f.endswith("SD_0.json")]  # type: ignore[arg-type]
-        splits = [read_split(corpus, raw / "vrdu" / f) for f in files]  # type: ignore[arg-type]
-        return sorted({d for sp in splits for d in getattr(sp, attr)})
-
-    body += [
-        "**Review at 99%: Sonnet 5.5 on the image, each field checked against Sonnet 5.5 on the "
-        "OCR text.** A field is accepted when the two reads agree; the threshold is chosen on "
-        "dev and applied once to test (legible/review.py, legible/agreement.py).",
-        "",
-        *review_table(
-            [
-                (
-                    "FARA, unseen templates",
-                    review_for(
-                        ["fara"],
-                        vrdu_ids("fara", "unseen", "valid"),
-                        vrdu_ids("fara", "unseen", "test"),
-                    ),
-                ),
-                (
-                    "DeepForm, unseen templates",
-                    review_for(
-                        ["deepform"],
-                        vrdu_ids("deepform", "unseen", "valid"),
-                        vrdu_ids("deepform", "unseen", "test"),
-                    ),
-                ),
-                ("CORD", review_for(["cord"], sorted(part_docs("cord", "dev")), cord_test)),
-                ("NIST", review_for(nist_faces, sorted(part_docs("nist", "dev")), nist_test)),
-            ]
-        ),
-    ]
-    from legible.report import TABLE_SETS, TOKEN_MISS, token_grades
-    from legible.train.recipe import chosen
-
-    def token_review(
-        size: Literal["2b", "4b"], table: str, corpora: list[str], dev: list[str], test: list[str]
-    ) -> object:
-        parts = {}
-        for part, ids in (("dev", dev), ("test", test)):
-            dirs = [
-                root
-                / "runs"
-                / "arm-b"
-                / f"{chosen(size, ds).run_id}@logprobs"
-                / "p1"
-                / "level0"
-                / c
-                / part
-                for ds in TABLE_SETS[table]
-                for c in corpora
-            ]
-            graded = token_grades(ids, truth, dirs)
-            if graded is None:
-                return None
-            parts[part] = graded
-        return review(parts["dev"], parts["test"])
-
-    sizes: tuple[tuple[Literal["2b", "4b"], str], ...] = (("2b", "E2B"), ("4b", "E4B"))
-    for size, name in sizes:
-        body += [
-            f"**Review at 99%: Gemma 4 {name} fine-tuned (seed 0), each field's confidence the "
-            "lowest probability among the tokens of its value.** Read a second time with "
-            "log-probabilities for this table (PLAN.md 2.6); the threshold is chosen on that dev "
-            "read and applied once to its test read (legible/tokenconf.py).",
-            "",
-            *review_table(
-                [
-                    (
-                        "FARA, unseen templates",
-                        token_review(
-                            size,
-                            "fara-unseen",
-                            ["fara"],
-                            vrdu_ids("fara", "unseen", "valid"),
-                            vrdu_ids("fara", "unseen", "test"),
-                        ),
-                    ),
-                    (
-                        "DeepForm, unseen templates",
-                        token_review(
-                            size,
-                            "deepform-unseen",
-                            ["deepform"],
-                            vrdu_ids("deepform", "unseen", "valid"),
-                            vrdu_ids("deepform", "unseen", "test"),
-                        ),
-                    ),
-                    (
-                        "CORD",
-                        token_review(
-                            size, "cord", ["cord"], sorted(part_docs("cord", "dev")), cord_test
-                        ),
-                    ),
-                    (
-                        "NIST",
-                        token_review(
-                            size, "nist", nist_faces, sorted(part_docs("nist", "dev")), nist_test
-                        ),
-                    ),
-                ],
-                TOKEN_MISS,
-            ),
-        ]
+    for rv in results.reviews:
+        body += [f"**{rv.title}** {rv.note}", "", *review_table(rv.rows, rv.miss)]
     body += [
         "Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held "
         "to the schema's grammar, the fine-tunes left their trained format: docs/training.md), "
@@ -707,6 +769,145 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     text = readme.read_text(encoding="utf-8")
     readme.write_text(splice(text, body), encoding="utf-8", newline="\n")
     typer.echo("\n".join(body))
+
+
+@app.command("site")
+def site_command(
+    out: Path = typer.Option(Path("site/out"), help="Where the site is written."),
+    serve: bool = typer.Option(
+        False, "--serve", help="Serve the built site with its host's headers; build nothing."
+    ),
+    port: int = typer.Option(8016, help="The port --serve listens on."),
+) -> None:
+    """Write the demo site (PLAN.md 2.8, docs/site.md): a handful of NIST, CORD and DeepForm
+    test pages with each arm's graded reads drawn on them at each degradation level, and the
+    cost and review tables, from the runs `legible report` reads. FARA is in the tables only."""
+    import datetime as dt
+
+    from legible.arms.ocr_run import load
+    from legible.arms.zonal import load_rules
+    from legible.data.cord import read_shard
+    from legible.data.fetch import load_checksums
+    from legible.data.render import read_manifest
+    from legible.data.vrdu import read_dataset
+    from legible.report import ARMS, answers_for
+    from legible.schema.corpora import NIST_SCHEMAS
+    from legible.site import build
+
+    if serve:
+        build.serve(out, port)
+        return
+    root, raw = data_root(), data_root() / "raw"
+    e_dir = root / "runs" / "arm-e"
+    truth = _truths()
+    results = _results(truth)
+    if out.exists():
+        import shutil
+
+        shutil.rmtree(out)
+    build.copy_assets(out)
+
+    nist_faces = sorted(NIST_SCHEMAS)
+    deepform_rules = _vrdu_rules("deepform", "unseen")
+    # Per corpus: the pages, the levels they are shown at, and each level's reads (corpora
+    # read, split part, arm E's runs, the report's table key), as the report's rows read them.
+    plan: dict[
+        str, tuple[list[str], tuple[int, ...], dict[int, tuple[list[str], str, list[Path], str]]]
+    ] = {
+        "nist": (
+            build.choose(part_docs("nist", "curve")),
+            (0, 1, 2, 3, 4),
+            {
+                lv: (
+                    nist_faces,
+                    "test" if lv == 0 else "curve",
+                    [e_dir / f"level{lv}" / "nist" / f"{'test' if lv == 0 else 'curve'}.jsonl"],
+                    "nist",
+                )
+                for lv in range(5)
+            },
+        ),
+        "cord": (
+            build.choose(part_docs("cord", "test")),
+            (0,),
+            {0: (["cord"], "test", [e_dir / "level0" / "cord" / "test.jsonl"], "cord")},
+        ),
+        "deepform": (
+            build.choose(
+                part_docs("deepform", "vrdu_curve") & set(_vrdu_ids("deepform", "unseen", "test"))
+            ),
+            (0, 2, 4),
+            {
+                lv: (
+                    ["deepform"],
+                    "test" if lv == 0 else "vrdu_curve",
+                    deepform_rules
+                    if lv == 0
+                    else [e_dir / f"level{lv}" / "deepform" / "vrdu_curve.jsonl"],
+                    "deepform-unseen",
+                )
+                for lv in (0, 2, 4)
+            },
+        ),
+    }
+    wanted = {d for docs, _, _ in plan.values() for d in docs}
+    boxes: dict[str, dict[str, build.Box]] = {}
+    for d in read_dataset("deepform", raw / "vrdu"):
+        if d.doc_id in wanted:
+            boxes[d.doc_id] = dict(d.boxes)
+    for shard in sorted(load_checksums("cord").files):
+        for cd, _ in read_shard(raw / "cord" / shard, None):
+            if cd.doc_id in wanted:
+                boxes[cd.doc_id] = dict(cd.boxes)
+    rules = load_rules()
+    by_face = {k.lower(): v for k, v in rules.items()}
+
+    index: dict[str, list[dict[str, object]]] = {}
+    for corpus, (docs, levels, how) in plan.items():
+        entries: dict[str, list[PageEntry]] = {}
+        for e in read_manifest(manifest(corpus)):
+            if e.doc_id in docs:
+                entries.setdefault(e.doc_id, []).append(e)
+        reads: dict[int, dict[str, dict[str, object] | None]] = {}
+        for lv in levels:
+            corpora, part, rules_files, table_key = how[lv]
+            reads[lv] = {}
+            for a in ARMS:
+                found = answers_for(root, a, corpora, part, lv, rules_files, table_key)
+                reads[lv][a.label] = (
+                    {d: found.outputs[d] for d in docs if d in found.outputs} if found else None
+                )
+        index[corpus] = []
+        for doc in docs:
+            pages = sorted(entries[doc], key=lambda e: e.page)
+            if corpus == "nist":
+                face = truth[doc].schema.corpus[len("nist_") :]
+                boxes[doc] = build.nist_boxes(load(root, 0, pages[0].path), by_face[face])
+            images = build.write_images(root, pages, levels, out)
+            record = build.page_record(
+                corpus=corpus,
+                doc_id=doc,
+                entries=pages,
+                truth=truth[doc],
+                boxes=boxes.get(doc, {}),
+                levels=levels,
+                reads=reads,
+                images=images,
+            )
+            build.dump(out / "data" / "pages" / f"{record['id']}.json", record)
+            index[corpus].append({"id": record["id"], "doc": doc, "pages": len(pages)})
+            typer.echo(f"{corpus} {doc}: {len(pages)} pages, levels {list(levels)}")
+    build.dump(
+        out / "data" / "index.json",
+        {
+            "built": dt.date.today().isoformat(),
+            "arms": [{"label": a.label, "arm": a.arm} for a in ARMS],
+            "pages": index,
+        },
+    )
+    build.dump(out / "data" / "results.json", build.results_json(results))
+    build.check_output(out)
+    typer.echo(f"{out}: {build.size_of(out) / 1e6:.1f} MB")
 
 
 gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")

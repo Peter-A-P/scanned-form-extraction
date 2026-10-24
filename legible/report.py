@@ -238,6 +238,49 @@ def row(
     )
 
 
+@dataclass(frozen=True)
+class Table:
+    """One results table: an arm per row, on one corpus's documents at level 0."""
+
+    key: str
+    title: str
+    rows: Sequence[Row]
+
+
+@dataclass(frozen=True)
+class Curve:
+    """Accuracy per arm per degradation level on a fixed set of pages. An arm with no read
+    at a level has no cell there."""
+
+    key: str
+    title: str
+    note: str
+    levels: tuple[int, ...]
+    documents: int
+    cells: Mapping[str, Mapping[int, Row]]
+
+
+@dataclass(frozen=True)
+class ReviewTable:
+    """The review rate at 99% for one confidence signal, per corpus. A corpus with no
+    result yet is None. `rows` hold (corpus label, legible.review.ReviewResult or None)."""
+
+    title: str
+    note: str
+    rows: Sequence[tuple[str, Any]]
+    miss: str
+
+
+@dataclass(frozen=True)
+class Results:
+    """What the README's tables and the demo site both show, computed once from the runs:
+    the report formats it as Markdown, `legible site` serialises it as JSON."""
+
+    tables: Sequence[Table]
+    curves: Sequence[Curve]
+    reviews: Sequence[ReviewTable]
+
+
 def pct(i: Interval | None) -> str:
     if i is None:
         return "not yet measured"
@@ -525,10 +568,40 @@ TOKEN_MISS = (
 )
 
 
-def review_table(rows: Sequence[tuple[str, Any]], miss: str = AGREEMENT_MISS) -> list[str]:
-    """Rows of (corpus label, ReviewResult or None)."""
+def price_date(arm: Arm) -> str:
+    """The date of the price an arm's cost per page is computed at: the frontier price list
+    for arms A and D (D's OCR at the CPU price, checked a day later), the CPU price for arm
+    E, the GPU price for the self-hosted arms B and C."""
+    if arm.arm == "a":
+        return PRICE_LIST_DATE
+    if arm.arm == "d":
+        return f"{PRICE_LIST_DATE}; OCR {OCR_PRICE.checked.isoformat()}"
+    if arm.arm == "e":
+        return OCR_PRICE.checked.isoformat()
+    return SERVE_PRICE.checked.isoformat()
+
+
+def review_cells(r: Any, miss: str = AGREEMENT_MISS) -> tuple[str, str, str]:
+    """A ReviewResult (or None) as its table cells: the fields sent to a person, the accuracy
+    of the fields accepted, and whether the dev threshold reached 99%."""
     import math
 
+    if r is None:
+        return "not yet measured", "", ""
+    reached = math.isfinite(r.threshold.value)
+    if not reached:
+        accepted = "none accepted"
+    elif math.isnan(r.accepted_accuracy.point):
+        # The dev threshold let a handful of fields through on dev and none on test.
+        accepted = "none accepted on test"
+    else:
+        accepted = pct(r.accepted_accuracy)
+    dev = f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev" if reached else miss
+    return pct(r.review_rate), accepted, dev
+
+
+def review_table(rows: Sequence[tuple[str, Any]], miss: str = AGREEMENT_MISS) -> list[str]:
+    """Rows of (corpus label, ReviewResult or None)."""
     out = [
         "| Corpus | Fields sent to a person (95% CI) | Accuracy of the fields accepted | "
         "Reached 99% on dev |",
@@ -538,14 +611,6 @@ def review_table(rows: Sequence[tuple[str, Any]], miss: str = AGREEMENT_MISS) ->
         if r is None:
             out.append(f"| {label} | not yet measured | | |")
             continue
-        reached = math.isfinite(r.threshold.value)
-        if not reached:
-            accepted = "none accepted"
-        elif math.isnan(r.accepted_accuracy.point):
-            # The dev threshold let a handful of fields through on dev and none on test.
-            accepted = "none accepted on test"
-        else:
-            accepted = pct(r.accepted_accuracy)
-        dev = f"yes, {100 * r.threshold.dev_accepted_accuracy:.1f}% on dev" if reached else miss
-        out.append(f"| {label} | {pct(r.review_rate)} | {accepted} | {dev} |")
+        sent, accepted, dev = review_cells(r, miss)
+        out.append(f"| {label} | {sent} | {accepted} | {dev} |")
     return [*out, ""]
