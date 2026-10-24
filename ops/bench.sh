@@ -17,7 +17,15 @@ export LEGIBLE_DATA="${LEGIBLE_DATA:-/root/legible-data}" HF_HOME=/root/hf PYTHO
 cd "$(dirname "$0")/.."
 export PATH="$PWD/.venv/bin:$PATH"
 dc="$(echo "$DATACENTER" | tr '[:upper:]' '[:lower:]')"
-s3() { aws s3 "$@" --endpoint-url "https://s3api-$dc.runpod.io" --region "$dc"; }
+# RunPod's S3 refuses an occasional GetObject with "InvalidArgument" that succeeds when
+# asked again (2026-10-23), so each call gets five tries.
+s3() {
+  for try in 1 2 3 4 5; do
+    aws s3 "$@" --endpoint-url "https://s3api-$dc.runpod.io" --region "$dc" && return 0
+    sleep $((try * 10))
+  done
+  return 1
+}
 
 if [ ! -x /root/vllm-env/bin/vllm ]; then
   uv venv -q /root/vllm-env --python 3.12
