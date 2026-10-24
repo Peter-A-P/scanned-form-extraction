@@ -6,7 +6,7 @@ import json
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import typer
 from PIL import Image
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from legible.bench.run import LoadRun
     from legible.prompt import Prompt
     from legible.report import Results, Row, Truth
+    from legible.schema import CorpusSchema
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -1848,6 +1849,270 @@ def serve_config(
     base = yaml.safe_load(GATEWAY_CONFIG.read_text(encoding="utf-8"))
     out.write_text(yaml.safe_dump(gateway_config(base, served_name, port)), encoding="utf-8")
     typer.echo(f"{out}: route {served_name}")
+
+
+docintel_app = typer.Typer(
+    no_args_is_help=True, help="Arm F: Azure AI Document Intelligence (legible/arms/docintel.py)."
+)
+app.add_typer(docintel_app, name="docintel")
+
+#: The training sets arm F builds a custom model for: FARA's three unseen-template splits and
+#: DeepForm's at seed 0, and NIST's twenty faces. CORD is read by the prebuilt receipt model.
+DOCINTEL_ROUTE_CORD = "docintel-receipt"
+
+
+def _docintel_sets() -> list[str]:
+    from legible.report import TABLE_SETS
+
+    return [*TABLE_SETS["fara-unseen"], *TABLE_SETS["deepform-unseen"], *_nist_keys()]
+
+
+def _docintel_training(dataset: str) -> tuple[CorpusSchema, dict[str, list[Path]], dict[str, Any]]:
+    """A training set's schema, its first documents by id (`TRAIN_DOCS`) as page images, and
+    their truth records."""
+    from legible.arms.docintel import TRAIN_DOCS
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+    from legible.train.dataset import read_training_set
+
+    schemas = {**SCHEMAS, **NIST_SCHEMAS}
+    path = data_root() / "train" / f"{dataset}.jsonl"
+    corpus = json.loads(path.read_text(encoding="utf-8").split("\n", 1)[0])["corpus"]
+    schema = schemas[corpus]
+    _, rows = read_training_set(path, schema)
+    n = TRAIN_DOCS["nist" if corpus.startswith("nist") else corpus]
+    chosen = sorted(rows, key=lambda r: r.doc_id)[:n]
+    images = {r.doc_id: [data_root() / "pages" / p for p in r.pages] for r in chosen}
+    truth = {r.doc_id: json.loads(r.target) for r in chosen}
+    return schema, images, truth
+
+
+def _docintel_gateway() -> Any:
+    from boundary import Gateway
+
+    return Gateway.from_config(GATEWAY_CONFIG, project="legible")
+
+
+@docintel_app.command("layout")
+def docintel_layout(
+    dataset: str = typer.Argument(..., help="A training set, or `all` for every one."),
+    collect: bool = typer.Option(False, help="Collect finished readings instead of sending."),
+) -> None:
+    """Read a training set's documents with the layout model, the words its labels are drawn
+    on; billed per page through the gateway."""
+    from legible.arms.docintel_run import collect_layout, submit_layout
+
+    gateway = _docintel_gateway()
+    for ds in _docintel_sets() if dataset == "all" else [dataset]:
+        if collect:
+            stored, running = collect_layout(gateway, data_root(), ds)
+            typer.echo(f"{ds}: {stored} layout readings stored, {running} still running")
+        else:
+            _, images, _ = _docintel_training(ds)
+            n = submit_layout(gateway, data_root(), ds, images, run_id=f"arm-f-layout-{ds}")
+            typer.echo(f"{ds}: {n} of {len(images)} documents sent to the layout model")
+
+
+@docintel_app.command("prepare")
+def docintel_prepare(dataset: str = typer.Argument(..., help="A training set, or `all`.")) -> None:
+    """Write a training set as the service reads it, labels drawn from the truth on the
+    layout reading's words, and say how many values were found."""
+    from legible.arms.docintel_run import write_set
+
+    for ds in _docintel_sets() if dataset == "all" else [dataset]:
+        schema, images, truth = _docintel_training(ds)
+        cov = write_set(data_root(), ds, schema, images, truth)
+        share = cov["labelled"] / cov["values"] if cov["values"] else 0.0
+        typer.echo(
+            f"{ds}: {cov['documents']} documents, {cov['labelled']} of {cov['values']} "
+            f"values labelled ({share:.1%})"
+        )
+
+
+#: Where arm F's training sets are uploaded for the service to build from (rg-portfolio,
+#: East US, created 2026-10-24). The account key is read from the Azure CLI's login.
+DOCINTEL_STORAGE = "legibledocinteltrain"
+DOCINTEL_CONTAINER = "train"
+
+
+def _az(*args: str) -> str:
+    import subprocess
+
+    out = subprocess.run(
+        ["az", *args], capture_output=True, text=True, check=True, shell=os.name == "nt"
+    )
+    return out.stdout.strip()
+
+
+@docintel_app.command("upload")
+def docintel_upload(dataset: str = typer.Argument(..., help="A training set, or `all`.")) -> None:
+    """Copy prepared training sets to the storage container the service builds from."""
+    from legible.arms.docintel_run import set_dir
+
+    key = _az(
+        "storage", "account", "keys", "list", "--account-name", DOCINTEL_STORAGE,
+        "--query", "[0].value", "-o", "tsv",
+    )  # fmt: skip
+    auth = ["--account-name", DOCINTEL_STORAGE, "--account-key", key]
+    _az("storage", "container", "create", "--name", DOCINTEL_CONTAINER, *auth)
+    for ds in _docintel_sets() if dataset == "all" else [dataset]:
+        _az(
+            "storage", "blob", "upload-batch", "--destination", DOCINTEL_CONTAINER,
+            "--destination-path", ds, "--source", str(set_dir(data_root(), ds)),
+            "--overwrite", "--only-show-errors", *auth,
+        )  # fmt: skip
+        typer.echo(f"{ds}: uploaded")
+
+
+@docintel_app.command("build")
+def docintel_build(
+    dataset: str = typer.Argument(..., help="A training set, or `all`."),
+    max_hours: float = typer.Option(1.0, help="The build's training-hour ceiling."),
+    collect: bool = typer.Option(False, help="Record finished builds instead of starting."),
+) -> None:
+    """Ask the service to build each training set's custom neural model, or record the builds
+    that have finished, with the training hours the service reports. Building is not a call
+    through the gateway: it reads no page and is billed, past ten free hours a month, by the
+    hour (docs/docintel.md)."""
+    import datetime as dt
+
+    import httpx
+    from boundary.env import find_dotenv, load_dotenv
+
+    from legible.arms.docintel import model_id
+    from legible.arms.docintel_run import meta_path
+
+    env = find_dotenv()
+    if env is not None:
+        load_dotenv(env)
+    endpoint = os.environ["AZURE_DOCINTEL_ENDPOINT"].rstrip("/")
+    headers = {"ocp-apim-subscription-key": os.environ["AZURE_DOCINTEL_KEY"]}
+    version = "api-version=2024-11-30"
+    for ds in _docintel_sets() if dataset == "all" else [dataset]:
+        record_path = meta_path(data_root(), ds, "build")
+        record = json.loads(record_path.read_text("utf-8")) if record_path.exists() else {}
+        if collect:
+            if "model" in record or "operation" not in record:
+                continue
+            r = httpx.get(record["operation"], headers=headers, timeout=60)
+            r.raise_for_status()
+            op = r.json()
+            if op.get("status") in {"notStarted", "running"}:
+                typer.echo(f"{ds}: still building ({op.get('percentCompleted', 0)}%)")
+                continue
+            if op.get("status") != "succeeded":
+                raise RuntimeError(f"{ds}: build {op.get('status')}: {op.get('error')}")
+            m = httpx.get(
+                f"{endpoint}/documentintelligence/documentModels/{model_id(ds)}?{version}",
+                headers=headers,
+                timeout=60,
+            )
+            m.raise_for_status()
+            info = m.json()
+            record["model"] = {
+                k: info.get(k)
+                for k in ("modelId", "createdDateTime", "trainingHours", "apiVersion")
+            }
+            record_path.write_text(json.dumps(record, indent=1), encoding="utf-8")
+            typer.echo(f"{ds}: built, {info.get('trainingHours')} training hours")
+            continue
+        if "operation" in record:
+            typer.echo(f"{ds}: already started")
+            continue
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=2)).strftime("%Y-%m-%dT%H:%MZ")
+        key = _az(
+            "storage", "account", "keys", "list", "--account-name", DOCINTEL_STORAGE,
+            "--query", "[0].value", "-o", "tsv",
+        )  # fmt: skip
+        sas = _az(
+            "storage", "container", "generate-sas", "--name", DOCINTEL_CONTAINER,
+            "--account-name", DOCINTEL_STORAGE, "--account-key", key,
+            "--permissions", "rl", "--expiry", expiry, "--https-only", "-o", "tsv",
+        )  # fmt: skip
+        url = f"https://{DOCINTEL_STORAGE}.blob.core.windows.net/{DOCINTEL_CONTAINER}?{sas}"
+        body = {
+            "modelId": model_id(ds),
+            "description": f"legible arm F, trained on {ds}",
+            "buildMode": "neural",
+            "azureBlobSource": {"containerUrl": url, "prefix": f"{ds}/"},
+            "maxTrainingHours": max_hours,
+        }
+        r = httpx.post(
+            f"{endpoint}/documentintelligence/documentModels:build?{version}",
+            headers=headers,
+            json=body,
+            timeout=120,
+        )
+        if r.status_code != 202:
+            raise RuntimeError(f"{ds}: build refused, {r.status_code} {r.text[:300]}")
+        record = {
+            "operation": r.headers["operation-location"],
+            "started": dt.datetime.now(dt.UTC).isoformat(),
+        }
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        record_path.write_text(json.dumps(record, indent=1), encoding="utf-8")
+        typer.echo(f"{ds}: build started")
+
+
+@docintel_app.command("read")
+def docintel_read(
+    dataset: str = typer.Argument(
+        ..., help="A training set (its model reads that split's or face's documents), or cord."
+    ),
+    part: str = typer.Option("test", help="test, or curve for a NIST face."),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+    collect: bool = typer.Option(False, help="Collect finished reads instead of sending."),
+) -> None:
+    """Send a part's documents to the model, one a batch, or collect what has finished. A
+    custom model reads only the documents its split holds out (NIST: its face's)."""
+    from legible.arms.docintel import custom_model, model_id, receipt_record, to_record
+    from legible.arms.docintel_run import collect_reads, doc_images, open_read_run, submit_reads
+    from legible.data.render import read_manifest
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+
+    schemas = {**SCHEMAS, **NIST_SCHEMAS}
+    if dataset == "cord":
+        corpus, route, model = "cord", DOCINTEL_ROUTE_CORD, DOCINTEL_ROUTE_CORD
+        docs = sorted(part_docs("cord", part))
+    elif dataset.startswith("nist_"):
+        corpus, route, model = dataset, model_id(dataset), custom_model(dataset)
+        docs = sorted(part_docs(dataset, part))
+    else:
+        if part != "test" or level != 0:
+            raise typer.BadParameter("a VRDU model reads its split's test documents at level 0")
+        line = next(x for x in _owed_reads(dataset) if x.split()[2] == "test")
+        corpus, split = line.split()[:2]
+        _, _, docs, _ = _read_run(
+            "a", corpus, "test", 0, "quality", 1, GATEWAY_CONFIG, split, require=False
+        )
+        route, model = model_id(dataset), custom_model(dataset)
+    schema = schemas[corpus]
+    convert = (
+        (lambda a: receipt_record(schema, a))
+        if dataset == "cord"
+        else (lambda a: to_record(schema, a))
+    )
+    path = data_root() / "runs" / "arm-f" / route / "p1" / f"level{level}" / corpus / part
+    run = open_read_run(
+        path,
+        {"arm": "f", "corpus": corpus, "part": part, "level": level, "model": model,
+         "dataset": dataset},
+    )  # fmt: skip
+    gateway = _docintel_gateway()
+    if collect:
+        stored, running = collect_reads(gateway, run, convert)
+        typer.echo(f"{route} {corpus} {part} level {level}: {stored} stored, {running} running")
+        return
+    pages: dict[str, list[PageEntry]] = {}
+    for e in read_manifest(manifest(corpus)):
+        pages.setdefault(e.doc_id, []).append(e)
+    n = submit_reads(
+        gateway,
+        run,
+        model,
+        doc_images(data_root(), level, pages, docs),
+        run_id=f"arm-f-{route}-{corpus}-{part}-level{level}",
+    )
+    typer.echo(f"{route} {corpus} {part} level {level}: {n} of {len(docs)} documents sent")
 
 
 bench_app = typer.Typer(

@@ -21,6 +21,14 @@ providers:
     base_url: https://generativelanguage.googleapis.com
     api_key_env: GOOGLE_API_KEY
     api_version: v1beta
+  # Arm F (2026-10-24): Azure AI Document Intelligence, this project's resource in East US. An
+  # analysis is asynchronous, so the gateway serves it as batches of one document (boundary
+  # 1.6). Custom models are named explicitly, `azure-docintel/custom/<modelId>`.
+  azure-docintel:
+    kind: azure_docintel
+    base_url: https://legible-docintel.cognitiveservices.azure.com
+    api_key_env: AZURE_DOCINTEL_KEY
+    api_version: "2024-11-30"
 routes:
   quality:
     provider: anthropic
@@ -37,6 +45,12 @@ routes:
   google:
     provider: google
     model: gemini-3.8-flash
+  docintel-receipt:
+    provider: azure-docintel
+    model: prebuilt/prebuilt-receipt
+  docintel-layout:
+    provider: azure-docintel
+    model: prebuilt/prebuilt-layout
 ledger:
   path: data/ledger.sqlite
 # The development cache holds public data only, which is all this project sends; it stays
