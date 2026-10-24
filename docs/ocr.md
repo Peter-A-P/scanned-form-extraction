@@ -40,6 +40,17 @@ another is read once, so the test rows count only pages not already read for dev
 
 NIST was read on a second pod of the same kind (EU-RO-1), 2026-10-17, the same Tesseract.
 
+The VRDU curve subset (39 FARA and 30 DeepForm unseen-template test documents) was read at levels 2 and 4 on a third 16 vCPU CPU pod at the same rate (US-CA-2, AMD EPYC 7713,
+2026-10-23), the same Tesseract 5.3.4, with the same pages: its degraded PNGs differ in bytes
+from the laptop's (another zlib), and decode to the same pixels on the page compared.
+
+| Corpus | Level | Documents | Pages read | CPU seconds | Seconds a page |
+|---|---:|---:|---:|---:|---:|
+| FARA | 2 | 39 | 75 | 298 | 4.0 |
+| FARA | 4 | 39 | 75 | 252 | 3.4 |
+| DeepForm | 2 | 30 | 75 | 605 | 8.1 |
+| DeepForm | 4 | 30 | 75 | 1,768 | 23.6 |
+
 A CORD receipt costs most because its preprocessing doubles the photograph, and some are
 2304 by 4096 pixels as published. Seconds are wall time of a single-threaded Tesseract process
 with all 16 vCPU busy, which is how a batch would be run.
