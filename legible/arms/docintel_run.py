@@ -101,6 +101,7 @@ def collect_layout(gateway: Any, root: Path, dataset: str) -> tuple[int, int]:
     from boundary import BatchNotReady
 
     out = set_dir(root, dataset)
+    out.mkdir(parents=True, exist_ok=True)
     stored = running = 0
     for doc_id, batch_id in Batches(meta_path(root, dataset, "layout-batches")).load().items():
         path = out / f"{safe_name(doc_id)}.tiff.ocr.json"

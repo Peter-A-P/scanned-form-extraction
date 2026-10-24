@@ -417,6 +417,7 @@ def _results(truth: dict[str, Truth]) -> Results:
         Table,
         agreed_grades,
         answers_for,
+        arms_in,
         row,
         token_grades,
     )
@@ -437,7 +438,7 @@ def _results(truth: dict[str, Truth]) -> Results:
                 truth,
                 answers_for(root, a, [corpus], "test", 0, rules, f"{corpus}-{level}"),
             )
-            for a in ARMS
+            for a in arms_in(f"{corpus}-{level}")
         ]
 
     nist_faces = sorted(NIST_SCHEMAS)
@@ -472,7 +473,7 @@ def _results(truth: dict[str, Truth]) -> Results:
                         "cord",
                     ),
                 )
-                for a in ARMS
+                for a in arms_in("cord")
             ],
         ),
         Table(
@@ -493,7 +494,7 @@ def _results(truth: dict[str, Truth]) -> Results:
                         "nist",
                     ),
                 )
-                for a in ARMS
+                for a in arms_in("nist")
             ],
         ),
         Table(
@@ -509,7 +510,7 @@ def _results(truth: dict[str, Truth]) -> Results:
     ]
     curve_docs = sorted(part_docs("nist", "curve"))
     cells: dict[str, dict[int, Row]] = {}
-    for a in ARMS:
+    for a in arms_in("nist"):
         cells[a.label] = {}
         for lv in range(5):
             part = "test" if lv == 0 else "curve"
@@ -531,7 +532,7 @@ def _results(truth: dict[str, Truth]) -> Results:
     for c, name in (("fara", "FARA"), ("deepform", "DeepForm")):
         sub = sorted(part_docs(c, "vrdu_curve"))
         vcells: dict[str, dict[int, Row]] = {}
-        for a in ARMS:
+        for a in arms_in(f"{c}-curve"):
             vcells[a.label] = {}
             for lv in (0, 2, 4):
                 # Level 0 is the subset's share of the test reads; 2 and 4 the subset itself.
@@ -1981,7 +1982,7 @@ def docintel_build(
     from legible.arms.docintel import model_id
     from legible.arms.docintel_run import meta_path
 
-    env = find_dotenv()
+    env = find_dotenv(Path.cwd(), GATEWAY_CONFIG.resolve().parent)
     if env is not None:
         load_dotenv(env)
     endpoint = os.environ["AZURE_DOCINTEL_ENDPOINT"].rstrip("/")

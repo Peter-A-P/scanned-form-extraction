@@ -80,7 +80,18 @@ ARMS: tuple[Arm, ...] = (
     Arm("B, Gemma 4 E4B fine-tuned on the image", "b", None, size="4b"),
     Arm("C, Gemma 4 E2B untuned on the image", "c", "2b-it"),
     Arm("C, Gemma 4 E4B untuned on the image", "c", "4b-it"),
+    Arm("F, Azure Document Intelligence", "f", None),
 )
+
+#: The tables arm F was measured for (PLAN.md 2.2, section 7): the headline sets and the NIST
+#: curve. It is left out of the others rather than shown as not yet measured.
+F_TABLES = frozenset({"fara-unseen", "deepform-unseen", "cord", "nist"})
+
+
+def arms_in(table: str) -> tuple[Arm, ...]:
+    """The arms a table has a row for."""
+    return tuple(a for a in ARMS if a.arm != "f" or table in F_TABLES)
+
 
 #: The training sets whose fine-tunes read each table's documents, at seed 0 (the gate's).
 TABLE_SETS: Mapping[str, tuple[str, ...]] = {
@@ -457,6 +468,21 @@ def arm_dirs(
 ) -> list[Path]:
     """The run directories an arm's reads of some corpora live in (not arm E's, whose
     answers are rules files). Arm B's are the models trained for the table's split."""
+    if arm.arm == "f":
+        # Arm F's model is the receipt model for CORD, each NIST face's own custom model, and
+        # each VRDU split's (legible/arms/docintel.py).
+        from legible.arms.docintel import model_id
+
+        out: list[Path] = []
+        for c in corpora:
+            if c == "cord":
+                routes = ["docintel-receipt"]
+            elif c.startswith("nist_"):
+                routes = [model_id(c)]
+            else:
+                routes = [model_id(ds) for ds in TABLE_SETS.get(table, ())]
+            out += [root / "runs" / "arm-f" / r / "p1" / f"level{level}" / c / part for r in routes]
+        return out
     if arm.arm in {"b", "c"}:
         from legible.train.recipe import chosen
 
