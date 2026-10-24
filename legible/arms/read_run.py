@@ -86,7 +86,7 @@ BATCH_BYTES: Mapping[Vendor, int] = {
 BATCH_DOCS = 1000
 #: A request too large for a vendor's batch on its own, in `request_bytes`: Gemini's inline
 #: batches are capped at 20 MiB of body (boundary's google_batch.MAX_INLINE_BYTES), which a
-#: DeepForm order of five level-4 pages passed at 22.7 MB (2026-10-24). The margin covers
+#: DeepForm order of eight level-4 pages passed at 22.7 MB (2026-10-24). The margin covers
 #: the batch's own envelope.
 SINGLE_REQUEST_CAP: Mapping[Vendor, int] = {"google": 19_500_000}
 

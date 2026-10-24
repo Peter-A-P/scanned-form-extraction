@@ -112,7 +112,7 @@ Two settings came out of dev:
   so asking again chooses nothing: `legible read retry-missing` sets such reads aside (kept in
   the run's `missing.jsonl`) and the next submit sends them again. It refuses dev and test.
 - **Gemini's inline batch cap.** Gemini takes a batch inline up to 20 MiB of body. One DeepForm
-  order of the VRDU curve subset, five pages at level 4, came to 22.7 MB on its own (a level-4
+  order of the VRDU curve subset, eight pages at level 4, came to 22.7 MB on its own (a level-4
   page's noise does not compress), so it was read synchronously at the standard price, which
   the ledger records (2026-10-24); its batch-mates were read in batches as everywhere else.
 - **NIST's output budget.** On NIST dev, at 3,072 output tokens, the fields came out at 92.1%
