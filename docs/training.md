@@ -53,3 +53,16 @@ NIST's fine-tunes read 800 of its 3,850 training faces, the first 800 in the int
 about 40 a face (`VOLUME_FOR` in `legible/train/recipe.py`). The whole part ran at 145 seconds a
 step for the 4B on an RTX A6000, its prompts listing every field of a face: nineteen hours for
 one run. The 4B's full-volume run was stopped at step 34 of 463.
+
+## Two seeds that learned to answer in the schema's shape (found 2026-10-23)
+
+Seed 1 of the 4B on FARA's Short-Form template and seed 1 of the 4B on DeepForm's unseen
+templates wrap their answers in the prompt's JSON schema: `{"type":"object","properties":
+{"registrant_name":"Charles N. Conconi",...}}` instead of the record itself. 294 of the 300
+FARA test answers and 132 of the 157 DeepForm ones have that shape; the values inside are
+often right, but the record is not where the grader reads it, so the two runs score 0.9% and
+8.0% of fields correct, far below the same configuration at seeds 0 and 2. The grader is not
+loosened to unwrap them: the answers are graded as written, as every arm's are, and the runs
+stand as part of the training variance the seeds measure. They are the evidence that one seed
+of a fine-tune can learn the wrong output format from the same data and recipe, which a
+buyer serving one model without a held-out check would not see.
