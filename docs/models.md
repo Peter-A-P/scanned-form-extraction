@@ -105,6 +105,12 @@ Two settings came out of dev:
   default reasoning; the cut-off run is archived, not deleted, and the table is the rerun.
 - **OpenAI's batch window.** Six of GPT-6.1 Sol's 380 FARA requests never came back within the
   24-hour window (`batch_missing` in the ledger) and are graded as unread.
+  Dev and test keep that rule. The NIST curve does not: at level 3, 45 of GPT-6.1 Sol's 300
+  pages came back as server errors (HTTP 500) or not at all inside the window (2026-10-22 to
+  24), which graded as wrong put the model's level 3 at 76.1% between 94.7% at level 2 and
+  91.8% at level 4, a vendor outage drawn as a degradation. An unanswered read holds no answer,
+  so asking again chooses nothing: `legible read retry-missing` sets such reads aside (kept in
+  the run's `missing.jsonl`) and the next submit sends them again. It refuses dev and test.
 - **NIST's output budget.** On NIST dev, at 3,072 output tokens, the fields came out at 92.1%
   for GPT-6.1 Sol, 83.6% for Sonnet 5.5, 64.3% for Haiku 5.5, 63.8% for Gemini 3.8 Flash and
   38.8% for Sonnet on the OCR text, and every answer that did not parse had been cut off at

@@ -216,6 +216,36 @@ class RunDir:
                 r.doc_id: r for r in (Read.model_validate_json(line) for line in f if line.strip())
             }
 
+    def set_aside_missing(self) -> list[str]:
+        """Move the reads a vendor never answered (status `missing`: a batch that expired or a
+        request its server failed) out of the run, into `missing.jsonl`, and their documents out
+        of their batches, into `retried.json`, so that the next submit sends them again. A
+        missing read holds no answer, so asking again chooses nothing. Returns the documents."""
+        reads = self.reads()
+        gone = sorted(d for d, r in reads.items() if r.status == "missing")
+        if not gone:
+            return []
+        with (self.path / "missing.jsonl").open("a", encoding="utf-8", newline="\n") as f:
+            for d in gone:
+                f.write(reads[d].model_dump_json() + "\n")
+        kept = [r for d, r in reads.items() if d not in gone]
+        self._reads.write_text(
+            "".join(r.model_dump_json() + "\n" for r in kept), encoding="utf-8", newline="\n"
+        )
+        batches = self.batches()
+        retried_path = self.path / "retried.json"
+        retried: dict[str, list[str]] = (
+            json.loads(retried_path.read_text(encoding="utf-8")) if retried_path.exists() else {}
+        )
+        for batch_id, ids in batches.items():
+            out = [d for d in ids if d in gone]
+            if out:
+                retried.setdefault(batch_id, []).extend(out)
+                batches[batch_id] = [d for d in ids if d not in gone]
+        self._batches.write_text(json.dumps(batches, indent=1) + "\n", encoding="utf-8")
+        retried_path.write_text(json.dumps(retried, indent=1) + "\n", encoding="utf-8")
+        return gone
+
     def add_reads(self, reads: Sequence[Read]) -> None:
         with self._reads.open("a", encoding="utf-8", newline="\n") as f:
             for r in reads:
@@ -252,6 +282,8 @@ def collect_batches(gateway: GatewayLike, run: RunDir, *, wait_s: float = 0.0) -
     added = 0
     for batch_id, doc_ids in run.batches().items():
         if all(d in have for d in doc_ids):
+            continue
+        if not doc_ids:
             continue
         responses = gateway.batch_results(gateway.batch_handle(batch_id), wait_s=wait_s)
         if len(responses) != len(doc_ids):

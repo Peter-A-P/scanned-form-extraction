@@ -153,3 +153,31 @@ def test_sync_run_resumes(tmp_path: Path) -> None:
     assert run_sync(gw, requests(3), run, purpose="arm-d", run_id="r") == 3
     assert run_sync(gw, requests(4), run, purpose="arm-d", run_id="r") == 1
     assert gw.calls == 4
+
+
+def test_unanswered_reads_are_set_aside_and_sent_again(tmp_path: Path) -> None:
+    from legible.arms.frontier import Read, RunDir
+
+    def read(doc: str, status: str) -> Read:
+        return Read(
+            doc_id=doc,
+            text=None if status == "missing" else "{}",
+            status=status,
+            cost_usd=None if status == "missing" else 0.01,
+            input_tokens=0,
+            output_tokens=0,
+            latency_ms=None,
+            ledger_id=None,
+            model_returned=None,
+        )
+
+    run = RunDir(tmp_path)
+    run.add_batch("b1", ["d1", "d2", "d3"])
+    run.add_reads([read("d1", "200"), read("d2", "missing"), read("d3", "200")])
+    assert run.set_aside_missing() == ["d2"]
+    assert set(run.reads()) == {"d1", "d3"}
+    assert run.batches() == {"b1": ["d1", "d3"]}
+    assert "d2" in (tmp_path / "missing.jsonl").read_text(encoding="utf-8")
+    # Nothing left to set aside the second time, and the record of the first is kept.
+    assert run.set_aside_missing() == []
+    assert (tmp_path / "retried.json").exists()

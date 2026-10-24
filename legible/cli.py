@@ -1523,6 +1523,27 @@ def read_submit(
     typer.echo(f"{spec.run_id}: {n} documents in {batches} new batches")
 
 
+@read_app.command("retry-missing")
+def read_retry_missing(
+    corpus: str = typer.Argument(...),
+    arm: str = typer.Option(..., help="a or d."),
+    part: str = typer.Option(..., help="curve or a subset; never dev or test."),
+    level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
+    route: str = typer.Option("quality"),
+    prompt_version: int = typer.Option(1, min=1),
+) -> None:
+    """Set aside the reads the vendor never answered, so the next submit asks again. Dev and
+    test are refused: their unanswered reads stay graded as unread, as reported since the
+    first test run (docs/models.md)."""
+    from legible.arms.read_run import open_run
+
+    if part in {"dev", "test"}:
+        raise typer.BadParameter("dev and test keep their unanswered reads as unread")
+    spec, prompt, _, path = _read_run(arm, corpus, part, level, route, prompt_version)
+    gone = open_run(path, spec, prompt).set_aside_missing()
+    typer.echo(f"{spec.run_id}: {len(gone)} unanswered reads set aside")
+
+
 @read_app.command("collect")
 def read_collect(
     corpus: str = typer.Argument(..., help="fara, deepform or cord."),
