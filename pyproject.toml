@@ -42,10 +42,12 @@ dependencies = [
 # receipts against a cap it would have cost a tenth of, and it reads Gemini's batches as the
 # endpoint returns them (v1.4.2 never saw one finish). Its ChatRequest passes vendor-shaped
 # content blocks (the page images) through untouched, as every 1.x does.
+# v1.6.0 (2026-10-24): adds Azure AI Document Intelligence (arm F) as batches of one document
+# billed by the page, and the 2026-10-24 price file, which carries the 2026-10-16 rates unchanged.
 # An extra so that the grader, the degradation pipeline and the tests install without git
 # access.
 gateway = [
-  "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.4.3",
+  "boundary @ git+https://github.com/Peter-A-P/compliant-ai-gateway.git@v1.6.0",
 ]
 
 # Arm B's training stack, on the rented card only. Exact pins, 06's (smallprint, pyproject at
