@@ -192,3 +192,33 @@ def test_a_logprobs_run_is_kept_apart_and_asks_for_them(tmp_path: Path) -> None:
     # A run begun before the field existed reads back as a plain run.
     legacy = plain.model_dump_json(exclude={"logprobs"})
     assert RunSpec.model_validate_json(legacy) == plain
+
+
+def test_a_document_too_large_for_a_gemini_batch_is_left_for_a_sync_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from typing import Any
+
+    from boundary import ChatRequest
+
+    import legible.arms.read_run as rr
+
+    spec = SPEC.model_copy(update={"vendor": "google", "model": "gemini-3.8-flash"})
+    big = ChatRequest(model="m", messages=[{"role": "user", "content": "x" * 19_600_000}])
+    small = ChatRequest(model="m", messages=[{"role": "user", "content": "y"}])
+    monkeypatch.setattr(rr, "chunks", lambda *a, **k: iter([{"big": big}, {"small": small}]))
+    sent: list[list[Any]] = []
+
+    class Gateway:
+        def batch_submit(self, requests: list[Any], **_: Any) -> Any:
+            sent.append(requests)
+
+            class Handle:
+                batch_id = f"b{len(sent)}"
+
+            return Handle()
+
+    run = RunDir(tmp_path)
+    docs, batches = rr.submit(Gateway(), tmp_path, spec, None, run, ["big", "small"], {})  # type: ignore[arg-type]
+    assert (docs, batches) == (1, 1)
+    assert run.batches() == {"b1": ["small"]}

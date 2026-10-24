@@ -84,6 +84,11 @@ BATCH_BYTES: Mapping[Vendor, int] = {
     "selfhosted": 0,  # no batches: a self-hosted server is read call by call
 }
 BATCH_DOCS = 1000
+#: A request too large for a vendor's batch on its own, in `request_bytes`: Gemini's inline
+#: batches are capped at 20 MiB of body (boundary's google_batch.MAX_INLINE_BYTES), which a
+#: DeepForm order of five level-4 pages passed at 22.7 MB (2026-10-24). The margin covers
+#: the batch's own envelope.
+SINGLE_REQUEST_CAP: Mapping[Vendor, int] = {"google": 19_500_000}
 
 
 class RunSpec(BaseModel):
@@ -330,6 +335,16 @@ def submit(
     todo = [d for d in doc_ids if d not in have]
     docs = batches = 0
     for batch in chunks(root, spec, prompt, todo, pages, max_bytes=BATCH_BYTES[spec.vendor]):
+        if len(batch) == 1 and spec.vendor in SINGLE_REQUEST_CAP:
+            ((only, request),) = batch.items()
+            if request_bytes(request) > SINGLE_REQUEST_CAP[spec.vendor]:
+                # One document's pages alone are over what the vendor's batch takes inline: it
+                # is left for a synchronous read (`legible read submit --sync`), at the
+                # standard price the ledger records.
+                print(
+                    f"{only}: {request_bytes(request):,} bytes, over the batch cap; read it --sync"
+                )
+                continue
         batches += len(
             submit_batches(
                 gateway,
