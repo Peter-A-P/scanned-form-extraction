@@ -89,27 +89,47 @@ def breakeven_table(
     api: Sequence[tuple[str, float]],
     utilisations: Sequence[float] = UTILISATIONS,
 ) -> list[str]:
-    """Pages a month at which renting the card for the fine-tune costs no more than paying
-    each frontier model per page, over utilisation. `api` is (label, US$ per page)."""
+    """The break-even curve against each frontier model, one row a model: the pages a month at
+    which renting the card for the fine-tune costs no more than paying that model per page,
+    at the lowest utilisation on the curve (10% to 90%) that breaks even and at 90%, and the
+    cards it takes. Below that utilisation it never breaks even; with no fixed cost, one card
+    breaks even at one month's rent in API pages whatever the utilisation above it, so the
+    curve is flat there unless more cards are needed. `api` is (label, US$ per page)."""
     best = best_throughput(run)
     if best is None:
         return ["Not yet measured.", ""]
-    _, rate = best
-    head = "| Utilisation | Fine-tune, US$ per 1,000 pages | " + " | ".join(
-        f"{label} (US${1000 * cost:.2f} per 1,000)" for label, cost in api
-    )
-    out = [head + " |", "|---:|---:|" + "---:|" * len(api)]
-    for u in utilisations:
-        cells = []
-        own = 0.0
-        for _, cost in api:
-            point = break_even(
+    concurrency, rate = best
+    own = {u: usd_per_page(run.price.usd_per_hour, rate.point, u) for u in utilisations}
+    out = [
+        f"The fine-tune at its best measured throughput, {_rate(rate)} pages a second at "
+        f"{concurrency} in flight on one {run.price.gpu} at US${run.price.usd_per_hour:.2f} an "
+        f"hour ({run.price.provider}, {run.price.checked.isoformat()}): "
+        f"US${1000 * own[min(own)]:.2f} per 1,000 pages at {100 * min(own):.0f}% utilisation, "
+        f"US${1000 * own[max(own)]:.2f} at {100 * max(own):.0f}%. No fixed cost; 730.5 hours "
+        "a month.",
+        "",
+        "| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation "
+        "| Pages a month there (cards) | Pages a month at 90% (cards) |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for label, cost in api:
+        points = [
+            break_even(
                 BreakEvenInputs(
                     price=run.price, pages_per_second=rate.point, api_usd_per_page=cost
                 ),
                 u,
             )
-            own = point.self_hosted_usd_per_page
-            cells.append(_volume(point.volume_per_month))
-        out.append(f"| {100 * u:.0f}% | US${1000 * own:.2f} | " + " | ".join(cells) + " |")
+            for u in utilisations
+        ]
+        reached = [p for p in points if p.volume_per_month is not None]
+        if not reached:
+            out.append(f"| {label} | US${1000 * cost:.2f} | never | | |")
+            continue
+        first, last = reached[0], points[-1]
+        out.append(
+            f"| {label} | US${1000 * cost:.2f} | {100 * first.utilisation:.0f}% "
+            f"| {_volume(first.volume_per_month)} ({first.gpus_at_break_even}) "
+            f"| {_volume(last.volume_per_month)} ({last.gpus_at_break_even}) |"
+        )
     return [*out, ""]

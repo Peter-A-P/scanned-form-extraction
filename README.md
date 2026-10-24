@@ -147,11 +147,11 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Level 0 | Level 1 | Level 2 | Level 3 | Level 4 |
 |---|---|---|---|---|---|
-| A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) | 86.9% (84.8 to 88.9) | 86.5% (84.1 to 88.8) | 87.0% (84.9 to 89.0) |  |
-| A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) | 85.8% (83.7 to 87.7) | 84.7% (82.4 to 86.9) | 84.5% (82.1 to 86.7) |  |
-| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 96.8% (95.3 to 98.1) |  |
-| A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) | 76.8% (71.5 to 82.0) | 80.9% (76.0 to 85.6) | 77.2% (71.8 to 82.2) |  |
-| D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) | 10.4% (8.9 to 11.9) | 8.3% (7.0 to 9.7) | 4.5% (3.7 to 5.4) |  |
+| A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) | 86.9% (84.8 to 88.9) | 86.5% (84.1 to 88.8) | 87.0% (84.9 to 89.0) | 85.7% (83.5 to 87.8) |
+| A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) | 85.8% (83.7 to 87.7) | 84.7% (82.4 to 86.9) | 84.5% (82.1 to 86.7) | 82.9% (80.4 to 85.2) |
+| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 76.1% (70.5 to 81.4) | 91.8% (90.4 to 93.0) |
+| A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) | 76.8% (71.5 to 82.0) | 80.9% (76.0 to 85.6) | 77.2% (71.8 to 82.2) | 76.2% (71.1 to 81.1) |
+| D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) | 10.4% (8.9 to 11.9) | 8.3% (7.0 to 9.7) | 4.5% (3.7 to 5.4) | 1.0% (0.7 to 1.4) |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
 | B, Gemma 4 E2B fine-tuned on the image | 74.9% (71.3 to 78.3) | 75.4% (72.0 to 78.8) | 73.9% (69.9 to 77.8) | 72.1% (68.4 to 75.6) | 68.7% (64.9 to 72.4) |
 | B, Gemma 4 E4B fine-tuned on the image | 74.9% (70.9 to 78.6) | 75.6% (72.1 to 78.8) | 77.5% (74.5 to 80.3) | 75.1% (71.5 to 78.5) | 72.6% (69.4 to 75.7) |
@@ -166,7 +166,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | A, Claude Haiku 5.5 on the image | 68.6% (60.5 to 76.4) |  |  |
 | A, GPT-6.1 Sol on the image | 65.7% (56.9 to 74.2) |  |  |
 | A, Gemini 3.8 Flash on the image | 72.9% (65.5 to 80.0) |  |  |
-| D, Claude Sonnet 5.5 on the OCR text | 62.6% (52.6 to 72.0) |  |  |
+| D, Claude Sonnet 5.5 on the OCR text | 62.6% (52.6 to 72.0) | 62.3% (53.4 to 70.9) | 27.5% (19.2 to 36.0) |
 | E, OCR plus rules | 10.3% (5.2 to 16.0) |  |  |
 | B, Gemma 4 E2B fine-tuned on the image | 61.7% (52.8 to 70.3) | 60.2% (51.8 to 68.4) | 56.9% (47.9 to 65.7) |
 | B, Gemma 4 E4B fine-tuned on the image | 56.5% (48.5 to 64.9) | 57.5% (49.6 to 65.4) | 57.0% (49.8 to 64.8) |
@@ -181,7 +181,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | A, Claude Haiku 5.5 on the image | 69.6% (56.9 to 80.2) |  |  |
 | A, GPT-6.1 Sol on the image | 80.6% (71.6 to 87.2) |  |  |
 | A, Gemini 3.8 Flash on the image | 62.5% (41.5 to 81.6) |  |  |
-| D, Claude Sonnet 5.5 on the OCR text | 78.8% (69.9 to 85.4) |  |  |
+| D, Claude Sonnet 5.5 on the OCR text | 78.8% (69.9 to 85.4) | 72.9% (61.1 to 81.3) | 18.8% (4.1 to 36.3) |
 | E, OCR plus rules | 13.8% (6.6 to 25.1) |  |  |
 | B, Gemma 4 E2B fine-tuned on the image | 66.4% (52.2 to 77.7) | 61.3% (46.5 to 73.4) | 57.1% (43.1 to 69.1) |
 | B, Gemma 4 E4B fine-tuned on the image | 67.7% (53.3 to 79.1) | 64.0% (49.2 to 75.5) | 63.0% (47.8 to 75.6) |
@@ -247,7 +247,80 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | CORD | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 | NIST | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 
-Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Not yet measured: latency, which batch reads do not give.
+**Latency and throughput of the fine-tunes**, one served at a time on one RTX 3090 (US$0.50 an hour, RunPod Secure Cloud, 2026-10-23), read through the gateway by 06's closed-loop client on the model's own test documents at level 0, the accuracy runs' requests cycled in order (docs/serving.md). A read is one document, every page of it; latency is per read, intervals are 95% bootstrap over reads, and the first 30 seconds of each level are discarded. The throughput interval resamples reads with the window fixed, as 06's does, so it has no width where every read is one page and none failed.
+
+| Fine-tune | In flight | Reads (errors) | Pages a read | Read p50 (95% CI) | Read p99 | First token p50 | Pages a second | Cost per 1,000 pages, GPU kept busy |
+|---|---:|---:|---:|---|---|---|---|---|
+| E2B, FARA (amendment template) | 1 | 111 (0) | 2.0 | 1.5 s (1.5 to 1.6) | 2.7 s (2.2 to 9.0) | 1.0 s (1.0 to 1.0) | 1.17 (1.10 to 1.23) | US$0.12 |
+| E2B, FARA (amendment template) | 8 | 358 (0) | 2.0 | 1.8 s (1.7 to 2.5) | 12.1 s (10.7 to 12.8) | 1.1 s (1.0 to 1.6) | 4.15 (4.06 to 4.24) | US$0.03 |
+| E2B, FARA (amendment template) | 32 | 748 (0) | 2.0 | 7.7 s (7.6 to 7.9) | 14.6 s (14.2 to 14.9) | 7.2 s (7.0 to 7.3) | 7.86 (7.74 to 7.99) | US$0.02 |
+| E4B, FARA (amendment template) | 1 | 90 (0) | 1.9 | 2.2 s (2.1 to 2.2) | 16.1 s (3.0 to 16.1) | 1.2 s (1.2 to 1.2) | 0.78 (0.72 to 0.83) | US$0.18 |
+| E4B, FARA (amendment template) | 8 | 166 (0) | 2.0 | 8.3 s (8.0 to 8.4) | 15.8 s (12.0 to 95.8) | 2.7 s (2.3 to 2.8) | 1.86 (1.80 to 1.93) | US$0.07 |
+| E4B, FARA (amendment template) | 32 | 288 (0) | 2.0 | 30.1 s (29.9 to 30.4) | 62.8 s (47.9 to 260.4) | 8.8 s (7.9 to 9.5) | 2.08 (2.03 to 2.13) | US$0.07 |
+| E2B, DeepForm | 1 | 98 (0) | 2.7 | 8.9 s (7.3 to 11.8) | 91.9 s (72.9 to 91.9) | 1.5 s (1.1 to 1.6) | 0.14 (0.13 to 0.16) | US$0.97 |
+| E2B, DeepForm | 8 | 79 (0) | 2.7 | 9.7 s (7.8 to 12.3) | 87.3 s (86.0 to 87.3) | 0.1 s (0.1 to 0.2) | 0.82 (0.71 to 0.92) | US$0.17 |
+| E2B, DeepForm | 32 | 239 (0) | 2.6 | 19.2 s (17.5 to 22.5) | 164.8 s (120.4 to 172.1) | 5.0 s (4.0 to 6.0) | 1.79 (1.66 to 1.93) | US$0.08 |
+| E4B, DeepForm | 1 | 97 (0) | 2.7 | 13.0 s (10.4 to 16.9) | 130.5 s (128.5 to 130.5) | 1.7 s (1.3 to 1.9) | 0.13 (0.12 to 0.15) | US$1.06 |
+| E4B, DeepForm | 8 | 87 (0) | 2.7 | 18.6 s (15.3 to 21.9) | 208.4 s (78.4 to 208.4) | 1.6 s (1.4 to 1.6) | 0.54 (0.48 to 0.61) | US$0.26 |
+| E4B, DeepForm | 32 | 288 (0) | 2.6 | 40.6 s (34.8 to 45.6) | 358.7 s (244.1 to 475.3) | 2.8 s (2.4 to 3.2) | 1.05 (0.98 to 1.12) | US$0.13 |
+| E2B, CORD | 1 | 86 (0) | 1.0 | 2.3 s (2.2 to 2.4) | 16.4 s (5.5 to 16.4) | 0.6 s (0.6 to 0.6) | 0.35 (0.35 to 0.35) | US$0.39 |
+| E2B, CORD | 8 | 536 (0) | 1.0 | 2.2 s (2.2 to 2.2) | 16.5 s (6.6 to 18.8) | 0.1 s (0.1 to 0.1) | 2.76 (2.76 to 2.76) | US$0.05 |
+| E2B, CORD | 32 | 1623 (0) | 1.0 | 2.9 s (2.8 to 2.9) | 8.9 s (8.7 to 24.3) | 0.1 s (0.1 to 0.1) | 8.54 (8.54 to 8.54) | US$0.02 |
+| E4B, CORD | 1 | 92 (0) | 1.0 | 4.0 s (3.9 to 4.2) | 10.4 s (9.4 to 10.4) | 0.7 s (0.7 to 0.7) | 0.22 (0.22 to 0.22) | US$0.63 |
+| E4B, CORD | 8 | 157 (0) | 1.0 | 7.8 s (7.3 to 8.2) | 22.5 s (20.5 to 64.6) | 0.8 s (0.7 to 1.0) | 0.83 (0.83 to 0.83) | US$0.17 |
+| E4B, CORD | 32 | 277 (0) | 1.0 | 20.9 s (20.1 to 21.6) | 61.1 s (54.2 to 64.3) | 1.3 s (1.2 to 1.3) | 1.25 (1.25 to 1.25) | US$0.11 |
+| E2B, NIST | 1 | 97 (0) | 1.0 | 13.3 s (13.2 to 13.3) | 13.7 s (13.6 to 13.7) | 1.4 s (1.4 to 1.4) | 0.08 (0.08 to 0.08) | US$1.70 |
+| E2B, NIST | 8 | 101 (0) | 1.0 | 14.8 s (14.7 to 14.9) | 20.1 s (19.0 to 20.1) | 0.1 s (0.1 to 0.1) | 0.54 (0.54 to 0.54) | US$0.26 |
+| E2B, NIST | 32 | 256 (0) | 1.0 | 35.3 s (34.0 to 37.0) | 92.7 s (85.3 to 115.4) | 1.7 s (1.5 to 1.8) | 0.76 (0.76 to 0.76) | US$0.18 |
+| E4B, NIST | 1 | 98 (0) | 1.0 | 23.8 s (23.6 to 23.9) | 25.5 s (24.7 to 25.5) | 2.0 s (2.0 to 2.0) | 0.05 (0.05 to 0.05) | US$3.04 |
+| E4B, NIST | 8 | 92 (0) | 1.0 | 39.4 s (38.5 to 39.6) | 46.3 s (44.1 to 46.3) | 2.0 s (1.9 to 2.0) | 0.22 (0.22 to 0.22) | US$0.64 |
+| E4B, NIST | 32 | 288 (0) | 1.0 | 69.8 s (64.9 to 74.7) | 207.8 s (192.0 to 236.5) | 8.0 s (6.2 to 11.1) | 0.37 (0.37 to 0.37) | US$0.37 |
+
+**Break-even, FARA: pages a month at which renting the card for the E2B, FARA (amendment template) fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+
+The fine-tune at its best measured throughput, 7.86 (7.74 to 7.99) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$0.18 per 1,000 pages at 10% utilisation, US$0.02 at 90%. No fixed cost; 730.5 hours a month.
+
+| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+|---|---:|---:|---:|---:|
+| Claude Sonnet 5.5 | US$2.96 | 10% | 123,226 (1) | 123,226 (1) |
+| Claude Haiku 5.5 | US$0.18 | 20% | 2.1 million (1) | 2.1 million (1) |
+| GPT-6.1 Sol | US$2.78 | 10% | 131,514 (1) | 131,514 (1) |
+| Gemini 3.8 Flash | US$1.65 | 10% | 221,213 (1) | 221,213 (1) |
+
+**Break-even, DeepForm: pages a month at which renting the card for the E4B, DeepForm fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+
+The fine-tune at its best measured throughput, 1.05 (0.98 to 1.12) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$1.32 per 1,000 pages at 10% utilisation, US$0.15 at 90%. No fixed cost; 730.5 hours a month.
+
+| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+|---|---:|---:|---:|---:|
+| Claude Sonnet 5.5 | US$5.19 | 10% | 70,432 (1) | 70,432 (1) |
+| Claude Haiku 5.5 | US$0.35 | 40% | 1.0 million (1) | 1.0 million (1) |
+| GPT-6.1 Sol | US$4.53 | 10% | 80,576 (1) | 80,576 (1) |
+| Gemini 3.8 Flash | US$2.73 | 10% | 133,787 (1) | 133,787 (1) |
+
+**Break-even, CORD: pages a month at which renting the card for the E4B, CORD fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+
+The fine-tune at its best measured throughput, 1.25 (1.25 to 1.25) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$1.11 per 1,000 pages at 10% utilisation, US$0.12 at 90%. No fixed cost; 730.5 hours a month.
+
+| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+|---|---:|---:|---:|---:|
+| Claude Sonnet 5.5 | US$5.27 | 10% | 69,340 (1) | 69,340 (1) |
+| Claude Haiku 5.5 | US$0.38 | 30% | 951,474 (1) | 951,474 (1) |
+| GPT-6.1 Sol | US$4.59 | 10% | 79,577 (1) | 79,577 (1) |
+| Gemini 3.8 Flash | US$4.42 | 10% | 82,565 (1) | 82,565 (1) |
+
+**Break-even, NIST: pages a month at which renting the card for the E4B, NIST fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+
+The fine-tune at its best measured throughput, 0.37 (0.37 to 0.37) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$3.73 per 1,000 pages at 10% utilisation, US$0.41 at 90%. No fixed cost; 730.5 hours a month.
+
+| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+|---|---:|---:|---:|---:|
+| Claude Sonnet 5.5 | US$16.38 | 10% | 22,298 (1) | 22,298 (1) |
+| Claude Haiku 5.5 | US$1.12 | 40% | 325,098 (1) | 325,098 (1) |
+| GPT-6.1 Sol | US$15.33 | 10% | 23,828 (1) | 23,828 (1) |
+| Gemini 3.8 Flash | US$12.48 | 10% | 29,259 (1) | 29,259 (1) |
+
+Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Latency is the fine-tunes' alone: the frontier models were read in batches, whose only latency is the batch's (docs/serving.md).
 <!-- results:end -->
 
 ## Tried and rejected

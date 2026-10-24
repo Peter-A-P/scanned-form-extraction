@@ -820,7 +820,9 @@ def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[
         "gateway by 06's closed-loop client on the model's own test documents at level 0, the "
         "accuracy runs' requests cycled in order (docs/serving.md). A read is one document, "
         "every page of it; latency is per read, intervals are 95% bootstrap over reads, and "
-        "the first 30 seconds of each level are discarded.",
+        "the first 30 seconds of each level are discarded. The throughput interval resamples "
+        "reads with the window fixed, as 06's does, so it has no width where every read is "
+        "one page and none failed.",
         "",
         *latency_table([(label(m), runs[m]) for m in ordered]),
     ]
@@ -846,11 +848,11 @@ def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[
         out += [
             f"**Break-even, {name}: pages a month at which renting the card for the {label(model)} "
             "fine-tune costs no more than paying each frontier model by the page**, over the "
-            "share of the month the card is kept busy. 06's arithmetic (legible/bench/"
-            "breakeven.py): whole cards rented all month, a month of 730.5 hours, no fixed "
-            "costs, the fine-tune at its best measured throughput and each frontier model at "
-            "its headline test cost. It says nothing about accuracy, which the tables above "
-            "do.",
+            "share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/"
+            "bench/breakeven.py): whole cards rented all month, each frontier model at its "
+            "headline test cost from the ledger. Below the utilisation given it never breaks "
+            "even; above it the volume holds while one card carries it. It says nothing "
+            "about accuracy, which the tables above do.",
             "",
             *breakeven_table(runs[model], api),
         ]

@@ -206,9 +206,10 @@ def test_a_card_dearer_per_page_than_the_api_never_breaks_even() -> None:
     # One page every two seconds on a US$0.50 card is US$0.28 a 1,000 pages at full use, so
     # an API at US$0.10 a 1,000 never loses to it, and one at US$5 does at one month's rent.
     lines = breakeven_table(_run(_level(1, (1,) * 20)), [("cheap", 0.0001), ("dear", 0.005)])
-    rows = [line for line in lines if line.startswith("| 50%")]
-    assert rows and "never" in rows[0]
-    assert "73,050" in rows[0]  # 0.50 * 730.5 / 0.005
+    cheap = next(line for line in lines if line.startswith("| cheap"))
+    dear = next(line for line in lines if line.startswith("| dear"))
+    assert "never" in cheap
+    assert "73,050 (1)" in dear  # 0.50 * 730.5 / 0.005, on one card
 
 
 def test_the_latency_table_has_a_row_per_level() -> None:
