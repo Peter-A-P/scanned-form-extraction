@@ -1,0 +1,154 @@
+---
+base_model: google/gemma-4-E2B
+base_model_revision: d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f
+library_name: peft
+pipeline_tag: image-text-to-text
+license: apache-2.0
+language:
+- en
+tags:
+- document-understanding
+- form-extraction
+- vision-language-model
+- qlora
+- lora
+- gemma4
+- legible
+- cord
+datasets:
+- naver-clova-ix/cord-v2
+legible_run_id: 2b-cord-v1120-s0-f83ed25a5c
+legible_publishable: true
+---
+
+# Gemma 4 E2B fine-tuned to read CORD receipts
+
+A QLoRA adapter on `google/gemma-4-E2B` that reads the page images of one page and writes its fields as JSON. Trained and measured in Forms That Read Themselves (package `legible`), which compares frontier vision models, fine-tuned small vision models and OCR pipelines on scanned forms with known answers. Run `2b-cord-v1120-s0-f83ed25a5c`. This card is written by `legible cards` from the run's records and graded reads; no number in it is typed by hand.
+
+## What it reads and what it writes
+
+Input: the document's pages as images, in page order, then the instruction every reader in the project is sent (`legible.prompt`, version 1), which describes each field and gives the JSON Schema. The adapter was trained on that instruction and nothing else.
+
+One JSON object a document, every value a string or null, in the compact form it was trained on (`{"advertiser":null}`, no spaces). A photographed restaurant or shop receipt from Indonesia.
+
+| Field | Kind | What it is |
+|---|---|---|
+| `menu` | list | One item bought. Each entry has: |
+| `menu[].nm` | string | The item's name. |
+| `menu[].num` | string | The item's code or number, if printed. |
+| `menu[].unitprice` | price | The price of one unit. |
+| `menu[].cnt` | number | How many were bought. |
+| `menu[].discountprice` | price | A discount on this item. |
+| `menu[].price` | price | The line's price. |
+| `menu[].itemsubtotal` | price | The item's subtotal, if printed separately. |
+| `menu[].vatyn` | string | Whether VAT applies to the item, as printed. |
+| `menu[].etc` | string | Anything else printed on the item's line. |
+| `sub_item` | list | A component or option printed under an item, such as a set meal's parts. Each entry has: |
+| `sub_item[].nm` | string | The component's name. |
+| `sub_item[].unitprice` | price | The price of one unit. |
+| `sub_item[].cnt` | number | How many. |
+| `sub_item[].price` | price | The component's price. |
+| `sub_item[].etc` | string | Anything else printed on its line. |
+| `void_menu` | list | An item voided on the receipt. Each entry has: |
+| `void_menu[].nm` | string | The voided item's name. |
+| `void_menu[].price` | price | Its price. |
+| `subtotal_price` | price | The subtotal. |
+| `discount_price` | price | A discount on the whole bill. |
+| `service_price` | price | The service charge. |
+| `othersvc_price` | price | Any other service charge. |
+| `tax_price` | price | The tax. |
+| `subtotal_etc` | string | Anything else printed in the subtotal section. |
+| `total_price` | price | The total to pay. |
+| `total_etc` | string | Anything else printed in the total section. |
+| `cashprice` | price | The cash tendered. |
+| `changeprice` | price | The change given. |
+| `creditcardprice` | price | The amount paid by card. |
+| `emoneyprice` | price | The amount paid by e-money. |
+| `menutype_cnt` | number | The number of distinct items, if printed. |
+| `menuqty_cnt` | number | The total quantity of items, if printed. |
+
+## How it was trained
+
+Project 06's QLoRA recipe with a vision encoder (`legible/train/vision.py`): one user turn of page images then the instruction, one assistant turn of the truth's JSON, the loss on the answer's tokens only. Every training document is from the split's train part; a held-out document refuses the set (`legible/train/dataset.py`).
+
+| Setting | Value |
+|---|---|
+| Base | `google/gemma-4-E2B` at revision `d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f` |
+| Chat template | `google/gemma-4-E2B-it` at revision `3e22461f65e89153144f8adb70e3b8c2cc9845a7` |
+| Quantisation | NF4 4-bit with double quantisation, bf16 compute; the vision and audio towers, the vision projector and the output layer kept at full precision |
+| LoRA | rank 64, alpha 128, dropout 0.05, on the language model's attention and MLP projections and the vision projector, never the towers |
+| Optimisation | learning rate 0.0001, cosine schedule, warmup 0.03, 1 epoch, 1 document a step, 8 steps accumulated |
+| Visual tokens a page | 1,120 |
+| Sequence limit | 12,288 tokens |
+| Seed | 0 |
+| Training set | `cord` (800 documents) |
+| Training documents and pages | 800 documents, 800 pages |
+| Optimiser steps | 100, from 800 documents at 8 a step |
+| Loss and timing | in `run.json`, the training record uploaded with the adapter; it was not on the machine that wrote this card |
+
+## Training data and its licences
+
+**CORD v2 receipts (Clova AI)**, https://huggingface.co/datasets/naver-clova-ix/cord-v2 at commit 7f0115a4b758a71d6473b8d085751692da2fef98. Terms: CC BY 4.0.
+
+> "This work is licensed under a [Creative Commons Attribution 4.0 International License][cc-by]."
+
+Quoted from https://github.com/clovaai/cord README, linking to http://creativecommons.org/licenses/by/4.0/; the Hugging Face card has `license: cc-by-4.0` (read 2026-10-16). Attribution: Clova AI's CORD (Park et al., "CORD: A Consolidated Receipt Dataset for Post-OCR Parsing", 2019), used under CC BY 4.0.
+
+The adapter is released under apache-2.0, the base model's licence. Publication: CORD is CC BY 4.0, which permits a derived model with attribution.
+
+## Results
+
+On CORD's 100 test receipts, read once, level 0, temperature 0, unconstrained. Field accuracy is VRDU's matchers, one grader for every reader; intervals are 95% bootstrap over documents. The adapter is costed at an RTX 3090 at US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of its read; the frontier models at the gateway ledger's cost at the 2026-10-16 price list, batch rate.
+
+| Reader | Fields correct (95% CI) | Every field right | Invented fields | Answers that did not parse | Cost per 1,000 pages | Documents |
+|---|---|---|---|---|---|---:|
+| B, Gemma 4 E2B fine-tuned (this adapter) | 75.2% (67.9 to 82.0) | 38.0% (29.0 to 48.0) | 1.0% (0.4 to 1.8) | 1.0% (0.0 to 3.0) | US$0.11 (0.11 to 0.11) | 100 |
+| C, Gemma 4 E2B untuned on the image | 40.7% (36.8 to 44.6) | 0.0% (0.0 to 0.0) | 9.8% (8.1 to 11.6) | 7.0% (2.0 to 12.0) | US$0.14 (0.14 to 0.14) | 100 |
+| A, Claude Sonnet 5.5 on the image | 84.0% (77.8 to 89.2) | 47.0% (37.0 to 57.0) | 3.4% (2.3 to 4.6) | 0.0% (0.0 to 0.0) | US$5.27 (5.06 to 5.50) | 100 |
+| A, Claude Haiku 5.5 on the image | 76.7% (70.1 to 82.6) | 28.0% (19.0 to 37.0) | 5.2% (4.0 to 6.6) | 2.0% (0.0 to 5.0) | US$0.38 (0.36 to 0.40) | 100 |
+| A, GPT-6.1 Sol on the image | 88.1% (84.2 to 91.6) | 51.0% (41.0 to 61.0) | 3.4% (2.4 to 4.6) | 0.0% (0.0 to 0.0) | US$4.59 (4.35 to 4.85) | 100 |
+| A, Gemini 3.8 Flash on the image | 86.1% (79.7 to 91.6) | 57.0% (47.0 to 66.0) | 1.2% (0.6 to 2.0) | 5.0% (1.0 to 10.0) | US$4.42 (3.77 to 5.12) | 100 |
+
+The best frontier model on these documents is GPT-6.1 Sol, at 88.1% (84.2 to 91.6) of fields for US$4.59 (4.35 to 4.85) a thousand pages. This adapter's field accuracy differs from it by -12.9 points, at US$0.11 (0.11 to 0.11) a thousand pages, about 1/41 of the cost. Against its untuned base it reads +34.5 points.
+
+Training variance: the same recipe at seeds 1 and 2, each on its own split's test set: seed 1, 69.3% (63.2 to 75.1); seed 2, 72.2% (66.2 to 78.1). The three seeds' point estimates span 5.9 points (their test sets differ where the split files do).
+
+### The 03 release gate
+
+Not gated. Project 03's gate compared the E4B, the better of the two sizes on dev, for this corpus (docs/gate.md); its decision is on that card.
+
+## Failure modes
+
+- **A form design it has not seen.** Not measured on this corpus: CORD's receipts have no template labels. On FARA and DeepForm, where it was measured, the fine-tunes read worse on templates they did not see and the frontier models do not (the README's template gap tables); expect worse on a form unlike its training set.
+- **A bad scan.** Not measured on receipts, which are photographs rather than scans; how it fails under blur or glare is unknown. The README's NIST and VRDU curves show what the degradation steps do to the other fine-tunes.
+- **Confidently wrong.** Its own token probability is not a reason to skip review. Of its dev fields written at a token probability of 0.999 or more (242), 80.2% (67.9 to 90.7) are right; the commonest error there is the value of another field on the page (32). At 99% accuracy it sends 100.0% (100.0 to 100.0) of its test fields to a person, since no threshold reached 99% on dev. The probability measures how sure the model is of its habit, not whether the page agrees (docs/review.md).
+- **Training variance.** The same recipe at three seeds reads from 69.3% to 75.2% of fields on test (above); a retrained copy is not guaranteed to read like this one.
+- **Not non-inferior to the frontier.** Project 03's gate cannot decide for the E4B, the size it compared, on this corpus at a 3-point margin per field (above). Do not take it as a drop-in for a frontier model's read.
+- **Malformed answers.** 1.0% (0.0 to 3.0) of its test answers did not parse as JSON. It is read freely: holding the fine-tunes to the schema's grammar was tried on dev and rejected, because it pushed them off their trained spacing and the DeepForm E2B then answered null for every field (docs/rejected.md). A caller must count a parse failure as a document to type by hand.
+- **Invented fields.** 1.0% (0.4 to 1.8) of scored fields carry a value where the form's box is blank.
+- **One instruction.** Trained on one prompt and one schema; another wording, another field list or another language is untested.
+
+## Intended use
+
+Reading CORD receipts of the kind it was trained on into JSON for a person to check, at a fraction of a frontier model's cost per page; and reproducing the measurements in this card. Plan on a person checking every field: no confidence measured in the project separates right fields from wrong ones well enough to skip review at 99% (the README's honest limitation).
+
+## Out of scope
+
+- Any decision about a person made on its output without a person checking it.
+- Handwriting, other form families, long multi-page documents, or a form whose type is unknown.
+- Unattended use on form designs it was not trained on, where it is worst.
+- Pages that are not public: it was measured on public records and datasets only.
+
+## Loading it
+
+```python
+from peft import PeftModel
+from transformers import AutoModelForImageTextToText, AutoProcessor
+
+base = AutoModelForImageTextToText.from_pretrained("google/gemma-4-E2B", revision="d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f")
+model = PeftModel.from_pretrained(base, "<this repository>")
+processor = AutoProcessor.from_pretrained("<this repository>")
+processor.image_processor.max_soft_tokens = 1120
+```
+
+Read it at temperature 0, with the prompt `legible.prompt.build_prompt` writes for its schema; the project served it merged into the bf16 base under vLLM (`legible serve merge`).
