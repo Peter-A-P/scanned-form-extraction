@@ -29,8 +29,52 @@ Why these, as decided on 2026-10-16:
   read 2026-10-16). Its introductory price doubles on 2027-01-01, so the Google arm runs before
   then, and the cost table prints the rate the run was billed at, from the ledger.
 
-Arm B and C's bases (Gemma 4 E2B and E4B, Apache 2.0) are recorded here with their revisions
-when the fine-tunes start.
+Arm B and C's bases (Gemma 4 E2B and E4B, Apache 2.0), at the revisions 06 resolved on
+2026-09-21 (`BASES` in `legible/train/recipe.py`):
+
+| Size | Base, arm B | Revision | Instruction model, arm C and the chat template | Revision |
+|---|---|---|---|---|
+| 2B | `google/gemma-4-E2B` | `d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f` | `google/gemma-4-E2B-it` | `3e22461f65e89153144f8adb70e3b8c2cc9845a7` |
+| 4B | `google/gemma-4-E4B` | `411aa17b749aa952df1359d2dcea73917a544d9a` | `google/gemma-4-E4B-it` | `ee0ef6023621cff504d758262d4e04895a5af4a2` |
+
+## Publishing the adapters
+
+Each seed-0 headline adapter (`legible serve headline`: both sizes for FARA's three held-out
+templates, DeepForm, CORD and NIST, twelve in all) has a Hugging Face model card in
+[cards/](cards/), named by its run id. `legible cards` writes them from the run's config, its
+training set (documents and pages), the training record when it is on the machine
+(`models/<run_id>/run.json`; otherwise the card gives the step count the recipe implies and
+says the measured one travels with the adapter), and the graded reads behind the README: the
+adapter on its own test set beside its untuned base and the four frontier models, FARA's pooled
+row, the template gap, the degradation curve, seeds 1 and 2, the 03 gate and the token
+probability. Its failure modes are written from those numbers. Rerun it whenever the reads
+change, and commit the cards with the change.
+
+`legible publish <adapter dir>` uploads one adapter with its card as the repository's README,
+in one Hub commit. It refuses when the card is missing, when the card names a different run
+from the adapter's `run.json`, when the adapter's PEFT base differs from the card's, or when the
+card is marked not for upload; and it creates the repository **private** unless `--public` is
+given, refusing to upload into an existing repository whose visibility differs from the one
+asked for. The token is read from `HF_TOKEN` and never printed. `huggingface_hub` comes with the
+train extra, so it runs where the adapters are, on the volume:
+
+```bash
+export HF_TOKEN=...            # a write token for the account the repositories go under
+legible publish models/<run_id>/adapter --repo <account>/legible-<run_id>
+```
+
+Who may be published, decided 2026-10-23 under the plan's licence rule (PLAN.md, risks: a
+corpus whose terms forbid redistributing derived models drops its adapter and keeps its
+numbers): none of the four corpora forbids it. VRDU's annotations are CC BY 4.0 and its pages
+public records; CORD is CC BY 4.0; NIST confirmed on 2026-10-17 that adapters trained on SD2
+may be published. Each card quotes its corpus's terms from [data.md](data.md) and gives the
+attribution CC BY asks for; the adapters carry the base model's Apache 2.0.
+
+The FARA adapters are publishable but stay private until Peter decides otherwise: the
+registration forms name individuals, and a model trained on them can write a name from its
+training forms onto a page that does not carry it. The pages are public records and are never
+shown here as images; whether a model that may reproduce names from them is public is a
+separate decision, and it is recorded here when it is made.
 
 ## Arm A on dev
 

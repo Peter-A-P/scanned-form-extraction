@@ -1512,6 +1512,335 @@ def serve_config(
     typer.echo(f"{out}: route {served_name}")
 
 
+#: The README table each headline training set's reads belong to, and the gate spec that
+#: decided it.
+_CARD_TABLE: dict[str, tuple[str, str]] = {
+    "fara-unseen": ("fara-unseen", "legible-fara-unseen"),
+    "deepform-unseen": ("deepform-unseen", "legible-deepform-unseen"),
+    "cord": ("cord", "legible-cord-test"),
+    "nist": ("nist", "legible-nist-test"),
+}
+
+
+def _vrdu_split(dataset: str) -> tuple[str, list[str], list[str]]:
+    """A VRDU training set's split file stem, and its valid and test documents."""
+    from legible.data.vrdu import headline_split_files, read_split
+
+    corpus = dataset.split("-")[0]
+    raw = data_root() / "raw" / "vrdu"
+    for level in ("unseen", "mixed"):
+        for f in headline_split_files(corpus, level):  # type: ignore[arg-type]
+            sp = read_split(corpus, raw / f)  # type: ignore[arg-type]
+            template = f"-{sp.template.lower().replace(' ', '_')}" if sp.template else ""
+            if f"{corpus}-{level}{template}-s{sp.seed}" == dataset:
+                return Path(f).stem, sorted(sp.valid), sorted(sp.test)
+    raise typer.BadParameter(f"no split file for {dataset}")
+
+
+@app.command("cards")
+def cards_command(
+    out: Path = typer.Option(Path("docs/cards")),
+    records: Path | None = typer.Option(
+        None, help="Where finished runs' run.json live. Default: the data root's models/."
+    ),
+) -> None:
+    """Write a model card for each seed-0 headline adapter from its records and graded reads."""
+    import math
+
+    from legible.cards import (
+        CardFacts,
+        Measured,
+        confidence,
+        render,
+        training_counts,
+    )
+    from legible.grade import grade_document, summarise
+    from legible.report import (
+        ARMS,
+        TABLE_SETS,
+        Answers,
+        Row,
+        answers_for,
+        read_gate,
+        row,
+        selfhosted_answers,
+        token_grades,
+    )
+    from legible.review import review
+    from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
+    from legible.stats import Interval
+    from legible.train.dataset import read_training_set
+    from legible.train.recipe import TrainConfig, chosen
+    from legible.train.vision import read_record
+
+    root = data_root()
+    record_root = records or root / "models"
+    truth = _truths()
+    nist_faces = sorted(NIST_SCHEMAS)
+    frontier = [a for a in ARMS if a.arm == "a"]
+    gates = [read_gate(p) for p in sorted(Path("gate-runs").glob("*/decision.txt"))]
+
+    def unparsed(ids: list[str], answers: Answers | None) -> Interval | None:
+        if answers is None:
+            return None
+        grades = [
+            grade_document(
+                truth[d].schema,
+                d,
+                truth[d].record,
+                answers.outputs[d],
+                page_text=truth[d].text,
+                alternatives=truth[d].alternatives,
+            )
+            for d in ids
+            if d in answers.outputs
+        ]
+        return summarise(grades).unparsed if grades else None
+
+    def run_answers(run_id: str, corpora: list[str], part: str, level: int) -> Answers | None:
+        dirs = [
+            root / "runs" / "arm-b" / run_id / "p1" / f"level{level}" / c / part for c in corpora
+        ]
+        found = selfhosted_answers(dirs)
+        return found if found.outputs else None
+
+    def measured(label: str, ids: list[str], answers: Answers | None) -> Measured:
+        return Measured(row(label, ids, truth, answers), unparsed(ids, answers))
+
+    out.mkdir(parents=True, exist_ok=True)
+    written = []
+    for table, (readme_table, gate_spec) in _CARD_TABLE.items():
+        for size, name in (("2b", "E2B"), ("4b", "E4B")):
+            b_arm = next(a for a in ARMS if a.arm == "b" and a.size == size)
+            c_arm = next(a for a in ARMS if a.arm == "c" and a.route == f"{size}-it")
+            for dataset in TABLE_SETS[table]:
+                config: TrainConfig = chosen(size, dataset)  # type: ignore[arg-type]
+                run_id = config.run_id
+                corpus = "nist" if dataset == "nist" else dataset.split("-")[0]
+                corpora = nist_faces if corpus == "nist" else [corpus]
+                set_names = nist_faces if corpus == "nist" else [dataset]
+                sets = []
+                for s in set_names:
+                    path = root / "train" / f"{s}.jsonl"
+                    key = s if corpus == "nist" else corpus
+                    header, rows = read_training_set(path, SCHEMAS[key])
+                    sets.append((header, list(rows)))
+                counts = training_counts(config, sets)
+                record = (
+                    read_record(record_root / run_id)
+                    if (record_root / run_id / "run.json").exists()
+                    else None
+                )
+                if corpus in {"fara", "deepform"}:
+                    stem, dev, test = _vrdu_split(dataset)
+                    test_name = (
+                        f"the {len(test)} test documents of VRDU's split file `{stem}`, "
+                        "templates never seen in training"
+                    )
+                elif corpus == "cord":
+                    dev, test = sorted(part_docs("cord", "dev")), sorted(part_docs("cord", "test"))
+                    test_name = f"CORD's {len(test)} test receipts"
+                else:
+                    dev, test = sorted(part_docs("nist", "dev")), sorted(part_docs("nist", "test"))
+                    test_name = f"the {len(test)} NIST test faces every reader reads"
+                mine = run_answers(run_id, corpora, "test", 0)
+                own = [
+                    measured(f"B, Gemma 4 {name} fine-tuned (this adapter)", test, mine),
+                    measured(c_arm.label, test, answers_for(root, c_arm, corpora, "test", 0, [])),
+                    *(
+                        measured(a.label, test, answers_for(root, a, corpora, "test", 0, []))
+                        for a in frontier
+                    ),
+                ]
+                frontier_own = [m for m in own if m.row.label.startswith("A,") and m.row.accuracy]
+                best = max(
+                    frontier_own,
+                    key=lambda m: m.row.accuracy.point if m.row.accuracy else 0.0,
+                    default=None,
+                )
+                best_arm = next((a for a in frontier if best and a.label == best.row.label), None)
+
+                def vrdu_union(c: str, level: str) -> list[str]:
+                    from legible.data.vrdu import headline_split_files, read_split
+
+                    files = [
+                        f
+                        for f in headline_split_files(c, level)  # type: ignore[arg-type]
+                        if f.endswith("SD_0.json")
+                    ]
+                    return sorted(
+                        {
+                            d
+                            for f in files
+                            for d in read_split(c, root / "raw" / "vrdu" / f).test  # type: ignore[arg-type]
+                        }
+                    )
+
+                pooled: list[Measured] = []
+                gap: list[tuple[str, Row, Row]] = []
+                if corpus in {"fara", "deepform"}:
+                    unseen_docs, mixed_docs = (
+                        vrdu_union(corpus, "unseen"),
+                        vrdu_union(corpus, "mixed"),
+                    )
+                    readers = [b_arm] + ([best_arm] if best_arm else [])
+                    for a in readers:
+                        unseen_answers = answers_for(
+                            root, a, [corpus], "test", 0, [], f"{corpus}-unseen"
+                        )
+                        u = row(a.label, unseen_docs, truth, unseen_answers)
+                        m = row(
+                            a.label,
+                            mixed_docs,
+                            truth,
+                            answers_for(root, a, [corpus], "test", 0, [], f"{corpus}-mixed"),
+                        )
+                        if u.accuracy and m.accuracy:
+                            gap.append((a.label, m, u))
+                        if corpus == "fara":
+                            pooled.append(Measured(u, unparsed(unseen_docs, unseen_answers)))
+                levels: tuple[int, ...] = ()
+                curve_pages = ""
+                curve: dict[str, dict[int, Row]] = {}
+                if corpus == "nist":
+                    levels = (0, 1, 2, 3, 4)
+                    docs = sorted(part_docs("nist", "curve"))
+                    curve_pages = f"NIST's {len(docs)} curve pages"
+                    me_label = own[0].row.label
+                    curve[me_label] = {}
+                    for lv in levels:
+                        found = run_answers(run_id, corpora, "test" if lv == 0 else "curve", lv)
+                        if found is not None:
+                            curve[me_label][lv] = row(me_label, docs, truth, found)
+                    if best_arm is not None:
+                        curve[best_arm.label] = {}
+                        for lv in levels:
+                            fa = answers_for(
+                                root, best_arm, corpora, "test" if lv == 0 else "curve", lv, []
+                            )
+                            if fa is not None:
+                                curve[best_arm.label][lv] = row(best_arm.label, docs, truth, fa)
+                elif corpus in {"fara", "deepform"}:
+                    levels = (0, 2, 4)
+                    docs = sorted(part_docs(corpus, "vrdu_curve") & set(test))
+                    curve_pages = (
+                        f"the {len(docs)} of its test documents in the VRDU curve subset, real "
+                        "scans"
+                    )
+                    me_label = own[0].row.label
+                    curve[me_label] = {}
+                    for lv in levels:
+                        found = run_answers(
+                            run_id, corpora, "test" if lv == 0 else "vrdu_curve", lv
+                        )
+                        if found is not None:
+                            curve[me_label][lv] = row(me_label, docs, truth, found)
+                seeds = []
+                for seed in (1, 2):
+                    other = (
+                        dataset.removesuffix("-s0") + f"-s{seed}"
+                        if dataset.endswith("-s0")
+                        else dataset
+                    )
+                    if corpus in {"fara", "deepform"}:
+                        _, _, other_test = _vrdu_split(other)
+                    else:
+                        other_test = test
+                    oid = chosen(size, other, seed=seed).run_id  # type: ignore[arg-type]
+                    r = row(f"seed {seed}", other_test, truth, run_answers(oid, corpora, "test", 0))
+                    if r.accuracy:
+                        seeds.append((seed, r))
+                gate = [g for g in gates if g.name.startswith(gate_spec + "-")]
+                gated_size = next(
+                    (
+                        s
+                        for g in gate
+                        for s in ("2b", "4b")
+                        if g.name.startswith(f"{gate_spec}-{s}-")
+                    ),
+                    None,
+                )
+                lp = f"{run_id}@logprobs"
+                dev_g = token_grades(
+                    dev,
+                    truth,
+                    [root / "runs" / "arm-b" / lp / "p1" / "level0" / c / "dev" for c in corpora],
+                )
+                test_g = token_grades(
+                    test,
+                    truth,
+                    [root / "runs" / "arm-b" / lp / "p1" / "level0" / c / "test" for c in corpora],
+                )
+                conf = (
+                    confidence(dev_g, review(dev_g, test_g) if test_g else None) if dev_g else None
+                )
+                facts = CardFacts(
+                    run_id=run_id,
+                    config=config,
+                    table=readme_table,
+                    schemas=[SCHEMAS[k] for k in (nist_faces if corpus == "nist" else [corpus])],
+                    prompt_version=sets[0][0].prompt_version,
+                    counts=counts,
+                    record=record,
+                    test_name=test_name,
+                    own=own,
+                    pooled=pooled,
+                    gap=gap,
+                    curve_levels=levels,
+                    curve_pages=curve_pages,
+                    curve=curve,
+                    seeds=seeds,
+                    gate=gate,
+                    gated_size=gated_size,
+                    confidence=conf,
+                )
+                path = out / f"{run_id}.md"
+                path.write_text(render(facts), encoding="utf-8", newline="\n")
+                acc = own[0].row.accuracy
+                written.append(
+                    f"{path}: {100 * acc.point:.1f}%"
+                    if acc and not math.isnan(acc.point)
+                    else str(path)
+                )
+    typer.echo("\n".join(written))
+
+
+@app.command("publish")
+def publish_command(
+    adapter: Path = typer.Argument(..., help="A finished run's adapter directory."),
+    repo: str | None = typer.Option(
+        None, help="The Hub repository. Default: legible-<run id> under the token's account."
+    ),
+    cards: Path = typer.Option(Path("docs/cards")),
+    public: bool = typer.Option(False, "--public", help="Create the repository public."),
+) -> None:
+    """Upload one adapter with its card to the Hugging Face Hub, private unless --public.
+    Reads the token from HF_TOKEN; refuses without a card for the run."""
+    import json as _json
+
+    from legible.publish import HubUploader, PublishRefused, publish
+
+    record = adapter / "run.json"
+    run_id = (
+        _json.loads(record.read_text(encoding="utf-8")).get("run_id") if record.exists() else None
+    )
+    card = cards / f"{run_id or adapter.parent.name}.md"
+    try:
+        from legible.publish import check
+
+        check(adapter, card)
+        done = publish(
+            adapter, card, repo or f"legible-{run_id}", HubUploader(), private=not public
+        )
+    except PublishRefused as refused:
+        typer.echo(f"refused: {refused}", err=True)
+        raise typer.Exit(1) from refused
+    typer.echo(
+        f"{done.repo_id} ({'private' if done.private else 'public'}): {len(done.files)} files, "
+        f"card sha256 {done.card_sha256}, {done.commit_url}"
+    )
+
+
 def main() -> None:
     app()
 
