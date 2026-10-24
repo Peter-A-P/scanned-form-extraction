@@ -110,6 +110,17 @@ def degrade(
     return page
 
 
+def skew_angle(page_id: str, level: int, *, base_seed: int = BASE_SEED) -> float:
+    """The degrees `degrade` turns a page by (counter-clockwise, about its centre) at a level:
+    the first draw of the same generator, so a field's box on the clean page can be placed on
+    the degraded one. The test suite holds it equal to what `degrade` does."""
+    spec = LEVELS[level]
+    if spec.skew <= 0:
+        return 0.0
+    rng = np.random.default_rng(seed_for(page_id, level, base_seed))
+    return float(rng.uniform(-spec.skew, spec.skew))
+
+
 def to_png(image: Image.Image) -> bytes:
     """PNG bytes with no metadata, so equal pixels are equal bytes."""
     buffer = io.BytesIO()

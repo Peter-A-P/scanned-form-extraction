@@ -273,7 +273,9 @@ intervals over documents and paired deltas between arms. The fine-tuned arm is G
 E4B with QLoRA on the page images; every model call, frontier and self-hosted, goes through the
 portfolio's gateway so cost per page has one ledger; the release gate from project 03 decides
 non-inferiority. The design, the data terms and the week-by-week order are in [PLAN.md](PLAN.md);
-the diagrams are in [docs/architecture.md](docs/architecture.md).
+the diagrams are in [docs/architecture.md](docs/architecture.md). The demo site, each arm's
+reads drawn on the pages at each scan quality beside these tables, is built by `legible site`
+([docs/site.md](docs/site.md)).
 
 ## Part of a portfolio
 

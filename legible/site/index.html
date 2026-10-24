@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forms That Read Themselves</title>
+<meta name="description" content="How well vision models, fine-tuned small models and OCR pipelines read scanned forms, field by field, on public pages with known answers.">
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Forms That Read Themselves</h1>
+    <p class="lede">Each way of reading a scanned form, measured on public pages with known answers:
+      which fields it gets right, what it costs a thousand pages, and how it holds up on a bad scan.
+      Every read on this site was made and graded beforehand; nothing is modelled in the browser
+      and nothing is uploaded.</p>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#pages" id="tab-pages">Pages</a>
+      <a href="#tables" id="tab-tables">Cost and review tables</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="pages" aria-labelledby="pages-h">
+    <h2 id="pages-h" class="vh">Pages</h2>
+    <div class="controls">
+      <div class="control" role="group" aria-label="Corpus" id="corpora"></div>
+      <label class="control">Page
+        <select id="page"></select>
+      </label>
+      <label class="control">Reader
+        <select id="arm"></select>
+      </label>
+      <div class="control level">
+        <label for="level">Scan quality: <strong id="level-name">level 0</strong></label>
+        <input type="range" id="level" min="0" max="4" step="1" value="0">
+        <span id="level-note" class="muted"></span>
+      </div>
+      <label class="control check"><input type="checkbox" id="labels" checked> Label wrong fields on the page</label>
+    </div>
+
+    <div class="viewer">
+      <figure class="page-figure">
+        <div id="sheets"></div>
+        <figcaption id="caption" class="muted"></figcaption>
+      </figure>
+      <aside class="fields" aria-labelledby="fields-h">
+        <h3 id="fields-h">Fields</h3>
+        <p id="summary"></p>
+        <p class="legend"><span class="key ok">right</span> <span class="key bad">wrong</span>
+          Truth is the corpus label; grading is the project's grader, run before the site was built.</p>
+        <label class="check"><input type="checkbox" id="wrong-only"> Wrong fields only</label>
+        <ol id="field-list" class="field-list"></ol>
+        <h4 id="unplaced-h">Not on the page image</h4>
+        <p class="muted" id="unplaced-note">Fields the corpus gives no location for, values the truth does not carry, and fields on pages not shown.</p>
+        <ol id="unplaced" class="field-list"></ol>
+      </aside>
+    </div>
+
+    <section class="arms" aria-labelledby="arms-h">
+      <h3 id="arms-h">Every reader, this scan quality</h3>
+      <p class="muted" id="arms-note"></p>
+      <table class="data">
+        <thead><tr><th scope="col">Reader</th><th scope="col">This page</th><th scope="col" id="curve-col">Fields correct over the curve pages (95% CI)</th><th scope="col" class="bar-col" aria-hidden="true"></th></tr></thead>
+        <tbody id="arms-body"></tbody>
+      </table>
+    </section>
+  </section>
+
+  <section id="tables" aria-labelledby="tables-h" hidden>
+    <h2 id="tables-h">Cost and review tables</h2>
+    <p class="muted">The same numbers as the repository's README, from the same function. Intervals are 95% bootstrap over documents; each cost carries the date of the price it was computed at. FARA's registration forms name individuals, so they appear here as numbers and never as images.</p>
+    <div id="tables-body"></div>
+  </section>
+</main>
+
+<footer class="wrap muted">
+  <p>Pages shown: NIST Special Database 2 (synthesised 1988 tax forms), CORD v2 receipts (CC BY 4.0), and DeepForm ad-buy forms from Google's VRDU benchmark (FCC public files). Eight test pages per corpus, drawn by a fixed seed from sorted ids, never by how a reader did. <span id="built"></span></p>
+</footer>
+</body>
+</html>
