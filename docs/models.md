@@ -111,6 +111,10 @@ Two settings came out of dev:
   91.8% at level 4, a vendor outage drawn as a degradation. An unanswered read holds no answer,
   so asking again chooses nothing: `legible read retry-missing` sets such reads aside (kept in
   the run's `missing.jsonl`) and the next submit sends them again. It refuses dev and test.
+- **Gemini's inline batch cap.** Gemini takes a batch inline up to 20 MiB of body. One DeepForm
+  order of the VRDU curve subset, five pages at level 4, came to 22.7 MB on its own (a level-4
+  page's noise does not compress), so it was read synchronously at the standard price, which
+  the ledger records (2026-10-24); its batch-mates were read in batches as everywhere else.
 - **NIST's output budget.** On NIST dev, at 3,072 output tokens, the fields came out at 92.1%
   for GPT-6.1 Sol, 83.6% for Sonnet 5.5, 64.3% for Haiku 5.5, 63.8% for Gemini 3.8 Flash and
   38.8% for Sonnet on the OCR text, and every answer that did not parse had been cut off at
