@@ -13,10 +13,14 @@
 # Monthly 215 from 190, and the portfolio 775 from 750, on 2026-10-22, approved by Peter: the
 # NIST curve came in above its estimate, and the repeat, VRDU-curve and Opus 5.5 ceiling
 # subsets need about US$25 more to finish in October.
+# Monthly 365 from 215, daily 80 from 40, and the portfolio 925 from 775, on 2026-10-24,
+# approved by Peter: arm F, Azure Document Intelligence, on the headline test sets and the NIST
+# curve, about US$140 at US$30 a 1,000 custom pages (PLAN.md section 7). The per-run cap stays
+# at US$25; no arm F run is over US$20.
 version: 1
-portfolio_monthly_usd: 775
+portfolio_monthly_usd: 925
 projects:
   legible:
-    monthly_usd: 215
+    monthly_usd: 365
     per_run_usd: 25
-    daily_usd: 40
+    daily_usd: 80
