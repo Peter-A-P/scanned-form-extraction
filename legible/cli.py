@@ -16,9 +16,12 @@ from legible.data.render import PageEntry
 from legible.degrade import LEVELS, degrade, to_png
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from legible.arms.read_run import RunSpec
+    from legible.bench.run import LoadRun
     from legible.prompt import Prompt
-    from legible.report import Truth
+    from legible.report import Row, Truth
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -384,7 +387,6 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     from legible.report import (
         ARMS,
         PRICE_LIST_DATE,
-        Row,
         answers_for,
         curve,
         row,
@@ -423,54 +425,41 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         "`legible report`; do not edit.",
         "",
     ]
+    headline: dict[str, list[Row]] = {
+        "fara": vrdu_rows("fara", "unseen"),
+        "deepform": vrdu_rows("deepform", "unseen"),
+    }
     body += table(
-        "FARA registration forms, templates never seen in training (headline)",
-        vrdu_rows("fara", "unseen"),
+        "FARA registration forms, templates never seen in training (headline)", headline["fara"]
     )
     body += table(
         "DeepForm ad-buy forms, templates never seen in training (headline)",
-        vrdu_rows("deepform", "unseen"),
+        headline["deepform"],
     )
-    body += table(
-        "CORD receipts, test set",
-        [
-            row(
-                a.label,
-                cord_test,
-                truth,
-                answers_for(
-                    root,
-                    a,
-                    ["cord"],
-                    "test",
-                    0,
-                    [e_dir / "level0" / "cord" / "test.jsonl"],
-                    "cord",
-                ),
-            )
-            for a in ARMS
-        ],
-    )
-    body += table(
-        "NIST tax forms, 500 test faces",
-        [
-            row(
-                a.label,
-                nist_test,
-                truth,
-                answers_for(
-                    root,
-                    a,
-                    nist_faces,
-                    "test",
-                    0,
-                    [e_dir / "level0" / "nist" / "test.jsonl"],
-                    "nist",
-                ),
-            )
-            for a in ARMS
-        ],
-    )
+    headline["cord"] = [
+        row(
+            a.label,
+            cord_test,
+            truth,
+            answers_for(
+                root, a, ["cord"], "test", 0, [e_dir / "level0" / "cord" / "test.jsonl"], "cord"
+            ),
+        )
+        for a in ARMS
+    ]
+    body += table("CORD receipts, test set", headline["cord"])
+    headline["nist"] = [
+        row(
+            a.label,
+            nist_test,
+            truth,
+            answers_for(
+                root, a, nist_faces, "test", 0, [e_dir / "level0" / "nist" / "test.jsonl"], "nist"
+            ),
+        )
+        for a in ARMS
+    ]
+    body += table("NIST tax forms, 500 test faces", headline["nist"])
     body += table(
         "FARA, templates seen in training (the gap beside the headline)", vrdu_rows("fara", "mixed")
     )
@@ -506,7 +495,9 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 rules = (
                     [e_dir / "level0" / c / f"{Path(f).stem}-test.jsonl" for f in files]
                     if lv == 0
-                    else [e_dir / f"level{lv}" / c / "vrdu_curve.jsonl"]
+                    else [
+                        e_dir / f"level{lv}" / c / f"{Path(f).stem}-vrdu_curve.jsonl" for f in files
+                    ]
                 )
                 found = answers_for(root, a, [c], part, lv, rules, f"{c}-unseen")
                 if found is not None:
@@ -696,17 +687,95 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
                 TOKEN_MISS,
             ),
         ]
+    body += _serving_section(root, headline)
     body += [
         "Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held "
         "to the schema's grammar, the fine-tunes left their trained format: docs/training.md), "
         "and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured "
         "wall time of each read pass. "
         "B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are "
-        "the training variance. Not yet measured: latency, which batch reads do not give.",
+        "the training variance. Latency is the fine-tunes' alone: the frontier models were "
+        "read in batches, whose only latency is the batch's (docs/serving.md).",
     ]
     text = readme.read_text(encoding="utf-8")
     readme.write_text(splice(text, body), encoding="utf-8", newline="\n")
     typer.echo("\n".join(body))
+
+
+#: The corpus a load-tested fine-tune's run id names, and how the tables call it.
+_BENCH_CORPORA = {
+    "fara": "FARA",
+    "deepform": "DeepForm",
+    "cord": "CORD",
+    "nist": "NIST",
+}
+
+
+def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[str]:
+    """The load test's latency table and, per corpus, the break-even of the fine-tune the gate
+    compared (the better on dev) against each frontier vision model (legible/bench/tables.py)."""
+    from legible.bench.run import read as read_load
+    from legible.bench.tables import breakeven_table, latency_table
+    from legible.report import ARMS
+
+    runs: dict[str, LoadRun] = {}
+    for p in sorted((root / "bench").glob("*/bench.json")):
+        runs[p.parent.name] = read_load(p.parent)
+    if not runs:
+        return ["**Latency and break-even**: not yet measured.", ""]
+
+    def corpus_of(model: str) -> str:
+        return model.split("-")[1]
+
+    def label(model: str) -> str:
+        size = "E2B" if model.startswith("2b") else "E4B"
+        extra = " (amendment template)" if corpus_of(model) == "fara" else ""
+        return f"{size}, {_BENCH_CORPORA[corpus_of(model)]}{extra}"
+
+    ordered = sorted(runs, key=lambda m: (list(_BENCH_CORPORA).index(corpus_of(m)), m))
+    any_run = runs[ordered[0]]
+    out = [
+        "**Latency and throughput of the fine-tunes**, one served at a time on one "
+        f"{any_run.price.gpu} (US${any_run.price.usd_per_hour:.2f} an hour, "
+        f"{any_run.price.provider}, {any_run.price.checked.isoformat()}), read through the "
+        "gateway by 06's closed-loop client on the model's own test documents at level 0, the "
+        "accuracy runs' requests cycled in order (docs/serving.md). A read is one document, "
+        "every page of it; latency is per read, intervals are 95% bootstrap over reads, and "
+        "the first 30 seconds of each level are discarded.",
+        "",
+        *latency_table([(label(m), runs[m]) for m in ordered]),
+    ]
+    frontier = [a for a in ARMS if a.arm == "a"]
+    gate_sizes = {
+        p.name.split("-")[1]: p.name.split("-")[3]
+        for p in Path("gate-runs").glob("legible-*-vs-best")
+        if p.name.split("-")[2] in {"unseen", "test"}
+    }
+    for corpus, name in _BENCH_CORPORA.items():
+        size = gate_sizes.get(corpus)
+        model = next(
+            (m for m in ordered if corpus_of(m) == corpus and m.startswith(size or "")), None
+        )
+        if model is None or size is None:
+            continue
+        rows = {r.label: r for r in headline.get(corpus, [])}
+        api = [
+            (a.label.removeprefix("A, ").removesuffix(" on the image"), r.per_thousand.point / 1000)
+            for a in frontier
+            if (r := rows.get(a.label)) is not None and r.per_thousand is not None
+        ]
+        out += [
+            f"**Break-even, {name}: pages a month at which renting the card for the {label(model)} "
+            "fine-tune costs no more than paying each frontier model by the page**, over the "
+            "share of the month the card is kept busy. 06's arithmetic (legible/bench/"
+            "breakeven.py): whole cards rented all month, a month of 730.5 hours, no fixed "
+            "costs, the fine-tune at its best measured throughput and each frontier model at "
+            "its headline test cost. It says nothing about accuracy, which the tables above "
+            "do.",
+            "",
+            *breakeven_table(runs[model], api),
+        ]
+    return out
 
 
 gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")
@@ -1013,7 +1082,9 @@ def rules_learn_nist() -> None:
 @rules_app.command("run")
 def rules_run(
     corpus: str = typer.Argument(..., help="fara, deepform, cord or nist."),
-    part: str = typer.Option("dev", help="dev or test (NIST also curve). Test is run once."),
+    part: str = typer.Option(
+        "dev", help="dev or test (NIST also curve, FARA and DeepForm vrdu_curve). Test is run once."
+    ),
     level: int = typer.Option(0, min=0, max=len(LEVELS) - 1),
 ) -> None:
     """Answer every document of a part from its stored OCR, one run per split file (NIST:
@@ -1045,6 +1116,19 @@ def rules_run(
         typer.echo(f"cord {part}: {n} documents")
         return
     raw = data_root() / "raw" / "vrdu"
+    if part == "vrdu_curve":
+        # The subset is the seed-0 unseen-template test documents; each is read with the rules
+        # of the split file it is a test document of, as at level 0.
+        subset = part_docs(corpus, "vrdu_curve")
+        for p in headline_split_files(corpus, "unseen"):  # type: ignore[arg-type]
+            if not p.endswith("SD_0.json"):
+                continue
+            split = read_split(corpus, raw / p)  # type: ignore[arg-type]
+            docs = [d for d in split.test if d in subset]
+            out = out_dir / f"{Path(p).stem}-{part}.jsonl"
+            n = run(data_root(), corpus, docs, pages, rule_sets_for(corpus, split), level, out)
+            typer.echo(f"{Path(p).stem} {part} level {level}: {n} documents")
+        return
     attr = {"dev": "valid", "test": "test"}[part]
     for split_level in ("unseen", "mixed"):
         for p in headline_split_files(corpus, split_level):  # type: ignore[arg-type]

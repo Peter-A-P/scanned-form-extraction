@@ -73,10 +73,16 @@ async def closed_loop(
     total: int,
     purpose: str,
     run_id: str,
+    seconds: float = 0.0,
     clock: Callable[[], float] = time.monotonic,
 ) -> tuple[list[RequestTiming], list[int], int, int]:
-    """Send `total` reads with `concurrency` in flight, cycling `requests` (each a request and
-    its page count) in order. Returns timings, their page counts, retries and the peak."""
+    """Send at least `total` reads with `concurrency` in flight, and keep sending until
+    `seconds` have passed since the first, cycling `requests` (each a request and its page
+    count) in order. Returns timings, their page counts, retries and the peak.
+
+    The duration is what 06's calls did not need: a CORD receipt at 32 in flight returns in
+    under three seconds, so 320 reads were over in half a minute, and a 30-second warm-up left
+    28 of them to measure (2026-10-23)."""
     if concurrency < 1 or total < 1:
         raise ValueError("concurrency and total must both be at least one")
     if not requests:
@@ -84,9 +90,10 @@ async def closed_loop(
     timings: list[RequestTiming] = []
     pages: list[int] = []
     counters = {"next": 0, "in_flight": 0, "peak": 0, "retried": 0}
+    start = clock()
 
     async def worker() -> None:
-        while counters["next"] < total:
+        while counters["next"] < total or clock() - start < seconds:
             index = counters["next"]
             counters["next"] += 1
             request, n_pages = requests[index % len(requests)]
@@ -143,6 +150,7 @@ def run_level(
     purpose: str,
     run_id: str,
     warmup_seconds: float = 0.0,
+    seconds: float = 0.0,
     runner: asyncio.Runner | None = None,
 ) -> LevelResult:
     """One concurrency level, run to completion and summarised. `runner` is the event loop a
@@ -157,6 +165,7 @@ def run_level(
             total=total,
             purpose=purpose,
             run_id=run_id,
+            seconds=seconds,
         )
     )
     try:

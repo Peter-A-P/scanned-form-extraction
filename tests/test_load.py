@@ -140,6 +140,7 @@ def test_the_sweep_writes_every_level_and_reads_back(tmp_path: Path) -> None:
         levels=(8, 1),
         warmup_seconds=0.0,
         total=lambda c: 4 * c,
+        measured_seconds=0.0,
     )
     again = read(tmp_path)
     assert isinstance(again, LoadRun)
@@ -151,3 +152,81 @@ def test_the_sweep_writes_every_level_and_reads_back(tmp_path: Path) -> None:
 def test_a_level_is_at_least_a_hundred_reads_and_ten_rounds() -> None:
     assert requests_per_level(1) == 100
     assert requests_per_level(32) == 320
+
+
+def _level(concurrency: int, pages: tuple[int, ...], seconds: float = 2.0) -> Any:
+    from legible.bench.client import LevelResult
+    from legible.bench.load import summarise
+
+    timings = tuple(
+        RequestTiming(
+            sent_at=i * seconds,
+            first_token_at=i * seconds + 0.1,
+            done_at=(i + 1) * seconds,
+            output_tokens=10,
+            ok=True,
+            input_tokens=100,
+        )
+        for i in range(len(pages))
+    )
+    return LevelResult(
+        concurrency=concurrency,
+        timings=timings,
+        pages=pages,
+        retried=0,
+        max_in_flight=concurrency,
+        summary=summarise(timings, concurrency=concurrency),
+    )
+
+
+def _run(*levels: Any) -> LoadRun:
+    return LoadRun(
+        model="4b-cord-v1120-s0-x",
+        corpus="cord",
+        documents=4,
+        price=PRICE,
+        warmup_seconds=0.0,
+        started_at=dt.datetime(2026, 10, 23, tzinfo=dt.UTC),
+        levels=levels,
+    )
+
+
+def test_the_throughput_interval_is_around_the_pages_over_the_window() -> None:
+    from legible.bench.tables import throughput
+
+    level = _level(1, (1, 2, 3, 2) * 10)
+    m = throughput(level, warmup_seconds=0.0)
+    assert m.point == pytest.approx(pages_per_second(level, warmup_seconds=0.0))
+    assert m.low < m.point < m.high
+
+
+def test_a_card_dearer_per_page_than_the_api_never_breaks_even() -> None:
+    from legible.bench.tables import breakeven_table
+
+    # One page every two seconds on a US$0.50 card is US$0.28 a 1,000 pages at full use, so
+    # an API at US$0.10 a 1,000 never loses to it, and one at US$5 does at one month's rent.
+    lines = breakeven_table(_run(_level(1, (1,) * 20)), [("cheap", 0.0001), ("dear", 0.005)])
+    rows = [line for line in lines if line.startswith("| 50%")]
+    assert rows and "never" in rows[0]
+    assert "73,050" in rows[0]  # 0.50 * 730.5 / 0.005
+
+
+def test_the_latency_table_has_a_row_per_level() -> None:
+    from legible.bench.tables import latency_table
+
+    lines = latency_table([("E4B, CORD", _run(_level(8, (1,) * 20), _level(1, (2,) * 20)))])
+    body = [line for line in lines if line.startswith("| E4B")]
+    assert [line.split("|")[2].strip() for line in body] == ["1", "8"]
+
+
+def test_a_level_keeps_reading_until_its_duration_has_passed() -> None:
+    ticks = iter(range(1000))
+    server = FakeServer(delay=0.0)
+    timings, _, _, _ = asyncio.run(
+        closed_loop(
+            server, [(_request(), 1)], concurrency=1, total=2, purpose="p", run_id="r",
+            seconds=10, clock=lambda: float(next(ticks)),
+        )
+    )  # fmt: skip
+    # Two clock reads a read and one at the start: the loop stops once ten ticks have passed.
+    assert 2 < len(timings) <= 6

@@ -10,8 +10,9 @@ cost.
 What changes from 06 is the number of reads a level takes. 06's calls took a second or two;
 a read here is a document of up to twelve page images and an answer of up to a few thousand
 tokens, and a DeepForm order at one in flight takes most of a minute. A level is 100 reads,
-or ten rounds of the loop if more, so the p99 at one in flight is close to the maximum and
-its interval says so.
+or ten rounds of the loop if more, and runs for at least three minutes after its 30-second
+warm-up, so a fast corpus is measured at steady state and a slow one still has a p99 that its
+interval qualifies.
 """
 
 from __future__ import annotations
@@ -33,6 +34,8 @@ RECORD: Final = "bench.json"
 LEVELS: Final = (1, 8, 32)
 MIN_REQUESTS: Final = 100
 ROUNDS: Final = 10
+#: Seconds each level runs for after its warm-up, at least.
+MEASURED_SECONDS: Final = 180.0
 
 
 class LoadRun(BaseModel):
@@ -80,6 +83,7 @@ def sweep(
     levels: Sequence[int] = LEVELS,
     warmup_seconds: float = 30.0,
     total: Callable[[int], int] = requests_per_level,
+    measured_seconds: float = MEASURED_SECONDS,
     on_level: Callable[[LevelResult], None] | None = None,
 ) -> LoadRun:
     """Every level in turn, lowest first, the record rewritten after each, so a pod lost at
@@ -107,6 +111,7 @@ def sweep(
                 purpose=model,
                 run_id=f"load-{model}-c{concurrency}",
                 warmup_seconds=warmup_seconds,
+                seconds=warmup_seconds + measured_seconds,
                 runner=runner,
             )
             record = record.model_copy(update={"levels": (*record.levels, result)})

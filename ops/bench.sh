@@ -2,7 +2,7 @@
 # The load test on the GPU pod: each fine-tune named is merged, served by vLLM and read by the
 # closed-loop client at 1, 8 and 32 in flight on its own test documents (legible bench run).
 #
-#   GPU="RTX 3090" RATE=0.46 CHECKED=2026-10-23 bash ops/bench.sh RUN_ID [RUN_ID ...]
+#   GPU="RTX 3090" RATE=0.50 CHECKED=2026-10-23 bash ops/bench.sh RUN_ID [RUN_ID ...]
 #
 # RATE is the pod's costPerHr as RunPod's API returned it at creation, CHECKED that day. Each
 # model's record is synced to the volume as soon as it finishes, so a lost pod keeps what it
@@ -10,6 +10,9 @@
 set -euo pipefail
 : "${VOLUME_ID:?}" "${DATACENTER:?}" "${GPU:?}" "${RATE:?}" "${CHECKED:?}"
 source /root/s3.env
+# Newer botocore asks for response checksums, and RunPod's S3 refused a 6 GB GetObject
+# with "Invalid object path" until it was told to ask only when required (2026-10-23).
+export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required AWS_REQUEST_CHECKSUM_CALCULATION=when_required
 export LEGIBLE_DATA="${LEGIBLE_DATA:-/root/legible-data}" HF_HOME=/root/hf PYTHONUNBUFFERED=1
 cd "$(dirname "$0")/.."
 export PATH="$PWD/.venv/bin:$PATH"
