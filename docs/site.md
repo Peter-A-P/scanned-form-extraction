@@ -104,6 +104,9 @@ It grades every run the report grades (the tables), then the chosen pages. It re
 root and writes nothing there. Rebuild whenever `legible report` would change the README.
 `uv run legible site --data-only` rewrites the site's own files and its results and story into
 a built `site/out/`, keeping its pages: a minute rather than six, for work on the front page.
+Inside a OneDrive folder the rebuild can fail with `Access is denied` on `site/out/data/pages`
+while the sync client holds the folder it is deleting; build outside it with
+`--out C:/Users/peter/legible-site-out` and deploy that directory (2026-10-25).
 
 ## Look at it locally
 
