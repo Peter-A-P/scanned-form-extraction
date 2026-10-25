@@ -57,3 +57,6 @@ site/out/
 Thumbs.db
 .vscode/
 .idea/
+
+# Claude Code session state (worktrees, local settings)
+.claude/

@@ -97,7 +97,7 @@ never on how any arm did. Images are JPEG at 1,000 pixels wide.
 ## Build it
 
 ```powershell
-$env:LEGIBLE_DATA = "C:/Users/peter/legible-data"   # where the runs are
+$env:LEGIBLE_DATA = "<data root>"   # where the runs are
 uv run legible site                                  # writes site/out/, about 6 minutes
 ```
 
@@ -107,7 +107,7 @@ root and writes nothing there. Rebuild whenever `legible report` would change th
 a built `site/out/`, keeping its pages: a minute rather than six, for work on the front page.
 Inside a OneDrive folder the rebuild can fail with `Access is denied` on `site/out/data/pages`
 while the sync client holds the folder it is deleting; build outside it with
-`--out C:/Users/peter/legible-site-out` and deploy that directory (2026-10-25).
+`--out <a folder outside OneDrive>` and deploy that directory (2026-10-25).
 
 ## Look at it locally
 

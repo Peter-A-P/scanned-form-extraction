@@ -58,7 +58,7 @@ one run. The 4B's full-volume run was stopped at step 34 of 463.
 
 Seed 1 of the 4B on FARA's Short-Form template and seed 1 of the 4B on DeepForm's unseen
 templates wrap their answers in the prompt's JSON schema: `{"type":"object","properties":
-{"registrant_name":"Charles N. Conconi",...}}` instead of the record itself. 294 of the 300
+{"registrant_name":"<the name>",...}}` instead of the record itself. 294 of the 300
 FARA test answers and 132 of the 157 DeepForm ones have that shape; the values inside are
 often right, but the record is not where the grader reads it, so the two runs score 0.9% and
 8.0% of fields correct, far below the same configuration at seeds 0 and 2. The grader is not
