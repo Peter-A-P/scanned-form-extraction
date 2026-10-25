@@ -765,6 +765,7 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     ]
     for rv in results.reviews:
         body += [f"**{rv.title}** {rv.note}", "", *review_table(rv.rows, rv.miss)]
+    body += _subsets_section(root, truth)
     headline_keys = ("fara-unseen", "deepform-unseen", "cord", "nist")
     body += _serving_section(
         root, {t.key.split("-")[0]: t.rows for t in results.tables if t.key in headline_keys}
@@ -778,9 +779,90 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
         "the training variance. Latency is the fine-tunes' alone: the frontier models were "
         "read in batches, whose only latency is the batch's (docs/serving.md).",
     ]
+    builds = [
+        json.loads(p.read_text("utf-8")).get("model", {}).get("trainingHours")
+        for p in (root / "docintel" / "meta").glob("*-build.json")
+    ]
+    hours = sum(h for h in builds if isinstance(h, (int, float)))
+    if builds:
+        body[-1] += (
+            f" Arm F is costed per page at Azure's prices read 2026-10-24, through the gateway; "
+            f"its {len(builds)} custom models took {hours:.2f} training hours, US$"
+            f"{max(0.0, hours - 10) * 3:.2f} past the ten free a month at US$3 an hour, which, "
+            "like arm B's training, is not in the cost per page (docs/docintel.md)."
+        )
     text = readme.read_text(encoding="utf-8")
     readme.write_text(splice(text, body), encoding="utf-8", newline="\n")
     typer.echo("\n".join(body))
+
+
+def _subsets_section(root: Path, truth: Mapping[str, Truth]) -> list[str]:
+    """The ceiling and the noise floor (legible/data/subsets.py): Opus 5.5 beside Sonnet 5.5
+    on the ceiling subset, and Sonnet 5.5's second read of the repeat subset beside its first,
+    with the share of fields whose outcome changed between them."""
+    from legible.grade import grade_document
+    from legible.report import ARMS, Arm, answers_for, pct, row, usd
+    from legible.schema.corpora import NIST_SCHEMAS
+    from legible.stats import ratio_ci
+
+    sonnet = ARMS[0]
+    opus = Arm("A, Claude Opus 5.5 on the image", "a", "ceiling")
+    nist_faces = sorted(NIST_SCHEMAS)
+    corpora = (("fara", "FARA", ["fara"]), ("deepform", "DeepForm", ["deepform"]),
+               ("cord", "CORD", ["cord"]), ("nist", "NIST", nist_faces))  # fmt: skip
+    out = [
+        "**The ceiling: Claude Opus 5.5, the dearest Anthropic model, on a subset of the "
+        "headline test documents, beside Sonnet 5.5's reads of the same documents** "
+        "(legible/data/subsets.py; batch rate; fields correct with 95% CI over documents).",
+        "",
+        "| Corpus | Documents | Opus 5.5 | Sonnet 5.5 | Opus cost per 1,000 pages | Sonnet cost |",
+        "|---|---:|---|---|---|---|",
+    ]
+    for family, name, cs in corpora:
+        docs = sorted(part_docs(family, "ceiling"))
+        o = answers_for(root, opus, cs, "ceiling", 0, [])
+        q = answers_for(root, sonnet, cs, "test", 0, [])
+        ro, rq = row(opus.label, docs, truth, o), row(sonnet.label, docs, truth, q)
+        have = len(docs) - ro.missing
+        n = f"{have}" + (f" of {len(docs)}" if ro.missing else "")
+        out.append(
+            f"| {name} | {n} | {pct(ro.accuracy)} | {pct(rq.accuracy)} | {usd(ro.per_thousand)} "
+            f"| {usd(rq.per_thousand)} |"
+        )
+    out += [
+        "",
+        "**The noise floor: Sonnet 5.5 reading the repeat subset a second time**, the same "
+        "request at the vendor's default sampling, days after the first. A difference between "
+        "two arms smaller than the share of fields one arm changes on itself is not a "
+        "difference.",
+        "",
+        "| Corpus | Documents | First read | Second read | Fields whose outcome changed |",
+        "|---|---:|---|---|---|",
+    ]
+    for family, name, cs in corpora:
+        docs = sorted(part_docs(family, "repeat"))
+        first = answers_for(root, sonnet, cs, "test", 0, [])
+        second = answers_for(root, sonnet, cs, "repeat", 0, [])
+        r1, r2 = row(sonnet.label, docs, truth, first), row(sonnet.label, docs, truth, second)
+        changed: list[float] = []
+        fields: list[float] = []
+        for d in docs:
+            if first is None or second is None or d not in first.outputs or d not in second.outputs:
+                continue
+            t = truth[d]
+            g1, g2 = (
+                grade_document(t.schema, d, t.record, a.outputs[d], page_text=t.text,
+                               alternatives=t.alternatives)
+                for a in (first, second)
+            )  # fmt: skip
+            o1 = {(o.path, o.index): o.correct for o in g1.outcomes}
+            o2 = {(o.path, o.index): o.correct for o in g2.outcomes}
+            keys = set(o1) | set(o2)
+            changed.append(float(sum(o1.get(k) != o2.get(k) for k in keys)))
+            fields.append(float(len(keys)))
+        flip = pct(ratio_ci(changed, fields)) if fields else "not yet measured"
+        out.append(f"| {name} | {len(fields)} | {pct(r1.accuracy)} | {pct(r2.accuracy)} | {flip} |")
+    return [*out, ""]
 
 
 #: The corpus a load-tested fine-tune's run id names, and how the tables call it.
@@ -828,7 +910,7 @@ def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[
         "",
         *latency_table([(label(m), runs[m]) for m in ordered]),
     ]
-    frontier = [a for a in ARMS if a.arm == "a"]
+    frontier = [a for a in ARMS if a.arm in {"a", "f"}]
     gate_sizes = {
         p.name.split("-")[1]: p.name.split("-")[3]
         for p in Path("gate-runs").glob("legible-*-vs-best")
@@ -843,13 +925,16 @@ def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[
             continue
         rows = {r.label: r for r in headline.get(corpus, [])}
         api = [
-            (a.label.removeprefix("A, ").removesuffix(" on the image"), r.per_thousand.point / 1000)
+            (
+                a.label.removeprefix("A, ").removeprefix("F, ").removesuffix(" on the image"),
+                r.per_thousand.point / 1000,
+            )
             for a in frontier
             if (r := rows.get(a.label)) is not None and r.per_thousand is not None
         ]
         out += [
             f"**Break-even, {name}: pages a month at which renting the card for the {label(model)} "
-            "fine-tune costs no more than paying each frontier model by the page**, over the "
+            "fine-tune costs no more than paying each frontier model, or Azure Document Intelligence, by the page**, over the "
             "share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/"
             "bench/breakeven.py): whole cards rented all month, each frontier model at its "
             "headline test cost from the ledger. Below the utilisation given it never breaks "

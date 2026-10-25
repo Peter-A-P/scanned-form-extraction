@@ -33,6 +33,18 @@ percent accuracy, how many fields still need a person.
 - **The cheapest frontier model is close on clean, printed forms.** Claude Haiku 5.5 reads
   84.5% of the tax forms' fields against Sonnet's 86.7%, at US$1.12 a thousand pages against
   US$16.38.
+- **The managed document service reads no better than the fine-tunes, at the highest price
+  per page.** Azure AI Document Intelligence, a custom neural model trained on each split's
+  documents, gets 68.9% of FARA's unseen-template fields (the 2B: 69.0%) and 72.5% of the tax
+  forms' (the 2B: 73.6%) at US$30 a thousand pages, against US$0.18 to 2.96 for the frontier
+  vision models on FARA and US$1.12 to 16.38 on the tax forms; its prebuilt receipt model gets 66.6% of CORD's at US$10, and DeepForm's line items pull it
+  to 40.5% there ([docs/docintel.md](docs/docintel.md)). A bad scan costs it more than a vision
+  model: 72.9% to 63.4% of the NIST curve's fields from level 0 to level 4.
+- **The dearest model buys accuracy only on some forms.** Claude Opus 5.5, at about twice
+  Sonnet's price, reads 93.5% of the ceiling subset's receipt fields against Sonnet's 83.8% and
+  94.1% of its tax-form fields against 85.4%, and is no better on FARA or DeepForm. Sonnet
+  reading the same pages twice changes 0.3% to 7.3% of its field outcomes, so a gap of a point
+  or two between arms on one corpus is inside that noise.
 
 ## The honest limitation
 
@@ -67,6 +79,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 66.8% (65.3 to 68.3) | 14.3% (12.1 to 16.6) | 13.2% (12.3 to 14.2) | US$0.07 (0.07 to 0.08) | 900 |
 | C, Gemma 4 E2B untuned on the image | 62.2% (60.7 to 63.7) | 10.7% (8.7 to 12.8) | 8.4% (7.6 to 9.3) | US$0.06 (0.06 to 0.06) | 900 |
 | C, Gemma 4 E4B untuned on the image | 70.8% (69.1 to 72.4) | 27.4% (24.6 to 30.3) | 9.3% (8.4 to 10.2) | US$0.09 (0.09 to 0.09) | 900 |
+| F, Azure Document Intelligence | 68.9% (67.5 to 70.4) | 20.8% (18.1 to 23.4) | 3.1% (2.6 to 3.6) | US$30.00 (30.00 to 30.00) | 900 |
 
 **DeepForm ad-buy forms, templates never seen in training (headline)**
 
@@ -82,6 +95,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 59.6% (53.7 to 65.3) | 3.1% (0.6 to 6.3) | 7.6% (5.4 to 10.3) | US$0.19 (0.17 to 0.20) | 159 |
 | C, Gemma 4 E2B untuned on the image | 20.4% (17.1 to 23.9) | 0.0% (0.0 to 0.0) | 8.2% (5.8 to 11.0) | US$0.13 (0.12 to 0.14) | 159 |
 | C, Gemma 4 E4B untuned on the image | 47.2% (42.6 to 51.9) | 0.0% (0.0 to 0.0) | 13.5% (10.4 to 16.9) | US$0.22 (0.20 to 0.24) | 159 |
+| F, Azure Document Intelligence | 40.5% (37.0 to 44.3) | 0.6% (0.0 to 1.9) | 3.1% (2.1 to 4.2) | US$30.00 (30.00 to 30.00) | 159 |
 
 **CORD receipts, test set**
 
@@ -97,6 +111,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 77.6% (71.5 to 83.3) | 30.0% (21.0 to 39.0) | 0.9% (0.4 to 1.5) | US$0.16 (0.16 to 0.16) | 100 |
 | C, Gemma 4 E2B untuned on the image | 40.7% (36.8 to 44.6) | 0.0% (0.0 to 0.0) | 9.8% (8.1 to 11.6) | US$0.14 (0.14 to 0.14) | 100 |
 | C, Gemma 4 E4B untuned on the image | 60.0% (54.6 to 65.2) | 3.0% (0.0 to 7.0) | 9.9% (8.3 to 11.8) | US$0.19 (0.19 to 0.19) | 100 |
+| F, Azure Document Intelligence | 66.6% (60.5 to 72.1) | 2.0% (0.0 to 5.0) | 0.4% (0.1 to 0.7) | US$10.00 (10.00 to 10.00) | 100 |
 
 **NIST tax forms, 500 test faces**
 
@@ -112,6 +127,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 74.2% (70.9 to 77.2) | 24.8% (21.0 to 28.6) | 3.3% (2.7 to 4.0) | US$0.64 (0.60 to 0.67) | 500 |
 | C, Gemma 4 E2B untuned on the image | 15.0% (13.7 to 16.4) | 0.0% (0.0 to 0.0) | 27.9% (25.3 to 30.4) | US$0.41 (0.39 to 0.43) | 500 |
 | C, Gemma 4 E4B untuned on the image | 16.0% (14.5 to 17.7) | 0.0% (0.0 to 0.0) | 27.3% (24.7 to 30.0) | US$0.69 (0.65 to 0.73) | 500 |
+| F, Azure Document Intelligence | 72.5% (70.5 to 74.4) | 6.8% (4.6 to 9.0) | 0.6% (0.4 to 0.8) | US$30.00 (30.00 to 30.00) | 500 |
 
 **FARA, templates seen in training (the gap beside the headline)**
 
@@ -149,7 +165,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 |---|---|---|---|---|---|
 | A, Claude Sonnet 5.5 on the image | 87.9% (85.8 to 89.9) | 86.9% (84.8 to 88.9) | 86.5% (84.1 to 88.8) | 87.0% (84.9 to 89.0) | 85.7% (83.5 to 87.8) |
 | A, Claude Haiku 5.5 on the image | 86.4% (84.3 to 88.2) | 85.8% (83.7 to 87.7) | 84.7% (82.4 to 86.9) | 84.5% (82.1 to 86.7) | 82.9% (80.4 to 85.2) |
-| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.7% (93.3 to 95.7) | 76.1% (70.5 to 81.4) | 91.8% (90.4 to 93.0) |
+| A, GPT-6.1 Sol on the image | 94.9% (93.8 to 95.8) | 95.1% (93.7 to 96.2) | 94.8% (93.5 to 95.8) | 94.8% (93.6 to 95.7) | 91.8% (90.4 to 93.0) |
 | A, Gemini 3.8 Flash on the image | 79.4% (74.4 to 84.0) | 76.8% (71.5 to 82.0) | 80.9% (76.0 to 85.6) | 77.2% (71.8 to 82.2) | 76.2% (71.1 to 81.1) |
 | D, Claude Sonnet 5.5 on the OCR text | 37.4% (34.5 to 40.5) | 10.4% (8.9 to 11.9) | 8.3% (7.0 to 9.7) | 4.5% (3.7 to 5.4) | 1.0% (0.7 to 1.4) |
 | E, OCR plus rules | 16.2% (14.4 to 18.1) | 4.9% (4.2 to 5.7) | 4.5% (3.8 to 5.3) | 2.3% (1.9 to 2.8) | 0.5% (0.3 to 0.7) |
@@ -157,15 +173,16 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 74.9% (70.9 to 78.6) | 75.6% (72.1 to 78.8) | 77.5% (74.5 to 80.3) | 75.1% (71.5 to 78.5) | 72.6% (69.4 to 75.7) |
 | C, Gemma 4 E2B untuned on the image | 14.5% (12.9 to 16.2) | 13.3% (11.8 to 14.8) | 13.4% (12.0 to 15.0) | 13.6% (12.2 to 15.1) | 12.3% (11.0 to 13.7) |
 | C, Gemma 4 E4B untuned on the image | 16.0% (14.0 to 18.0) | 16.2% (14.2 to 18.4) | 16.8% (14.6 to 19.0) | 15.9% (13.8 to 18.1) | 14.4% (12.4 to 16.4) |
+| F, Azure Document Intelligence | 72.9% (70.4 to 75.3) | 72.0% (69.5 to 74.4) | 71.0% (68.5 to 73.3) | 69.5% (67.0 to 71.9) | 63.4% (60.7 to 66.0) |
 
 **FARA, the 39 unseen-template test documents of the VRDU curve subset at levels 0, 2 and 4** (fields correct; real scans beside the NIST curve)
 
 | Arm | Level 0 | Level 2 | Level 4 |
 |---|---|---|---|
-| A, Claude Sonnet 5.5 on the image | 72.9% (65.5 to 79.8) |  |  |
-| A, Claude Haiku 5.5 on the image | 68.6% (60.5 to 76.4) |  |  |
-| A, GPT-6.1 Sol on the image | 65.7% (56.9 to 74.2) |  |  |
-| A, Gemini 3.8 Flash on the image | 72.9% (65.5 to 80.0) |  |  |
+| A, Claude Sonnet 5.5 on the image | 72.9% (65.5 to 79.8) | 70.1% (61.8 to 78.0) | 71.4% (63.5 to 79.1) |
+| A, Claude Haiku 5.5 on the image | 68.6% (60.5 to 76.4) | 69.3% (61.7 to 76.6) | 68.1% (59.8 to 75.9) |
+| A, GPT-6.1 Sol on the image | 65.7% (56.9 to 74.2) | 66.8% (58.5 to 75.0) | 65.2% (56.6 to 73.6) |
+| A, Gemini 3.8 Flash on the image | 72.9% (65.5 to 80.0) | 73.1% (65.6 to 80.1) | 69.8% (61.5 to 77.6) |
 | D, Claude Sonnet 5.5 on the OCR text | 62.6% (52.6 to 72.0) | 62.3% (53.4 to 70.9) | 27.5% (19.2 to 36.0) |
 | E, OCR plus rules | 10.3% (5.2 to 16.0) |  |  |
 | B, Gemma 4 E2B fine-tuned on the image | 61.7% (52.8 to 70.3) | 60.2% (51.8 to 68.4) | 56.9% (47.9 to 65.7) |
@@ -177,10 +194,10 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Arm | Level 0 | Level 2 | Level 4 |
 |---|---|---|---|
-| A, Claude Sonnet 5.5 on the image | 78.2% (68.4 to 85.2) |  |  |
-| A, Claude Haiku 5.5 on the image | 69.6% (56.9 to 80.2) |  |  |
-| A, GPT-6.1 Sol on the image | 80.6% (71.6 to 87.2) |  |  |
-| A, Gemini 3.8 Flash on the image | 62.5% (41.5 to 81.6) |  |  |
+| A, Claude Sonnet 5.5 on the image | 78.2% (68.4 to 85.2) | 77.0% (68.0 to 83.9) | 74.6% (65.5 to 82.5) |
+| A, Claude Haiku 5.5 on the image | 69.6% (56.9 to 80.2) | 70.0% (59.2 to 79.1) | 68.5% (56.6 to 78.8) |
+| A, GPT-6.1 Sol on the image | 80.6% (71.6 to 87.2) | 79.7% (70.7 to 86.3) | 78.0% (69.8 to 84.9) |
+| A, Gemini 3.8 Flash on the image | 62.5% (41.5 to 81.6) | 81.5% (73.8 to 87.1) | 78.9% (69.4 to 85.7) |
 | D, Claude Sonnet 5.5 on the OCR text | 78.8% (69.9 to 85.4) | 72.9% (61.1 to 81.3) | 18.8% (4.1 to 36.3) |
 | E, OCR plus rules | 13.8% (6.6 to 25.1) |  |  |
 | B, Gemma 4 E2B fine-tuned on the image | 66.4% (52.2 to 77.7) | 61.3% (46.5 to 73.4) | 57.1% (43.1 to 69.1) |
@@ -202,6 +219,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | B, Gemma 4 E4B fine-tuned on the image | 0.3% (0.1 to 0.6); where a rule looks 13.9% (3.2 to 26.3); false alarms 0.5% (0.3 to 0.8) | 1.5% (0.8 to 2.2); where a rule looks 21.7% (12.8 to 33.8); false alarms 1.2% (0.6 to 1.8) |
 | C, Gemma 4 E2B untuned on the image | 0.2% (0.1 to 0.4); where a rule looks 16.0% (3.6 to 32.0); false alarms 0.5% (0.3 to 0.8) | 15.1% (12.9 to 17.4); where a rule looks 70.1% (64.8 to 74.8); false alarms 8.3% (6.2 to 10.6) |
 | C, Gemma 4 E4B untuned on the image | 0.4% (0.1 to 0.8); where a rule looks 23.1% (7.7 to 40.9); false alarms 0.4% (0.2 to 0.6) | 13.2% (11.0 to 15.5); where a rule looks 63.4% (57.7 to 68.6); false alarms 6.2% (4.4 to 8.1) |
+| F, Azure Document Intelligence | 0.5% (0.1 to 0.9); where a rule looks 41.2% (16.7 to 66.7); false alarms 0.7% (0.4 to 1.0) | 10.1% (7.9 to 12.4); where a rule looks 52.1% (44.5 to 59.1); false alarms 4.6% (3.7 to 5.5) |
 
 **Non-inferiority through the 03 gate** (docs/gate.md): the fine-tune with the better dev accuracy against the frontier vision model with the best, and against the cost anchor, one suite per field, one outcome per document, a 3-point margin, Holm's adjustment across the decided fields. A field the test set holds too few documents of to resolve 3 points is under-powered and not decided.
 
@@ -247,6 +265,24 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | CORD | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 | NIST | 100.0% (100.0 to 100.0) | none accepted | no: at no token probability are the fields above it right 99% of the time on dev, so every field goes to a person |
 
+**The ceiling: Claude Opus 5.5, the dearest Anthropic model, on a subset of the headline test documents, beside Sonnet 5.5's reads of the same documents** (legible/data/subsets.py; batch rate; fields correct with 95% CI over documents).
+
+| Corpus | Documents | Opus 5.5 | Sonnet 5.5 | Opus cost per 1,000 pages | Sonnet cost |
+|---|---:|---|---|---|---|
+| FARA | 101 | 79.9% (75.9 to 83.7) | 81.8% (78.2 to 85.2) | US$6.35 (6.22 to 6.49) | US$2.97 (2.94 to 3.00) |
+| DeepForm | 60 | 65.9% (58.4 to 73.3) | 67.1% (59.8 to 74.3) | US$10.60 (9.91 to 11.35) | US$5.07 (4.76 to 5.39) |
+| CORD | 50 | 93.5% (90.2 to 96.4) | 83.8% (74.6 to 91.3) | US$11.32 (10.54 to 12.16) | US$5.43 (5.12 to 5.78) |
+| NIST | 200 | 94.1% (92.1 to 95.8) | 85.4% (82.3 to 88.3) | US$35.49 (33.02 to 38.10) | US$16.36 (15.22 to 17.58) |
+
+**The noise floor: Sonnet 5.5 reading the repeat subset a second time**, the same request at the vendor's default sampling, days after the first. A difference between two arms smaller than the share of fields one arm changes on itself is not a difference.
+
+| Corpus | Documents | First read | Second read | Fields whose outcome changed |
+|---|---:|---|---|---|
+| FARA | 35 | 80.1% (74.6 to 85.3) | 79.6% (74.2 to 84.7) | 0.6% (0.0 to 1.7) |
+| DeepForm | 18 | 66.7% (54.6 to 78.2) | 66.9% (54.8 to 78.3) | 0.3% (0.0 to 1.0) |
+| CORD | 30 | 91.4% (87.4 to 94.9) | 90.0% (85.6 to 93.8) | 3.0% (0.6 to 6.2) |
+| NIST | 50 | 83.7% (76.4 to 89.8) | 88.6% (84.4 to 92.5) | 7.3% (2.4 to 14.5) |
+
 **Latency and throughput of the fine-tunes**, one served at a time on one RTX 3090 (US$0.50 an hour, RunPod Secure Cloud, 2026-10-23), read through the gateway by 06's closed-loop client on the model's own test documents at level 0, the accuracy runs' requests cycled in order (docs/serving.md). A read is one document, every page of it; latency is per read, intervals are 95% bootstrap over reads, and the first 30 seconds of each level are discarded. The throughput interval resamples reads with the window fixed, as 06's does, so it has no width where every read is one page and none failed.
 
 | Fine-tune | In flight | Reads (errors) | Pages a read | Read p50 (95% CI) | Read p99 | First token p50 | Pages a second | Cost per 1,000 pages, GPU kept busy |
@@ -276,51 +312,55 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | E4B, NIST | 8 | 92 (0) | 1.0 | 39.4 s (38.5 to 39.6) | 46.3 s (44.1 to 46.3) | 2.0 s (1.9 to 2.0) | 0.22 (0.22 to 0.22) | US$0.64 |
 | E4B, NIST | 32 | 288 (0) | 1.0 | 69.8 s (64.9 to 74.7) | 207.8 s (192.0 to 236.5) | 8.0 s (6.2 to 11.1) | 0.37 (0.37 to 0.37) | US$0.37 |
 
-**Break-even, FARA: pages a month at which renting the card for the E2B, FARA (amendment template) fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+**Break-even, FARA: pages a month at which renting the card for the E2B, FARA (amendment template) fine-tune costs no more than paying each frontier model, or Azure Document Intelligence, by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
 
 The fine-tune at its best measured throughput, 7.86 (7.74 to 7.99) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$0.18 per 1,000 pages at 10% utilisation, US$0.02 at 90%. No fixed cost; 730.5 hours a month.
 
-| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+| Paid by the page | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
 |---|---:|---:|---:|---:|
 | Claude Sonnet 5.5 | US$2.96 | 10% | 123,226 (1) | 123,226 (1) |
 | Claude Haiku 5.5 | US$0.18 | 20% | 2.1 million (1) | 2.1 million (1) |
 | GPT-6.1 Sol | US$2.78 | 10% | 131,514 (1) | 131,514 (1) |
 | Gemini 3.8 Flash | US$1.65 | 10% | 221,213 (1) | 221,213 (1) |
+| Azure Document Intelligence | US$30.00 | 10% | 12,175 (1) | 12,175 (1) |
 
-**Break-even, DeepForm: pages a month at which renting the card for the E4B, DeepForm fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+**Break-even, DeepForm: pages a month at which renting the card for the E4B, DeepForm fine-tune costs no more than paying each frontier model, or Azure Document Intelligence, by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
 
 The fine-tune at its best measured throughput, 1.05 (0.98 to 1.12) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$1.32 per 1,000 pages at 10% utilisation, US$0.15 at 90%. No fixed cost; 730.5 hours a month.
 
-| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+| Paid by the page | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
 |---|---:|---:|---:|---:|
 | Claude Sonnet 5.5 | US$5.19 | 10% | 70,432 (1) | 70,432 (1) |
 | Claude Haiku 5.5 | US$0.35 | 40% | 1.0 million (1) | 1.0 million (1) |
 | GPT-6.1 Sol | US$4.53 | 10% | 80,576 (1) | 80,576 (1) |
 | Gemini 3.8 Flash | US$2.73 | 10% | 133,787 (1) | 133,787 (1) |
+| Azure Document Intelligence | US$30.00 | 10% | 12,175 (1) | 12,175 (1) |
 
-**Break-even, CORD: pages a month at which renting the card for the E4B, CORD fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+**Break-even, CORD: pages a month at which renting the card for the E4B, CORD fine-tune costs no more than paying each frontier model, or Azure Document Intelligence, by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
 
 The fine-tune at its best measured throughput, 1.25 (1.25 to 1.25) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$1.11 per 1,000 pages at 10% utilisation, US$0.12 at 90%. No fixed cost; 730.5 hours a month.
 
-| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+| Paid by the page | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
 |---|---:|---:|---:|---:|
 | Claude Sonnet 5.5 | US$5.27 | 10% | 69,340 (1) | 69,340 (1) |
 | Claude Haiku 5.5 | US$0.38 | 30% | 951,474 (1) | 951,474 (1) |
 | GPT-6.1 Sol | US$4.59 | 10% | 79,577 (1) | 79,577 (1) |
 | Gemini 3.8 Flash | US$4.42 | 10% | 82,565 (1) | 82,565 (1) |
+| Azure Document Intelligence | US$10.00 | 10% | 36,525 (1) | 36,525 (1) |
 
-**Break-even, NIST: pages a month at which renting the card for the E4B, NIST fine-tune costs no more than paying each frontier model by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
+**Break-even, NIST: pages a month at which renting the card for the E4B, NIST fine-tune costs no more than paying each frontier model, or Azure Document Intelligence, by the page**, over the share of the month the card is kept busy (10% to 90%). 06's arithmetic (legible/bench/breakeven.py): whole cards rented all month, each frontier model at its headline test cost from the ledger. Below the utilisation given it never breaks even; above it the volume holds while one card carries it. It says nothing about accuracy, which the tables above do.
 
 The fine-tune at its best measured throughput, 0.37 (0.37 to 0.37) pages a second at 32 in flight on one RTX 3090 at US$0.50 an hour (RunPod Secure Cloud, 2026-10-23): US$3.73 per 1,000 pages at 10% utilisation, US$0.41 at 90%. No fixed cost; 730.5 hours a month.
 
-| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
+| Paid by the page | Its cost per 1,000 pages | Breaks even from utilisation | Pages a month there (cards) | Pages a month at 90% (cards) |
 |---|---:|---:|---:|---:|
 | Claude Sonnet 5.5 | US$16.38 | 10% | 22,298 (1) | 22,298 (1) |
 | Claude Haiku 5.5 | US$1.12 | 40% | 325,098 (1) | 325,098 (1) |
 | GPT-6.1 Sol | US$15.33 | 10% | 23,828 (1) | 23,828 (1) |
 | Gemini 3.8 Flash | US$12.48 | 10% | 29,259 (1) | 29,259 (1) |
+| Azure Document Intelligence | US$30.00 | 10% | 12,175 (1) | 12,175 (1) |
 
-Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Latency is the fine-tunes' alone: the frontier models were read in batches, whose only latency is the batch's (docs/serving.md).
+Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (held to the schema's grammar, the fine-tunes left their trained format: docs/training.md), and are costed at the GPU's US$0.50 an hour on RunPod (2026-10-18) over the measured wall time of each read pass. B's row is seed 0, the model trained for that table's split; seeds 1 and 2 are the training variance. Latency is the fine-tunes' alone: the frontier models were read in batches, whose only latency is the batch's (docs/serving.md). Arm F is costed per page at Azure's prices read 2026-10-24, through the gateway; its 24 custom models took 18.72 training hours, US$26.16 past the ten free a month at US$3 an hour, which, like arm B's training, is not in the cost per page (docs/docintel.md).
 <!-- results:end -->
 
 ## Tried and rejected

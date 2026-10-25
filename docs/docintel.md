@@ -73,4 +73,7 @@ with its confidence for each, are kept beside every run in `fields.jsonl`.
 - **The mixed-template gap and the VRDU curve subset** were not in arm F's scope.
 - **Training hours are not in the ledger**: building a model reads no page and is not a call
   through the gateway. They are recorded from the service's own `trainingHours` in
-  `data/docintel/meta/<set>-build.json` and summed in the README's cost note.
+  `data/docintel/meta/<set>-build.json` and summed in the README's cost note: 18.72 hours over
+  the 24 builds (2026-10-24), US$26.16 past the ten free hours. Each build was given a
+  one-hour ceiling; the three FARA models stopped at about the half-hour minimum, and DeepForm
+  and most NIST faces used close to the full hour.

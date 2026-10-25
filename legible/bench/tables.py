@@ -108,7 +108,7 @@ def breakeven_table(
         f"US${1000 * own[max(own)]:.2f} at {100 * max(own):.0f}%. No fixed cost; 730.5 hours "
         "a month.",
         "",
-        "| Frontier model | Its cost per 1,000 pages | Breaks even from utilisation "
+        "| Paid by the page | Its cost per 1,000 pages | Breaks even from utilisation "
         "| Pages a month there (cards) | Pages a month at 90% (cards) |",
         "|---|---:|---:|---:|---:|",
     ]
