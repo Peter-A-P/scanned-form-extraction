@@ -72,7 +72,10 @@ no inline script or style, no frames, no form posts and no connections beyond th
 
 ## Deploy it
 
-Not done yet. It follows 08's `docs/deploy.md`
+Deployed 2026-10-25: the app is `forms-peterparker-ca` in `rg-portfolio` (East US 2, Free),
+served at `white-mud-04682300f.3.azurestaticapps.net` with the content security policy from
+`staticwebapp.config.json`; `forms.peterparker.ca` waits on its Cloudflare record (step 3). It
+follows 08's `docs/deploy.md`
 ([capacity-planning-forecaster](https://github.com/Peter-A-P/capacity-planning-forecaster/blob/main/docs/deploy.md)),
 with these names:
 
