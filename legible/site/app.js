@@ -241,18 +241,21 @@ function fills() {
   const words = ["none", "one", "two", "three", "four", "five", "six"];
   fill("beat-words", 2 * beat.length === pairs.length ? "half" : `${words[beat.length]} of the ${words[pairs.length]}`);
   fill("beat-figure", beat.map((p) => `+${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))}`).join(" and "));
-  fill("beat-unit", `points more fields right than Azure on ${list(beat.map((p) => p.c.noun))}`);
+  fill("beat-unit", `percentage points more fields right than Azure on ${list(beat.map((p) => p.c.noun))}`);
   fill("beat-note", `${list(beat.map((p) => `${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)}`))}, the fine-tune's whole 95% interval above Azure's score; level with it on ${list(level.map((p) => p.c.noun))}`);
   fill("f-azure-figure", `${words[beat.length]} better, ${words[level.length]} level`.replace(/^./, (c) => c.toUpperCase()));
   const readers = state.results.arms.length + (s.ceiling.length ? 1 : 0);
   fill("scale-note", `${int(s.corpora.pages)} distinct pages of ${int(s.corpora.documents)} documents, read by ${readers} readers across 4 form types, up to 5 scan qualities, development and test, 3 training seeds and second reads`);
   const ratios = pairs.map((p) => p.z.per_thousand.point / p.f.per_thousand.point);
-  fill("vs-azure-ratio", `${times(Math.min(...ratios))}x to ${times(Math.max(...ratios))}x`);
   const ftCosts = pairs.map((p) => p.f.per_thousand.point);
   const azCosts = pairs.map((p) => p.z.per_thousand.point);
+  // One number: 1,000 pages of each form type, read by each, the bills compared. A mean of the
+  // four ratios would be pulled up by the cheapest form alone.
+  const azTotal = azCosts.reduce((a, b) => a + b, 0), ftTotal = ftCosts.reduce((a, b) => a + b, 0);
+  fill("vs-azure-ratio", `${Math.round(azTotal / ftTotal)}x cheaper`);
   fill("ft-price-range", span(Math.min(...ftCosts), Math.max(...ftCosts), usd).replace(/ to US\$/, " to "));
   fill("azure-price", span(Math.min(...azCosts), Math.max(...azCosts), usd).replace(/ to US\$/, " to "));
-  fill("vs-azure-ratio-note", `Azure ${span(Math.min(...azCosts), Math.max(...azCosts), usd).replace(/ to US\$/, " to ")} a thousand pages (${s.prices.docintel}); the fine-tune ${span(Math.min(...ftCosts), Math.max(...ftCosts), usd).replace(/ to US\$/, " to ")} (${s.prices.serve_checked})`);
+  fill("vs-azure-ratio-note", `1,000 pages of each of the ${pairs.length} form types: ${usd(azTotal)} on Azure (${s.prices.docintel}), ${usd(ftTotal)} on the fine-tune (${s.prices.serve_checked}); ${times(Math.min(...ratios))}x to ${times(Math.max(...ratios))}x form by form`);
   fill("f-azure-detail", `It gets more fields right than Azure's model on ${list(beat.map((p) => `${p.c.noun} (${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)})`))}, by more than the uncertainty in either, and as many on ${list(level.map((p) => `${p.c.noun} (${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)})`))}`);
 
   const bests = pairs.map((p) => p.best.accuracy.point);
@@ -305,7 +308,7 @@ function fills() {
 
   const cordFt = ft("cord"), cordHaiku = row("cord", HAIKU);
   const faraInv = invented[0];
-  fill("m-strong", `It beats Azure's models on ${list(beat.map((p) => `${p.c.noun} by ${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))} points`))} and matches them on ${list(level.map((p) => p.c.noun))}, at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
+  fill("m-strong", `It beats Azure's models on ${list(beat.map((p) => `${p.c.noun} by ${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))} percentage points`))} and matches them on ${list(level.map((p) => p.c.noun))}, at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
   const vsBest = s.gate.filter((g) => g.name.endsWith("-vs-best") && g.verdict === "block" && !g.name.includes("mixed"));
   const worst = vsBest.map((g) => {
     const corpus = CORPORA.find((c) => g.name.includes(`-${c.key}-`));
