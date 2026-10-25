@@ -33,13 +33,15 @@ percent accuracy, how many fields still need a person.
 - **The cheapest frontier model is close on clean, printed forms.** Claude Haiku 5.5 reads
   84.5% of the tax forms' fields against Sonnet's 86.7%, at US$1.12 a thousand pages against
   US$16.38.
-- **The managed document service reads no better than the fine-tunes, at the highest price
-  per page.** Azure AI Document Intelligence, a custom neural model trained on each split's
-  documents, gets 68.9% of FARA's unseen-template fields (the 2B: 69.0%) and 72.5% of the tax
-  forms' (the 2B: 73.6%) at US$30 a thousand pages, against US$0.18 to 2.96 for the frontier
-  vision models on FARA and US$1.12 to 16.38 on the tax forms; its prebuilt receipt model gets 66.6% of CORD's at US$10, and DeepForm's line items pull it
-  to 40.5% there ([docs/docintel.md](docs/docintel.md)). A bad scan costs it more than a vision
-  model: 72.9% to 63.4% of the NIST curve's fields from level 0 to level 4.
+- **The fine-tunes beat the managed document service on two of the four form types and match
+  it on the other two, at 47 to 509 times less a page.** Against Azure
+  AI Document Intelligence the 4B gets 59.6% (53.7 to 65.3) of DeepForm's unseen-template fields
+  to its 40.5% (37.0 to 44.3), and 77.6% (71.5 to 83.3) of CORD's receipt fields to its prebuilt
+  receipt model's 66.6% (60.5 to 72.1), at US$0.19 and US$0.16 a thousand pages against US$30
+  and US$10. On FARA's unseen templates (the 2B: 69.0%, Azure 68.9%) and the tax forms (the 4B:
+  74.2%, Azure 72.5%) the two are level, Azure's custom neural models at US$30 a thousand pages
+  ([docs/docintel.md](docs/docintel.md)). A bad scan costs Azure more than a vision model: 72.9%
+  to 63.4% of the NIST curve's fields from level 0 to level 4.
 - **The dearest model buys accuracy only on some forms.** Claude Opus 5.5, at about twice
   Sonnet's price, reads 93.5% of the ceiling subset's receipt fields against Sonnet's 83.8% and
   94.1% of its tax-form fields against 85.4%, and is no better on FARA or DeepForm. Sonnet

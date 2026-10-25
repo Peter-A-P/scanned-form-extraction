@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forms That Read Themselves: a small vision model you own, measured against the frontier and Azure</title>
-<meta name="description" content="Twelve readers of scanned forms, from frontier vision APIs to a 2B model fine-tuned here, graded field by field on public pages with known answers. The fine-tuned model reads as many fields right as Azure Document Intelligence at a small fraction of the price, and this page shows where it falls short, what it costs to serve, and when owning it pays.">
+<meta name="description" content="Twelve readers of scanned forms, from frontier vision APIs to a 2B model fine-tuned here, graded field by field on public pages with known answers. The fine-tuned model gets more fields right than Azure Document Intelligence on half the form types tested and as many on the rest, at a small fraction of the price, and this page shows where it falls short, what it costs to serve, and when owning it pays.">
 <link rel="stylesheet" href="style.css">
 <script src="breakeven.js" defer></script>
 <script src="app.js" defer></script>
@@ -41,22 +41,24 @@
       <a class="button" href="https://huggingface.co/Peter-A-P">The models</a>
     </div>
 
-    <p class="eyebrow"><span data-fill="pages-read">-</span> pages read, every field graded against a known answer</p>
-    <h1>A small vision model you own reads scanned forms <span class="hl">as well as Azure's document AI, for a fraction of the price</span></h1>
+    <p class="eyebrow"><span data-fill="pages-read">-</span> pages processed, every field graded against a known answer</p>
+    <h1>A small vision model you own <span class="hl">beats Azure's document AI on <span data-fill="beat-words">half</span> the forms tested, and matches it on the rest</span>, for a fraction of the price</h1>
     <p class="lead">
       Every organisation that still takes paper has someone typing forms in. There are three ways to
       hand that to a machine: pay a frontier AI model by the page, buy a managed document service, or
       fine-tune a small open model and run it yourself. They are rarely measured on the same pages.
       <strong>This project measured them.</strong> Twelve readers, from Claude, GPT and Gemini to Azure
       Document Intelligence, classic OCR pipelines, and a 2B and a 4B Gemma model fine-tuned here,
-      read the same <span data-fill="corpus-pages">-</span> public pages, and every field they wrote was
-      graded by code against the answer the dataset records.
+      read the same <span data-fill="corpus-pages">-</span> public pages, many of them again and again: clean and
+      degraded, development and test, three training seeds, second reads. Every field they wrote, on
+      every one of those <span data-fill="pages-read">-</span> page reads, was graded by code against the
+      answer the dataset records.
     </p>
     <div class="hero-points">
       <div class="point good">
-        <span class="point-figure" data-fill="vs-azure-count">-</span>
-        <span class="point-unit">form types where the fine-tune gets as many fields right as Azure</span>
-        <span class="point-label">tax forms, receipts, registration and ad-buy forms</span>
+        <span class="point-figure" data-fill="beat-figure">-</span>
+        <span class="point-unit" data-fill="beat-unit">-</span>
+        <span class="point-label" data-fill="beat-note">-</span>
       </div>
       <div class="point">
         <span class="point-figure" data-fill="vs-azure-ratio">-</span>
@@ -68,10 +70,10 @@
         <span class="point-unit">of fields right from the best frontier model</span>
         <span class="point-label" data-fill="best-frontier-gap">-</span>
       </div>
-      <div class="point warn">
-        <span class="point-figure" data-fill="ocr-collapse">-</span>
-        <span class="point-unit">what OCR plus a language model keeps of its accuracy on a bad scan</span>
-        <span class="point-label" data-fill="ocr-collapse-note">-</span>
+      <div class="point">
+        <span class="point-figure" data-fill="pages-read">-</span>
+        <span class="point-unit">pages processed and graded, field by field</span>
+        <span class="point-label" data-fill="scale-note">-</span>
       </div>
     </div>
     <p class="hero-note">
@@ -90,9 +92,8 @@
     <div class="findings">
       <article class="finding good">
         <p class="finding-figure" data-fill="f-azure-figure">-</p>
-        <h3>A fine-tuned 2B or 4B model matches Azure Document Intelligence</h3>
-        <p>On every form type measured, the fine-tune gets as many fields right as Azure's
-          custom-trained model, or more: <span data-fill="f-azure-detail">-</span>. Azure charges
+        <h3>A fine-tuned 2B or 4B model beats Azure Document Intelligence on half the forms, and matches it on the rest</h3>
+        <p><span data-fill="f-azure-detail">-</span>. Azure charges
           <span data-fill="azure-price">-</span> a thousand pages; the fine-tune costs
           <span data-fill="ft-price-range">-</span> on a rented gaming GPU.</p>
         <a href="#model">The head-to-head</a>

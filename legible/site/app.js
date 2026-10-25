@@ -234,9 +234,18 @@ function fills() {
   fill("corpus-pages", int(s.corpora.pages));
 
   const pairs = CORPORA.map((c) => ({ c, f: ft(c.key), z: row(c.table, AZURE), best: bestFrontier(c.table), cheap: cheapestFrontier(c.table) }));
-  const matched = pairs.filter((p) => p.f && p.z && p.f.accuracy.point >= p.z.accuracy.low);
-  fill("vs-azure-count", `${matched.length} of ${pairs.length}`);
-  fill("f-azure-figure", `${matched.length} of ${pairs.length} form types`);
+  // Beats: the fine-tune's whole 95% interval is above Azure's score. Matches: its score is
+  // inside Azure's interval or above it, short of that.
+  const beat = pairs.filter((p) => p.f.accuracy.low > p.z.accuracy.point);
+  const level = pairs.filter((p) => !beat.includes(p) && p.f.accuracy.point >= p.z.accuracy.low);
+  const words = ["none", "one", "two", "three", "four", "five", "six"];
+  fill("beat-words", 2 * beat.length === pairs.length ? "half" : `${words[beat.length]} of the ${words[pairs.length]}`);
+  fill("beat-figure", beat.map((p) => `+${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))}`).join(" and "));
+  fill("beat-unit", `points more fields right than Azure on ${list(beat.map((p) => p.c.noun))}`);
+  fill("beat-note", `${list(beat.map((p) => `${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)}`))}, the fine-tune's whole 95% interval above Azure's score; level with it on ${list(level.map((p) => p.c.noun))}`);
+  fill("f-azure-figure", `${words[beat.length]} better, ${words[level.length]} level`.replace(/^./, (c) => c.toUpperCase()));
+  const readers = state.results.arms.length + (s.ceiling.length ? 1 : 0);
+  fill("scale-note", `${int(s.corpora.pages)} distinct pages of ${int(s.corpora.documents)} documents, read by ${readers} readers across 4 form types, up to 5 scan qualities, development and test, 3 training seeds and second reads`);
   const ratios = pairs.map((p) => p.z.per_thousand.point / p.f.per_thousand.point);
   fill("vs-azure-ratio", `${times(Math.min(...ratios))}x to ${times(Math.max(...ratios))}x`);
   const ftCosts = pairs.map((p) => p.f.per_thousand.point);
@@ -244,7 +253,7 @@ function fills() {
   fill("ft-price-range", span(Math.min(...ftCosts), Math.max(...ftCosts), usd).replace(/ to US\$/, " to "));
   fill("azure-price", span(Math.min(...azCosts), Math.max(...azCosts), usd).replace(/ to US\$/, " to "));
   fill("vs-azure-ratio-note", `Azure ${span(Math.min(...azCosts), Math.max(...azCosts), usd).replace(/ to US\$/, " to ")} a thousand pages (${s.prices.docintel}); the fine-tune ${span(Math.min(...ftCosts), Math.max(...ftCosts), usd).replace(/ to US\$/, " to ")} (${s.prices.serve_checked})`);
-  fill("f-azure-detail", list(pairs.map((p) => `${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)} on ${p.c.noun}`)));
+  fill("f-azure-detail", `It gets more fields right than Azure's model on ${list(beat.map((p) => `${p.c.noun} (${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)})`))}, by more than the uncertainty in either, and as many on ${list(level.map((p) => `${p.c.noun} (${pct(p.f.accuracy.point)} against ${pct(p.z.accuracy.point)})`))}`);
 
   const bests = pairs.map((p) => p.best.accuracy.point);
   fill("best-frontier-range", `${Math.round(100 * Math.min(...bests))} to ${Math.round(100 * Math.max(...bests))}%`);
@@ -263,8 +272,6 @@ function fills() {
   const lv = nist.levels[nist.levels.length - 1];
   const at = (label, level) => nist.cells[label][String(level)].accuracy.point;
   const ocr0 = at(SONNET_OCR, 0), ocrN = at(SONNET_OCR, lv);
-  fill("ocr-collapse", pct(ocrN / ocr0, 0));
-  fill("ocr-collapse-note", `Sonnet on OCR's text, ${pct(ocr0)} to ${pct(ocrN)} of the tax forms' fields from a clean scan to the worst; Sonnet on the image ${pct(at(SONNET, 0))} to ${pct(at(SONNET, lv))}`);
   fill("f-scan-figure", `${pts(at(SONNET, 0) - at(SONNET, lv))} points against ${pts(ocr0 - ocrN)}`);
   fill("f-scan-detail", `From a clean page to the worst scan, Claude Sonnet 5.5 reading the image goes from ${pct(at(SONNET, 0))} to ${pct(at(SONNET, lv))} of the tax forms' fields; the same model reading OCR's text goes from ${pct(ocr0)} to ${pct(ocrN)}, and OCR plus rules from ${pct(at(RULES, 0))} to ${pct(at(RULES, lv))}`);
 
@@ -298,7 +305,7 @@ function fills() {
 
   const cordFt = ft("cord"), cordHaiku = row("cord", HAIKU);
   const faraInv = invented[0];
-  fill("m-strong", `It gets as many fields right as Azure's custom models on all four form types at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
+  fill("m-strong", `It beats Azure's models on ${list(beat.map((p) => `${p.c.noun} by ${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))} points`))} and matches them on ${list(level.map((p) => p.c.noun))}, at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
   const vsBest = s.gate.filter((g) => g.name.endsWith("-vs-best") && g.verdict === "block" && !g.name.includes("mixed"));
   const worst = vsBest.map((g) => {
     const corpus = CORPORA.find((c) => g.name.includes(`-${c.key}-`));
@@ -350,7 +357,10 @@ function fills() {
 
 function drawHeadToHead() {
   const host = document.getElementById("h2h");
-  const W = 920, labelW = 200, accX0 = labelW + 10, accX1 = 570, costX0 = 668, costX1 = W - 60;
+  // Fields correct starts at 25%: no reader shown here is near the bottom, and the space goes
+  // to the cost panel, whose thousandfold spread is the point.
+  const W = 920, labelW = 200, accX0 = labelW + 10, accX1 = 470, costX0 = 545, costX1 = W - 55;
+  const ACC_LO = 0.25;
   const rowH = 22, groupGap = 30, top = 34;
   const groups = CORPORA.map((c) => {
     const picks = [ft(c.key), row(c.table, AZURE), cheapestFrontier(c.table), bestFrontier(c.table)];
@@ -359,10 +369,10 @@ function drawHeadToHead() {
   });
   const H = top + groups.reduce((n, g) => n + (g.rows.length + 1) * rowH + groupGap, 0);
   const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Fields correct and cost per thousand pages for the fine-tune, Azure, the cheapest and the best frontier model on each form type" });
-  const ax = linScale(0, 1, accX0, accX1);
+  const ax = linScale(ACC_LO, 1, accX0, accX1);
   const cx = logScale(0.01, 100, costX0, costX1);
   s.append(svg("text", { x: accX0, y: 14, class: "panel-title" }, "Fields correct"), svg("text", { x: costX0, y: 14, class: "panel-title" }, "US$ per 1,000 pages"));
-  for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+  for (const v of [0.25, 0.5, 0.75, 1]) {
     s.append(svg("line", { x1: ax(v), x2: ax(v), y1: top - 8, y2: H - groupGap + 6, class: "gridline" }));
     s.append(svg("text", { x: ax(v), y: 28, "text-anchor": "middle", class: "tick" }, `${100 * v}%`));
   }
@@ -405,7 +415,9 @@ function drawLandscape() {
   const c = CORPUS[state.landscape];
   const t = table(c.table);
   const rows = t.rows.filter((r) => r.accuracy && r.per_thousand);
-  const W = 900, H = 470, L = 56, R = 190, T = 16, B = 46;
+  // As wide as the column allows, the cost axis running to the right edge; labels near the
+  // edge go to the left of their mark.
+  const W = 1100, H = 500, L = 56, R = 24, T = 16, B = 46;
   const x = logScale(0.01, 100, L, W - R);
   const y = linScale(0, 1, H - B, T);
   const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Fields correct against cost per thousand pages, ${c.name}` });
@@ -444,7 +456,7 @@ function drawLandscape() {
     g.append(svg("line", { x1: px, x2: px, y1: y(r.accuracy.low), y2: y(r.accuracy.high), class: `ci-line k-stroke-${k}` }));
     const m = mark(k, px, py, k === "finetuned" ? 7 : 6);
     g.append(m);
-    const spot = placeLabel(placed, marks, px, py, short(r.arm).length * 6.3, W - R + 150);
+    const spot = placeLabel(placed, marks, px, py, short(r.arm).length * 6.3, W - 4);
     g.append(svg("text", { x: spot.x, y: spot.y, "text-anchor": spot.anchor, class: `mark-label halo${k === "finetuned" ? " strong" : ""}` }, short(r.arm)));
     const show = () => {
       m.classList.add("on");

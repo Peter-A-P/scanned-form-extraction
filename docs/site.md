@@ -18,10 +18,11 @@ a table; no table is shown by default.
 
 - **The opening.** The pages read in all (every answered read over every stored run: dev and
   test, every seed and level, the subsets and second reads, `build.pages_read`), and four
-  figures: on how many form types the fine-tune the gate compared gets as many fields right as
-  Azure Document Intelligence (its point estimate at or above the bottom of Azure's 95%
-  interval), how many times cheaper a page it is, the best frontier model's accuracy, and what
-  OCR to a language model keeps of its accuracy on the worst scan.
+  figures: by how many points the fine-tune the gate compared beats Azure Document Intelligence
+  where it beats it (its whole 95% interval above Azure's score; it is called level where its
+  score is inside Azure's interval or above it, short of that), how many times cheaper a page it
+  is, the best frontier model's accuracy, and the pages processed with the distinct pages and
+  readers behind them. The headline's "half the forms tested" is filled from the same count.
 - **What we found.** Six findings with their numbers, each linking to its chart.
 - **The head-to-head.** Per form type, the gated fine-tune beside Azure, the cheapest and the
   most accurate frontier model: fields correct with intervals, and cost per 1,000 pages on a
