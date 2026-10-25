@@ -79,8 +79,10 @@ separate decision, and it is recorded here when it is made.
 Uploaded 2026-10-25: all twelve, **private**, under `Peter-A-P` as `legible-<run_id>`, each
 with its card as the README. They were copied from the volume's `legible/checkpoints/<run_id>/adapter`
 over RunPod's S3 and uploaded from the laptop with `huggingface_hub` installed beside the venv,
-which needs no pod (an upload reads no page and times nothing). Making any of them public,
-the FARA six above all, has not been decided.
+which needs no pod (an upload reads no page and times nothing).
+
+Made public 2026-10-25 (Peter's decision): the six CORD, DeepForm and NIST adapters, 2B and 4B,
+linked from the demo site. The six FARA adapters stay private, for the reason above.
 
 ## Arm A on dev
 
