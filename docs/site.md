@@ -5,7 +5,58 @@ and page images `legible site` writes beside them into `site/out/` (gitignored).
 no CDN, no build step beyond the command. Nothing is modelled in the browser and nothing is
 uploaded: every read on it was made, and graded, before the site was built.
 
+It wears the portfolio's look, the palette, type and page furniture of peterparker.ca and of
+06's site (smallmodel.peterparker.ca), whose stylesheet it starts from; the two fonts
+(Newsreader and Inter, SIL Open Font License) are copied into `legible/site/fonts/` so the page
+makes no request off its own origin.
+
 ## What it shows
+
+The front page leads with what the measurements mean for someone choosing a pipeline, then
+shows the evidence. Every chart has a "See as a table" switch that draws the same numbers as
+a table; no table is shown by default.
+
+- **The opening.** The pages read in all (every answered read over every stored run: dev and
+  test, every seed and level, the subsets and second reads, `build.pages_read`), and four
+  figures: on how many form types the fine-tune the gate compared gets as many fields right as
+  Azure Document Intelligence (its point estimate at or above the bottom of Azure's 95%
+  interval), how many times cheaper a page it is, the best frontier model's accuracy, and what
+  OCR to a language model keeps of its accuracy on the worst scan.
+- **What we found.** Six findings with their numbers, each linking to its chart.
+- **The head-to-head.** Per form type, the gated fine-tune beside Azure, the cheapest and the
+  most accurate frontier model: fields correct with intervals, and cost per 1,000 pages on a
+  log scale. Then where it is strong and where it falls short (the gate's blocking fields), and
+  why the Azure comparison is fair.
+- **Accuracy against cost.** Every reader on each headline table as a scatter, both intervals
+  as whiskers, with the line through the readers no other beats on both.
+- **How it was fine-tuned.** Untuned against fine-tuned for both sizes on each form type, the
+  recipe, and each headline adapter's training time from its `run.json`.
+- **Serving it.** The load test (pages a second and read latency at 1, 8 and 32 in flight) and
+  what one card does in a month.
+- **Your break-even.** 06's calculator: `breakeven.js` is 06's file, tested under Node against
+  `legible/bench/breakeven.py` over a grid that reaches the never, one-card and many-card cases
+  (`tests/test_site.py`). Its presets are each reader's measured cost on the chosen form type.
+- **Bad scans.** The degradation curves, NIST's and the two VRDU subsets, with interval bands.
+- **Surprises.** Opus against Sonnet (the ceiling), seen against unseen form designs, the
+  noise floor, the seeds that learned the schema's shape, the untuned 4B on registration forms,
+  and Azure's low invention rate.
+- **Limits**, the 99% review rate first.
+
+The prose's numbers are filled by `app.js` from the data files, so a re-run that changes a
+number changes the sentence; the wording around them was written for the results of
+2026-10-25 and is checked against them when the site is rebuilt.
+
+The data files are `data/results.json` (`legible.report.Results`, the object the README's
+tables are formatted from, with the report's own cell text), `data/story.json` (the load test,
+the training records, the gate's decisions, the ceiling and noise floor, arm F's training
+hours and the pages read: `legible.cli._story`), and `data/index.json` with `data/pages/` for
+the viewer.
+
+**The training records.** `legible site` reads each headline adapter's `run.json` from
+`$LEGIBLE_DATA/models/<run id>/run.json`, copied there from beside the adapter on the volume
+(`legible/checkpoints/<run id>/adapter/run.json`); `legible cards` reads the same place.
+
+**The page viewer** ("Watch them read a page"):
 
 - **The page viewer.** Eight test pages from each of three corpora: NIST's synthesised tax
   forms, CORD's receipts (CC BY 4.0) and DeepForm's ad-buy forms (VRDU, FCC public files). For
@@ -29,14 +80,11 @@ uploaded: every read on it was made, and graded, before the site was built.
   all the curve pages at that level with its 95% interval, from the same rows as the README's
   curve tables. On a degraded page each box is turned by the skew `degrade` applied
   (`legible.degrade.skew_angle`). An arm with no read at a level says "not yet read".
-- **The tables.** Every headline and template-gap table (fields correct, every field right,
-  invented fields, cost per 1,000 pages), with each cost's price date; the curves; and the
-  review rate at 99% for each confidence signal. They are serialised from
-  `legible.report.Results`, the object the README's tables are formatted from, with the
-  report's own cell text, so the site and the README cannot disagree.
+- **Every reader at this level.** Each reader's accuracy over the set at the chosen level,
+  with its interval and its score on the page shown; selecting one draws its read.
 
 **Registration forms are never shown.** FARA's forms name individuals, so FARA is in the
-tables only. `legible.site.build` refuses to make an image or a page record of any corpus but
+charts only. `legible.site.build` refuses to make an image or a page record of any corpus but
 NIST, CORD and DeepForm, and checks the finished directory once more
 (`tests/test_site.py` holds both).
 
@@ -54,6 +102,8 @@ uv run legible site                                  # writes site/out/, about 6
 
 It grades every run the report grades (the tables), then the chosen pages. It reads the data
 root and writes nothing there. Rebuild whenever `legible report` would change the README.
+`uv run legible site --data-only` rewrites the site's own files and its results and story into
+a built `site/out/`, keeping its pages: a minute rather than six, for work on the front page.
 
 ## Look at it locally
 
@@ -107,5 +157,5 @@ with these names:
    npx --yes @azure/static-web-apps-cli deploy ./site/out --env production
    ```
 
-5. **Check it.** `https://forms.peterparker.ca` over HTTPS with no warning, the numbers on the
-   tables tab equal to the README's, and an empty browser console.
+5. **Check it.** `https://forms.peterparker.ca` over HTTPS with no warning, the numbers in the
+   charts' tables equal to the README's, and an empty browser console.

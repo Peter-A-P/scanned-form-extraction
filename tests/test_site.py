@@ -269,3 +269,177 @@ def test_json_has_no_nan() -> None:
     json.loads(json.dumps(out, allow_nan=False))
     with pytest.raises(ValueError):
         build.dump(Path("unused.json"), {"x": math.nan})
+
+
+# --- The front page's story -----------------------------------------------------------------
+
+
+def test_the_architecture_diagrams_are_the_one_exception_to_the_image_check(tmp_path: Path) -> None:
+    build.copy_assets(tmp_path)
+    for name in build.DIAGRAMS:
+        assert (tmp_path / "architecture" / name).is_file()
+    build.check_output(tmp_path)
+    # The exception is by name and place: the same file anywhere else is refused.
+    (tmp_path / "img").mkdir()
+    (tmp_path / "img" / "system.svg").write_text("<svg/>", encoding="utf-8")
+    with pytest.raises(build.RegistrationImage):
+        build.check_output(tmp_path)
+
+
+def test_every_asset_the_pages_load_is_copied(tmp_path: Path) -> None:
+    import re
+
+    build.copy_assets(tmp_path)
+    for page in ("index.html", "architecture.html"):
+        html = (tmp_path / page).read_text(encoding="utf-8")
+        for ref in re.findall(r'(?:src|href)="([^":#]+)"', html):
+            assert (tmp_path / ref).is_file(), f"{page} loads {ref}, which the build does not copy"
+    css = (tmp_path / "style.css").read_text(encoding="utf-8")
+    for ref in re.findall(r"url\(([^)]+)\)", css):
+        assert (tmp_path / ref).is_file()
+
+
+def test_the_pages_load_nothing_from_another_origin_and_nothing_inline() -> None:
+    import re
+
+    for page in ("index.html", "architecture.html"):
+        html = (build.SOURCE / page).read_text(encoding="utf-8")
+        # The policy allows no inline style or script, and no origin but the site's own.
+        assert "<style" not in html and " style=" not in html
+        assert not re.search(r"<script(?![^>]*\bsrc=)", html)
+        for tag in ("script", "link", "img"):
+            for url in re.findall(rf'<{tag}\b[^>]*\b(?:src|href)="([^"]+)"', html):
+                assert "://" not in url, f"{page} loads {url}"
+
+
+def test_arms_are_named_without_their_letter_and_input() -> None:
+    assert build.arm_short("A, Claude Sonnet 5.5 on the image") == "Claude Sonnet 5.5"
+    assert (
+        build.arm_short("D, Claude Sonnet 5.5 on the OCR text") == "Claude Sonnet 5.5 on OCR text"
+    )
+    assert build.arm_short("F, Azure Document Intelligence") == "Azure Document Intelligence"
+    assert {build.arm_json(a)["kind"] for a in ARMS} == set(build.ARM_KIND.values())
+
+
+def test_only_the_registration_form_adapters_have_no_public_link() -> None:
+    assert build.hub_url("2b-fara-unseen-amendment-s0-v1120-s0-d12371af07") is None
+    assert build.hub_url("4b-cord-v1120-s0-7695d3c79b") == (
+        "https://huggingface.co/Peter-A-P/legible-4b-cord-v1120-s0-7695d3c79b"
+    )
+
+
+def _record(rows: list[int], steps: int, left_out: int = 0) -> dict[str, Any]:
+    return {
+        "run_id": "2b-nist-x",
+        "config": {
+            "size": "2b", "dataset": "nist", "rank": 64, "alpha": 128, "learning_rate": 1e-4,
+            "epochs": 1, "visual_tokens": 1120, "max_seq_len": 12288, "grad_accum": 8,
+        },
+        "datasets": [{"rows": n} for n in rows],
+        "started_at": "2026-10-18T10:00:00Z",
+        "finished_at": "2026-10-18T10:30:00Z",
+        "steps": steps,
+        "seconds_per_step": 18.0,
+        "train_loss": 0.1,
+        "left_out": left_out,
+    }  # fmt: skip
+
+
+def test_the_documents_trained_on_are_what_the_steps_saw() -> None:
+    # NIST's run reads the first 800 of a 3,850-face set: the steps decide, not the set.
+    (big,) = build.training_json([_record([620, 3230], steps=97)])
+    assert big["documents"] == 776 and big["minutes"] == pytest.approx(30.0)
+    # A set read whole, less the documents left out for length.
+    (small,) = build.training_json([_record([200], steps=25, left_out=2)])
+    assert small["documents"] == 198
+
+
+def test_pages_read_counts_answered_pages_over_every_run(tmp_path: Path) -> None:
+    runs = tmp_path / "runs"
+    a = runs / "arm-a" / "quality" / "p1" / "level0" / "deepform" / "test"
+    a.mkdir(parents=True)
+    (a / "reads.jsonl").write_text(
+        '{"doc_id":"d1","text":"{}"}\n{"doc_id":"d2","text":null}\n', encoding="utf-8"
+    )
+    e = runs / "arm-e" / "level0" / "cord"
+    e.mkdir(parents=True)
+    (e / "test.jsonl").write_text('{"doc_id":"c1","output":{}}\n', encoding="utf-8")
+    old = runs / "archive" / "arm-a" / "deepform"
+    old.mkdir(parents=True)
+    (old / "reads.jsonl").write_text('{"doc_id":"d1","text":"{}"}\n', encoding="utf-8")
+    pages = {("deepform", "d1"): 3, ("deepform", "d2"): 2, ("cord", "c1"): 1}
+    out = build.pages_read(runs, pages)
+    # d1's three pages and c1's one; the failed read and the archived run are not counted.
+    assert out == {"pages": 4, "documents": 2, "by_arm": {"a": 3, "e": 1}}
+
+
+# --- The calculator's JavaScript ------------------------------------------------------------
+
+NODE = __import__("shutil").which("node")
+
+RUNNER = """
+const B = require(process.argv[1]);
+const cases = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const out = cases.map((c) => {
+  const p = B.breakEven(c.inputs, c.utilisation);
+  return { volume: p.volumePerMonth, gpus: p.gpus, cost: p.monthlyCost, perPage: p.selfHostedUsdPerCall };
+});
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason="Node is not installed")
+def test_the_calculator_gives_the_pythons_break_even() -> None:
+    import datetime as dt
+    import subprocess
+
+    from legible.bench.breakeven import BreakEvenInputs, break_even
+    from legible.bench.cost import GpuPrice, PriceKind
+
+    grid = [
+        (rate, pps, api, fixed, u)
+        for rate in (0.27, 0.5, 2.5)
+        for pps in (0.05, 0.37, 7.86)
+        for api in (0.00018, 0.0016, 0.03)
+        for fixed in (0.0, 900.0)
+        for u in (0.1, 0.5, 0.9)
+    ]
+    cases = [
+        {
+            "inputs": {"usdPerHour": rate, "requestsPerSecond": pps, "apiUsdPerCall": api,
+                       "fixedUsdPerMonth": fixed, "hoursPerMonth": 730.5, "secondsPerHour": 3600.0},
+            "utilisation": u,
+        }
+        for rate, pps, api, fixed, u in grid
+    ]  # fmt: skip
+    assert NODE is not None
+    result = subprocess.run(
+        [NODE, "-e", RUNNER, str(build.SOURCE / "breakeven.js")],
+        input=json.dumps(cases),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    kinds = set()
+    for (rate, pps, api, fixed, u), js in zip(grid, json.loads(result.stdout), strict=True):
+        price = GpuPrice(
+            gpu="RTX 3090", provider="RunPod", kind=PriceKind.ON_DEMAND, usd_per_hour=rate,
+            checked=dt.date(2026, 10, 23), source="test",
+        )  # fmt: skip
+        py = break_even(
+            BreakEvenInputs(
+                price=price, pages_per_second=pps, api_usd_per_page=api, fixed_usd_per_month=fixed
+            ),
+            u,
+        )
+        assert js["perPage"] == pytest.approx(py.self_hosted_usd_per_page, rel=1e-12)
+        assert js["gpus"] == py.gpus_at_break_even
+        if py.volume_per_month is None:
+            assert js["volume"] is None
+            kinds.add("never")
+        else:
+            assert js["volume"] == pytest.approx(py.volume_per_month, rel=1e-12)
+            assert js["cost"] == pytest.approx(py.monthly_cost_at_break_even, rel=1e-12)
+            kinds.add("one card" if py.gpus_at_break_even == 1 else "more cards")
+    # The grid has to reach every branch, or agreeing on it proves less than it says.
+    assert kinds == {"never", "one card", "more cards"}

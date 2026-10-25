@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
     from legible.prompt import Prompt
     from legible.report import Results, Row, Truth
     from legible.schema import CorpusSchema
+    from legible.stats import Interval
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 data_app = typer.Typer(no_args_is_help=True, help="Fetch, verify, render and split the corpora.")
@@ -796,12 +798,24 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     typer.echo("\n".join(body))
 
 
-def _subsets_section(root: Path, truth: Mapping[str, Truth]) -> list[str]:
-    """The ceiling and the noise floor (legible/data/subsets.py): Opus 5.5 beside Sonnet 5.5
-    on the ceiling subset, and Sonnet 5.5's second read of the repeat subset beside its first,
-    with the share of fields whose outcome changed between them."""
+@dataclass(frozen=True)
+class _Subset:
+    """One corpus's row of the ceiling or the noise floor: the documents, the two reads'
+    accuracy and cost, and for the noise floor the share of fields whose outcome changed."""
+
+    corpus: str
+    documents: int
+    missing: int
+    first: Row
+    second: Row
+    changed: Interval | None = None
+
+
+def _subsets(root: Path, truth: Mapping[str, Truth]) -> tuple[list[_Subset], list[_Subset]]:
+    """The ceiling (Opus 5.5 first, Sonnet 5.5 second, on the ceiling subset) and the noise
+    floor (Sonnet 5.5's first and second reads of the repeat subset), per corpus."""
     from legible.grade import grade_document
-    from legible.report import ARMS, Arm, answers_for, pct, row, usd
+    from legible.report import ARMS, Arm, answers_for, row
     from legible.schema.corpora import NIST_SCHEMAS
     from legible.stats import ratio_ci
 
@@ -810,35 +824,14 @@ def _subsets_section(root: Path, truth: Mapping[str, Truth]) -> list[str]:
     nist_faces = sorted(NIST_SCHEMAS)
     corpora = (("fara", "FARA", ["fara"]), ("deepform", "DeepForm", ["deepform"]),
                ("cord", "CORD", ["cord"]), ("nist", "NIST", nist_faces))  # fmt: skip
-    out = [
-        "**The ceiling: Claude Opus 5.5, the dearest Anthropic model, on a subset of the "
-        "headline test documents, beside Sonnet 5.5's reads of the same documents** "
-        "(legible/data/subsets.py; batch rate; fields correct with 95% CI over documents).",
-        "",
-        "| Corpus | Documents | Opus 5.5 | Sonnet 5.5 | Opus cost per 1,000 pages | Sonnet cost |",
-        "|---|---:|---|---|---|---|",
-    ]
+    ceiling: list[_Subset] = []
     for family, name, cs in corpora:
         docs = sorted(part_docs(family, "ceiling"))
         o = answers_for(root, opus, cs, "ceiling", 0, [])
         q = answers_for(root, sonnet, cs, "test", 0, [])
         ro, rq = row(opus.label, docs, truth, o), row(sonnet.label, docs, truth, q)
-        have = len(docs) - ro.missing
-        n = f"{have}" + (f" of {len(docs)}" if ro.missing else "")
-        out.append(
-            f"| {name} | {n} | {pct(ro.accuracy)} | {pct(rq.accuracy)} | {usd(ro.per_thousand)} "
-            f"| {usd(rq.per_thousand)} |"
-        )
-    out += [
-        "",
-        "**The noise floor: Sonnet 5.5 reading the repeat subset a second time**, the same "
-        "request at the vendor's default sampling, days after the first. A difference between "
-        "two arms smaller than the share of fields one arm changes on itself is not a "
-        "difference.",
-        "",
-        "| Corpus | Documents | First read | Second read | Fields whose outcome changed |",
-        "|---|---:|---|---|---|",
-    ]
+        ceiling.append(_Subset(name, len(docs), ro.missing, ro, rq))
+    noise: list[_Subset] = []
     for family, name, cs in corpora:
         docs = sorted(part_docs(family, "repeat"))
         first = answers_for(root, sonnet, cs, "test", 0, [])
@@ -860,8 +853,49 @@ def _subsets_section(root: Path, truth: Mapping[str, Truth]) -> list[str]:
             keys = set(o1) | set(o2)
             changed.append(float(sum(o1.get(k) != o2.get(k) for k in keys)))
             fields.append(float(len(keys)))
-        flip = pct(ratio_ci(changed, fields)) if fields else "not yet measured"
-        out.append(f"| {name} | {len(fields)} | {pct(r1.accuracy)} | {pct(r2.accuracy)} | {flip} |")
+        flip = ratio_ci(changed, fields) if fields else None
+        noise.append(_Subset(name, len(fields), 0, r1, r2, flip))
+    return ceiling, noise
+
+
+def _subsets_section(root: Path, truth: Mapping[str, Truth]) -> list[str]:
+    """The ceiling and the noise floor (legible/data/subsets.py): Opus 5.5 beside Sonnet 5.5
+    on the ceiling subset, and Sonnet 5.5's second read of the repeat subset beside its first,
+    with the share of fields whose outcome changed between them."""
+    from legible.report import pct, usd
+
+    ceiling, noise = _subsets(root, truth)
+    out = [
+        "**The ceiling: Claude Opus 5.5, the dearest Anthropic model, on a subset of the "
+        "headline test documents, beside Sonnet 5.5's reads of the same documents** "
+        "(legible/data/subsets.py; batch rate; fields correct with 95% CI over documents).",
+        "",
+        "| Corpus | Documents | Opus 5.5 | Sonnet 5.5 | Opus cost per 1,000 pages | Sonnet cost |",
+        "|---|---:|---|---|---|---|",
+    ]
+    for c in ceiling:
+        have = c.documents - c.missing
+        n = f"{have}" + (f" of {c.documents}" if c.missing else "")
+        out.append(
+            f"| {c.corpus} | {n} | {pct(c.first.accuracy)} | {pct(c.second.accuracy)} "
+            f"| {usd(c.first.per_thousand)} | {usd(c.second.per_thousand)} |"
+        )
+    out += [
+        "",
+        "**The noise floor: Sonnet 5.5 reading the repeat subset a second time**, the same "
+        "request at the vendor's default sampling, days after the first. A difference between "
+        "two arms smaller than the share of fields one arm changes on itself is not a "
+        "difference.",
+        "",
+        "| Corpus | Documents | First read | Second read | Fields whose outcome changed |",
+        "|---|---:|---|---|---|",
+    ]
+    for c in noise:
+        flip = pct(c.changed) if c.changed is not None else "not yet measured"
+        out.append(
+            f"| {c.corpus} | {c.documents} | {pct(c.first.accuracy)} | {pct(c.second.accuracy)} "
+            f"| {flip} |"
+        )
     return [*out, ""]
 
 
@@ -953,10 +987,17 @@ def site_command(
         False, "--serve", help="Serve the built site with its host's headers; build nothing."
     ),
     port: int = typer.Option(8016, help="The port --serve listens on."),
+    data_only: bool = typer.Option(
+        False,
+        "--data-only",
+        help="Rewrite the site's files and its results and story into a built site, keeping "
+        "its pages: for working on the front page without re-drawing every page.",
+    ),
 ) -> None:
-    """Write the demo site (PLAN.md 2.8, docs/site.md): a handful of NIST, CORD and DeepForm
-    test pages with each arm's graded reads drawn on them at each degradation level, and the
-    cost and review tables, from the runs `legible report` reads. FARA is in the tables only."""
+    """Write the demo site (PLAN.md 2.8, docs/site.md): the front page's findings and charts,
+    from the runs `legible report` reads, and a handful of NIST, CORD and DeepForm test pages
+    with each arm's graded reads drawn on them at each degradation level. FARA is in the
+    charts only."""
     import datetime as dt
 
     from legible.arms.ocr_run import load
@@ -976,6 +1017,15 @@ def site_command(
     e_dir = root / "runs" / "arm-e"
     truth = _truths()
     results = _results(truth)
+    if data_only:
+        if not (out / "data" / "index.json").exists():
+            raise typer.BadParameter(f"{out} has no pages yet; run legible site first")
+        build.copy_assets(out)
+        build.dump(out / "data" / "results.json", build.results_json(results))
+        build.dump(out / "data" / "story.json", _story(root, truth))
+        build.check_output(out)
+        typer.echo(f"{out}: results and story rewritten, {build.size_of(out) / 1e6:.1f} MB")
+        return
     if out.exists():
         import shutil
 
@@ -1087,8 +1137,80 @@ def site_command(
         },
     )
     build.dump(out / "data" / "results.json", build.results_json(results))
+    build.dump(out / "data" / "story.json", _story(root, truth))
     build.check_output(out)
     typer.echo(f"{out}: {build.size_of(out) / 1e6:.1f} MB")
+
+
+#: Where `legible site` and `legible cards` find the headline adapters' training records,
+#: under the data root: `models/<run id>/run.json`, copied from beside each adapter on the
+#: volume (docs/site.md).
+TRAINING_RECORDS = Path("models")
+
+
+def _story(root: Path, truth: Mapping[str, Truth]) -> dict[str, object]:
+    """What the front page tells around the tables (legible/site/build.py): the load test, the
+    training records, the gate, the ceiling and noise floor, arm F's training and the pages
+    read in all."""
+    from legible.bench.run import read as read_load
+    from legible.data.render import read_manifest
+    from legible.report import DOCINTEL_PRICE_DATE, PRICE_LIST_DATE, SERVE_PRICE, read_gate
+    from legible.site import build
+
+    runs = {
+        p.parent.name: read_load(p.parent) for p in sorted((root / "bench").glob("*/bench.json"))
+    }
+    gated = {
+        p.name.split("-")[1]: p.name.split("-")[3]
+        for p in Path("gate-runs").glob("legible-*-vs-best")
+        if p.name.split("-")[2] in {"unseen", "test"}
+    }
+    records = [
+        json.loads(p.read_text(encoding="utf-8"))
+        for p in sorted((root / TRAINING_RECORDS).glob("*/run.json"))
+    ]
+    decisions = [read_gate(p) for p in sorted(Path("gate-runs").glob("*/decision.txt"))]
+    ceiling, noise = _subsets(root, truth)
+    pages: dict[tuple[str, str], int] = {}
+    for corpus in ("cord", "deepform", "fara", "nist"):
+        for e in read_manifest(manifest(corpus)):
+            pages[(corpus, e.doc_id)] = pages.get((corpus, e.doc_id), 0) + 1
+    builds = [
+        json.loads(p.read_text("utf-8")).get("model", {}).get("trainingHours")
+        for p in (root / "docintel" / "meta").glob("*-build.json")
+    ]
+    hours = sum(h for h in builds if isinstance(h, (int, float)))
+    return {
+        "read": build.pages_read(root / "runs", pages),
+        "corpora": {
+            "documents": len(pages),
+            "pages": sum(pages.values()),
+            "by_corpus": {
+                c: {
+                    "documents": sum(1 for k in pages if k[0] == c),
+                    "pages": sum(n for k, n in pages.items() if k[0] == c),
+                }
+                for c in ("fara", "deepform", "cord", "nist")
+            },
+        },
+        "prices": {
+            "frontier": PRICE_LIST_DATE,
+            "docintel": DOCINTEL_PRICE_DATE,
+            "serve_gpu": SERVE_PRICE.gpu,
+            "serve_usd_per_hour": SERVE_PRICE.usd_per_hour,
+            "serve_checked": SERVE_PRICE.checked.isoformat(),
+        },
+        "serving": build.serving_json(runs, gated),
+        "training": build.training_json(records),
+        "gate": build.gate_json(decisions),
+        "ceiling": build.subset_json(ceiling),
+        "noise": build.subset_json(noise),
+        "docintel_training": {
+            "models": len(builds),
+            "hours": hours,
+            "usd": max(0.0, hours - 10) * 3,
+        },
+    }
 
 
 gate_app = typer.Typer(no_args_is_help=True, help="Files for the 03 release gate.")
@@ -2339,7 +2461,6 @@ def cards_command(
     )
     from legible.review import review
     from legible.schema.corpora import NIST_SCHEMAS, SCHEMAS
-    from legible.stats import Interval
     from legible.train.dataset import read_training_set
     from legible.train.recipe import TrainConfig, chosen
     from legible.train.vision import read_record

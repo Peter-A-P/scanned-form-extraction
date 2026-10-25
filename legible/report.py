@@ -47,6 +47,8 @@ OCR_PRICE = GpuPrice(
     source="RunPod's create-pod response, costPerHr 0.48 for 16 vCPU",
 )
 PRICE_LIST_DATE = "2026-10-16"
+#: The day Azure Document Intelligence's prices were read (docs/docintel.md).
+DOCINTEL_PRICE_DATE = "2026-10-24"
 
 
 @dataclass(frozen=True)
@@ -597,13 +599,15 @@ TOKEN_MISS = (
 def price_date(arm: Arm) -> str:
     """The date of the price an arm's cost per page is computed at: the frontier price list
     for arms A and D (D's OCR at the CPU price, checked a day later), the CPU price for arm
-    E, the GPU price for the self-hosted arms B and C."""
+    E, the GPU price for the self-hosted arms B and C, and Azure's price list for arm F."""
     if arm.arm == "a":
         return PRICE_LIST_DATE
     if arm.arm == "d":
         return f"{PRICE_LIST_DATE}; OCR {OCR_PRICE.checked.isoformat()}"
     if arm.arm == "e":
         return OCR_PRICE.checked.isoformat()
+    if arm.arm == "f":
+        return DOCINTEL_PRICE_DATE
     return SERVE_PRICE.checked.isoformat()
 
 

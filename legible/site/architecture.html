@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it's built: Forms That Read Themselves</title>
+<meta name="description" content="How the readers of scanned forms behind this page were fed the same pages, graded by one grader, fine-tuned, served and costed, in four diagrams.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="https://peterparker.ca"><span class="mono-mark" aria-hidden="true">P</span>Peter Parker</a>
+    <p class="top-nav"><a href="https://peterparker.ca/projects/scanned-form-extraction/">Project 16: Forms That Read Themselves</a></p>
+  </div>
+</header>
+<nav class="tabs" aria-label="This site">
+  <div class="tabs-inner">
+    <a href="index.html">Overview</a>
+    <a href="index.html#findings">What we found</a>
+    <a href="index.html#model">The fine-tuned model</a>
+    <a href="index.html#landscape">Accuracy against cost</a>
+    <a href="index.html#training">How it was trained</a>
+    <a href="index.html#serving">Serving it</a>
+    <a href="index.html#calculator">Your break-even</a>
+    <a href="index.html#scans">Bad scans</a>
+    <a href="index.html#viewer">Watch it read</a>
+    <a href="index.html#surprises">Surprises</a>
+    <a href="index.html#limits">Limits</a>
+    <a href="architecture.html" aria-current="page">How it's built</a>
+  </div>
+</nav>
+<main>
+
+  <header class="hero">
+    <p class="eyebrow">Architecture</p>
+    <h1>How it's built</h1>
+    <p class="lead">
+      Four pictures, drawn before the first line of code so the design could not be shaped to fit
+      the result. Select a diagram to open it full size.
+    </p>
+    <p class="hero-note"><a href="index.html">Back to the results</a></p>
+  </header>
+
+  <section class="section" id="the-system">
+    <h2>The system</h2>
+    <figure class="arch-figure">
+      <a href="architecture/system.svg"><img src="architecture/system.svg" width="1236" height="1180" alt="Public pages are fetched with their licences quoted, rendered, split and degraded to five levels; the readers see the same pages, the frontier and OCR-to-model readers through the gateway and the fine-tuned models served as gateway hosts; one grader scores every field, and the review rate, the verifier, the cost per page and the release gate are computed from the outcomes."></a>
+    </figure>
+    <div class="prose">
+      <p>Three public sources come in and are never committed: Google's VRDU benchmark, with US Department of Justice registration forms and FCC political ad-buy orders; CORD's photographed receipts; and NIST's Special Database 2 of synthesised 1988 tax forms. Each loader checks the files against recorded checksums, and each licence is quoted before the first download.</p>
+      <p>Pages are rendered at 300 dpi and split so that a form design held out for testing never reaches training, with a check on every build that no document crosses. A degradation step then makes four worse copies of each test page from a fixed seed: noise, blur, skew and lost contrast, calibrated to what each does to OCR's word accuracy rather than to a filter's settings.</p>
+      <p>Every reader is sent the same page and the same instruction. Every model call, to a frontier vendor or to the fine-tunes on a rented card, goes through project 04's gateway, which writes a ledger row for each, so the cost per page has one source. One grader scores every field of every reader against the dataset's answer, and the release gate from project 03 decides whether the fine-tune is no worse than a frontier model, field by field.</p>
+    </div>
+  </section>
+
+  <section class="section" id="one-page">
+    <h2>One page, every reader</h2>
+    <figure class="arch-figure">
+      <a href="architecture/five-arms.svg"><img src="architecture/five-arms.svg" width="1236" height="708" alt="One page image at a degradation level, with its schema, is read by a frontier vision model, the fine-tuned small vision model, the same model untuned, OCR text sent to the frontier model, and OCR with per-template rules; one grader scores every field of every reader the same way."></a>
+    </figure>
+    <div class="prose">
+      <p>One schema per kind of form is the single definition the prompt, the training answers and the grader all read. The frontier models get the page image and the instruction. The fine-tuned Gemma models get the same, trained on it. The untuned bases get the same, so the gain from training is measured on equal terms. Two OCR pipelines read Tesseract's text instead: one sends it to Claude Sonnet, one applies rules learned from the training forms.</p>
+      <p>Azure Document Intelligence was added after these diagrams were drawn, as a sixth reader: a custom neural model trained on each training split, and its prebuilt receipt model for the receipts, sent the same pages through the same gateway.</p>
+      <p>The grader marks each field right, a wrong value, a value in the wrong field, a blank filled, or invented, and records whether the whole document was right.</p>
+    </div>
+  </section>
+
+  <section class="section" id="train-serve">
+    <h2>Fine-tuning and serving</h2>
+    <figure class="arch-figure">
+      <a href="architecture/train-serve.svg"><img src="architecture/train-serve.svg" width="1206" height="1196" alt="Training pages and their JSON answers are fed to QLoRA on a rented GPU with the vision encoder kept whole and checkpoints in object storage; the adapters are published with their cards, served, registered with the gateway at a price per page, load-tested and priced into a break-even curve."></a>
+    </figure>
+    <div class="prose">
+      <p>Project 06's fine-tuning recipe, with a vision encoder. Each training page and its answer become one example: page images and the instruction, then the answer as JSON, with the loss on the answer only. QLoRA keeps the base model frozen in 4 bits and trains small adapters beside its layers; the vision tower stays at full precision.</p>
+      <p>What changed from the plan: the 2B kept 06's rank-64 recipe and the 4B its rank-16 one; training ran on RunPod's Secure Cloud on 24 and 48 GB cards, because its cheaper Community Cloud had none free that day; and the outputs were read freely rather than forced into the schema's grammar, which pushed the models off their trained format.</p>
+      <p>Each adapter is served with vLLM on one RTX 3090, registered with the gateway, load-tested at 1, 8 and 32 requests in flight, and priced into the break-even with 06's arithmetic.</p>
+    </div>
+  </section>
+
+  <section class="section" id="evaluation">
+    <h2>Which pages carry which claim</h2>
+    <figure class="arch-figure">
+      <a href="architecture/evaluation.svg"><img src="architecture/evaluation.svg" width="1236" height="996" alt="Development pages are the only ones prompts and thresholds may see; the unseen-template test carries the headline and the mixed-template test the gap; NIST's degraded pages carry the degradation curve; each test set is read once per reader, bootstrapped over documents, gated per form type, and the review rate is read at 99 percent."></a>
+    </figure>
+    <div class="prose">
+      <p>Prompts and confidence thresholds are tuned on development pages only. Each test set is then read once per reader. The headline for registration and ad-buy forms is the test set of form designs no training page came from; the test set of designs seen in training is reported beside it as the gap.</p>
+      <p>Every number carries a 95% interval from a bootstrap over documents, and comparisons between readers are paired on the same documents. The review rate is the share of fields that would still go to a person if the fields let through had to be 99% right, with the threshold set on the development pages.</p>
+    </div>
+  </section>
+
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <p>Source and the diagrams' specification: <a href="https://github.com/Peter-A-P/scanned-form-extraction">github.com/Peter-A-P/scanned-form-extraction</a> (docs/architecture.md)</p>
+  </div>
+</footer>
+</body>
+</html>

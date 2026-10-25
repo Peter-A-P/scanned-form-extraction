@@ -3,82 +3,492 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forms That Read Themselves</title>
-<meta name="description" content="How well vision models, fine-tuned small models and OCR pipelines read scanned forms, field by field, on public pages with known answers.">
+<title>Forms That Read Themselves: a small vision model you own, measured against the frontier and Azure</title>
+<meta name="description" content="Twelve readers of scanned forms, from frontier vision APIs to a 2B model fine-tuned here, graded field by field on public pages with known answers. The fine-tuned model reads as many fields right as Azure Document Intelligence at a small fraction of the price, and this page shows where it falls short, what it costs to serve, and when owning it pays.">
 <link rel="stylesheet" href="style.css">
+<script src="breakeven.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
 <header class="top">
-  <div class="wrap">
-    <h1>Forms That Read Themselves</h1>
-    <p class="lede">Each way of reading a scanned form, measured on public pages with known answers:
-      which fields it gets right, what it costs a thousand pages, and how it holds up on a bad scan.
-      Every read on this site was made and graded beforehand; nothing is modelled in the browser
-      and nothing is uploaded.</p>
-    <nav class="tabs" aria-label="Sections">
-      <a href="#pages" id="tab-pages">Pages</a>
-      <a href="#tables" id="tab-tables">Cost and review tables</a>
-    </nav>
+  <div class="top-inner">
+    <a class="brand" href="https://peterparker.ca"><span class="mono-mark" aria-hidden="true">P</span>Peter Parker</a>
+    <p class="top-nav"><a href="https://peterparker.ca/projects/scanned-form-extraction/">Project 16: Forms That Read Themselves</a></p>
   </div>
 </header>
+<nav class="tabs" aria-label="This site">
+  <div class="tabs-inner">
+    <a href="index.html" aria-current="page">Overview</a>
+    <a href="#findings">What we found</a>
+    <a href="#model">The fine-tuned model</a>
+    <a href="#landscape">Accuracy against cost</a>
+    <a href="#training">How it was trained</a>
+    <a href="#serving">Serving it</a>
+    <a href="#calculator">Your break-even</a>
+    <a href="#scans">Bad scans</a>
+    <a href="#viewer">Watch it read</a>
+    <a href="#surprises">Surprises</a>
+    <a href="#limits">Limits</a>
+    <a href="architecture.html">How it's built</a>
+  </div>
+</nav>
+<main>
 
-<main class="wrap">
-  <section id="pages" aria-labelledby="pages-h">
-    <h2 id="pages-h" class="vh">Pages</h2>
-    <div class="controls">
-      <div class="control" role="group" aria-label="Corpus" id="corpora"></div>
-      <label class="control">Page
-        <select id="page"></select>
-      </label>
-      <label class="control">Reader
-        <select id="arm"></select>
-      </label>
-      <div class="control level">
-        <label for="level">Scan quality: <strong id="level-name">level 0</strong></label>
-        <input type="range" id="level" min="0" max="4" step="1" value="0">
-        <span id="level-note" class="muted"></span>
+  <header class="hero">
+    <div class="cta">
+      <a class="button primary" href="#calculator">Work out your own break-even</a>
+      <a class="button" href="https://github.com/Peter-A-P/scanned-form-extraction">Read the code</a>
+      <a class="button" href="https://huggingface.co/Peter-A-P">The models</a>
+    </div>
+
+    <p class="eyebrow"><span data-fill="pages-read">-</span> pages read, every field graded against a known answer</p>
+    <h1>A small vision model you own reads scanned forms <span class="hl">as well as Azure's document AI, for a fraction of the price</span></h1>
+    <p class="lead">
+      Every organisation that still takes paper has someone typing forms in. There are three ways to
+      hand that to a machine: pay a frontier AI model by the page, buy a managed document service, or
+      fine-tune a small open model and run it yourself. They are rarely measured on the same pages.
+      <strong>This project measured them.</strong> Twelve readers, from Claude, GPT and Gemini to Azure
+      Document Intelligence, classic OCR pipelines, and a 2B and a 4B Gemma model fine-tuned here,
+      read the same <span data-fill="corpus-pages">-</span> public pages, and every field they wrote was
+      graded by code against the answer the dataset records.
+    </p>
+    <div class="hero-points">
+      <div class="point good">
+        <span class="point-figure" data-fill="vs-azure-count">-</span>
+        <span class="point-unit">form types where the fine-tune gets as many fields right as Azure</span>
+        <span class="point-label">tax forms, receipts, registration and ad-buy forms</span>
       </div>
-      <label class="control check"><input type="checkbox" id="labels" checked> Label wrong fields on the page</label>
+      <div class="point">
+        <span class="point-figure" data-fill="vs-azure-ratio">-</span>
+        <span class="point-unit">cheaper per page than Azure's custom model</span>
+        <span class="point-label" data-fill="vs-azure-ratio-note">-</span>
+      </div>
+      <div class="point violet">
+        <span class="point-figure" data-fill="best-frontier-range">-</span>
+        <span class="point-unit">of fields right from the best frontier model</span>
+        <span class="point-label" data-fill="best-frontier-gap">-</span>
+      </div>
+      <div class="point warn">
+        <span class="point-figure" data-fill="ocr-collapse">-</span>
+        <span class="point-unit">what OCR plus a language model keeps of its accuracy on a bad scan</span>
+        <span class="point-label" data-fill="ocr-collapse-note">-</span>
+      </div>
+    </div>
+    <p class="hero-note">
+      Every figure on this page is read from the project's results files, written by the same code
+      that writes the repository's tables, with a 95% interval behind each one and the date of every
+      price. <a href="architecture.html">See how it's built</a>.
+    </p>
+    <noscript><p class="noscript">The figures and charts on this page need JavaScript. Every number is also in the repository's README, as tables.</p></noscript>
+  </header>
+
+  <section class="section" id="findings">
+    <h2>What we found</h2>
+    <p class="section-lead">
+      The short version, before any chart. Each card links to the evidence further down.
+    </p>
+    <div class="findings">
+      <article class="finding good">
+        <p class="finding-figure" data-fill="f-azure-figure">-</p>
+        <h3>A fine-tuned 2B or 4B model matches Azure Document Intelligence</h3>
+        <p>On every form type measured, the fine-tune gets as many fields right as Azure's
+          custom-trained model, or more: <span data-fill="f-azure-detail">-</span>. Azure charges
+          <span data-fill="azure-price">-</span> a thousand pages; the fine-tune costs
+          <span data-fill="ft-price-range">-</span> on a rented gaming GPU.</p>
+        <a href="#model">The head-to-head</a>
+      </article>
+      <article class="finding violet">
+        <p class="finding-figure" data-fill="f-frontier-figure">-</p>
+        <h3>The frontier vision models still read best, and which one depends on the form</h3>
+        <p><span data-fill="f-frontier-detail">-</span>. No single vendor wins everywhere, so the
+          model has to be picked per document type, on your own pages.</p>
+        <a href="#landscape">Accuracy against cost</a>
+      </article>
+      <article class="finding warn">
+        <p class="finding-figure" data-fill="f-scan-figure">-</p>
+        <h3>A bad scan barely moves a vision model, and breaks OCR</h3>
+        <p><span data-fill="f-scan-detail">-</span>. Reading the pixels directly is the
+          single biggest robustness gain on offer.</p>
+        <a href="#scans">The degradation curve</a>
+      </article>
+      <article class="finding good">
+        <p class="finding-figure" data-fill="f-lift-figure">-</p>
+        <h3>Fine-tuning is what makes a small model usable</h3>
+        <p><span data-fill="f-lift-detail">-</span>, from about
+          <span data-fill="train-minutes-range">-</span> of training on one rented card.</p>
+        <a href="#training">How it was trained</a>
+      </article>
+      <article class="finding">
+        <p class="finding-figure" data-fill="f-invent-figure">-</p>
+        <h3>On two form types it invents fewer values than any frontier model</h3>
+        <p><span data-fill="f-invent-detail">-</span>. For a form a person signs off, a blank is
+          cheaper than a confident wrong value.</p>
+        <a href="#model">Where it is strong</a>
+      </article>
+      <article class="finding violet">
+        <p class="finding-figure" data-fill="f-cheap-figure">-</p>
+        <h3>The cheapest frontier model is close on clean, printed forms</h3>
+        <p><span data-fill="f-cheap-detail">-</span>. Paying for the biggest model is not where
+          the accuracy is.</p>
+        <a href="#surprises">The ceiling</a>
+      </article>
+    </div>
+    <div class="verdict">
+      <p><strong>And the limit.</strong> No reader reached 99% accuracy on the fields it was confident
+        about, so at that standard a person still checks every field, whichever pipeline you buy. What
+        these models replace is the typing, not the checking. <a href="#limits">Why, and what was tried</a>.</p>
+    </div>
+  </section>
+
+  <section class="section" id="model">
+    <h2>The fine-tuned model, head to head</h2>
+    <p class="section-lead">
+      For each kind of form, the fine-tune the release gate compared (the better of the 2B and the 4B
+      on the development pages) beside Azure Document Intelligence, the cheapest frontier model and the
+      most accurate one. Left: the share of fields right, with its 95% interval. Right: what a thousand
+      pages cost, on a log scale, so each gridline is ten times the last.
+    </p>
+    <div class="legend" aria-hidden="true" id="h2h-legend"></div>
+    <figure class="chart-figure" data-table="h2h">
+      <div class="chart wide-chart" id="h2h"></div>
+      <figcaption id="h2h-caption"></figcaption>
+    </figure>
+    <div class="two-up">
+      <div class="verdict">
+        <p><strong>Where it earns its place.</strong> <span data-fill="m-strong">-</span></p>
+      </div>
+      <div class="assumption">
+        <p><strong>Where it falls short.</strong> <span data-fill="m-weak">-</span></p>
+      </div>
+    </div>
+    <h3 class="subhead">Why it is a fair fight with Azure</h3>
+    <ul class="ticks">
+      <li><strong>Same pages, same grader.</strong> Both read the same test documents, at the same
+        resolution, and one programmatic grader scored every field of both.</li>
+      <li><strong>Both were trained on the forms.</strong> Azure's custom neural models were trained on
+        100 labelled documents of each registration and ad-buy training split and 30 of each tax-form
+        face; the fine-tunes on <span data-fill="ft-train">-</span>. On registration and ad-buy forms
+        neither saw a page of the form design it was tested on.</li>
+      <li><strong>Azure was not handicapped on receipts.</strong> CORD's receipts went to Azure's own
+        prebuilt receipt model, untrained, at its lower <span data-fill="azure-receipt-price">-</span>
+        price.</li>
+      <li><strong>The prices are list prices, dated.</strong> Azure's from its retail price API
+        (<span data-fill="azure-date">-</span>), the fine-tune's from the measured GPU time at
+        <span data-fill="gpu-rate">-</span> (<span data-fill="gpu-date">-</span>).</li>
+    </ul>
+  </section>
+
+  <section class="section" id="landscape">
+    <h2>Every reader, accuracy against cost</h2>
+    <p class="section-lead">
+      Each mark is one reader on one kind of form: its share of fields right against what a thousand
+      pages cost it, with both 95% intervals as whiskers. Up and to the left is better. The line joins
+      the readers nothing beats on both counts. Pick a form type.
+    </p>
+    <div class="button-row" id="landscape-corpus" role="group" aria-label="Form type"></div>
+    <div class="legend" id="landscape-legend" aria-hidden="true"></div>
+    <figure class="chart-figure" data-table="landscape">
+      <div class="chart wide-chart" id="landscape-chart"></div>
+      <p class="readout" id="landscape-readout" aria-live="polite">Point at a mark for its figures.</p>
+      <figcaption id="landscape-caption"></figcaption>
+    </figure>
+    <div class="corpora" id="corpora-cards"></div>
+  </section>
+
+  <section class="section" id="training">
+    <h2>How it was fine-tuned</h2>
+    <p class="section-lead">
+      Two open-weights bases from Google, Gemma 4 E2B and E4B, each fine-tuned per kind of form with
+      <strong>QLoRA</strong>: the base model's weights are frozen and stored in 4 bits, and only small
+      low-rank "adapter" matrices beside its attention and feed-forward layers are trained, on the page
+      images directly. That is what lets a vision model train on one 24 GB card in minutes rather than
+      on a cluster.
+    </p>
+    <h3 class="subhead">What fine-tuning bought, per form type</h3>
+    <p>The same base model before and after, on the same test pages: the share of fields right.</p>
+    <figure class="chart-figure" data-table="lift">
+      <div class="chart wide-chart" id="lift"></div>
+      <figcaption id="lift-caption"></figcaption>
+    </figure>
+
+    <h3 class="subhead">The recipe</h3>
+    <div class="recipes" id="recipes"></div>
+
+    <h3 class="subhead">How long each adapter took to train</h3>
+    <figure class="chart-figure" data-table="minutes">
+      <div class="chart wide-chart" id="minutes"></div>
+      <figcaption id="minutes-caption"></figcaption>
+    </figure>
+
+    <h3 class="subhead">From scanned page to served model</h3>
+    <ol class="steps">
+      <li><span class="step-n">1</span><span><strong>Pair each page with its answer.</strong> The page image, and the fields the dataset records for it as the exact JSON the grader marks. Form designs held out for testing never reach training, and a held-out document refuses the training set.</span></li>
+      <li><span class="step-n">2</span><span><strong>Train on the answer only.</strong> One turn of page images and the same instruction every other reader is sent, one turn of the JSON. The loss falls on the answer's tokens, so it learns to read, not to recite the prompt.</span></li>
+      <li><span class="step-n">3</span><span><strong>Keep the vision tower whole.</strong> The image encoder, its projector and the output layer stay at full precision; the adapter trains the projector and the language layers. A first run that quantised the tower failed at its first step.</span></li>
+      <li><span class="step-n">4</span><span><strong>Checkpoint from the first steps.</strong> Rented cards can be taken back, so every checkpoint goes to object storage and a run resumes from its newest.</span></li>
+      <li><span class="step-n">5</span><span><strong>Serve it plainly.</strong> vLLM on one RTX 3090 at temperature 0. Forcing the output into the schema's grammar was tried and rejected: it pushed the models off the format they were trained on.</span></li>
+      <li><span class="step-n">6</span><span><strong>Grade it once, publish it.</strong> Each test set read once, graded by the same code as every other reader, and the adapters published with cards that list their failure modes.</span></li>
+    </ol>
+  </section>
+
+  <section class="section" id="serving">
+    <h2>Serving it: what one card does</h2>
+    <p class="section-lead">
+      Each fine-tune was served on its own on one rented <span data-fill="bench-gpu">-</span> at
+      <span data-fill="bench-rate">-</span> an hour, behind the same gateway as the frontier APIs, and read by a
+      closed-loop client with 1, 8 and 32 requests in flight for three minutes each. Pages a second
+      climb with the load until the card is full; the time to read one document climbs too.
+    </p>
+    <div class="button-row" id="serving-corpus" role="group" aria-label="Form type"></div>
+    <div class="legend" aria-hidden="true" id="serving-legend"></div>
+    <figure class="chart-figure" data-table="serving">
+      <div class="chart wide-chart" id="serving-chart"></div>
+      <figcaption id="serving-caption"></figcaption>
+    </figure>
+    <div class="headline" id="serving-stats"></div>
+    <div class="assumption">
+      <p><strong>In practice.</strong> A 2B fine-tune and vLLM fit on one consumer 24 GB card with
+        room for 32 requests at once. No page leaves the building: for records that cannot go to a
+        vendor, that matters more than the price. The card is paid by the hour whether it is busy or
+        not, so what a page really costs depends on how full you keep it, which is what the calculator
+        below is for.</p>
+    </div>
+  </section>
+
+  <section class="section" id="calculator">
+    <h2>Your break-even</h2>
+    <p class="section-lead">
+      An API is paid by the page. A card is rented by the hour, whether it reads one page or its fill.
+      Below some volume the API is cheaper; above it, the card. Choose the model, put in what you pay,
+      and how hard you would run the card; the measured throughput does the rest.
+    </p>
+    <div class="controls">
+      <div class="control">
+        <label for="calc-served">Fine-tune and form type<span class="hint">its throughput, as measured</span></label>
+        <select id="calc-served"></select>
+      </div>
+      <div class="control">
+        <label for="calc-rate">Card rent, US$ an hour<span class="hint" id="calc-rate-hint">as rented</span></label>
+        <input type="number" id="calc-rate" min="0.01" step="0.01" inputmode="decimal">
+      </div>
+      <div class="control">
+        <label for="calc-api">What you pay now, US$ per 1,000 pages<span class="hint" id="calc-api-hint">or pick a measured price below</span></label>
+        <input type="number" id="calc-api" min="0.001" step="0.01" inputmode="decimal">
+      </div>
+      <div class="control">
+        <label for="calc-fixed">Fixed costs, US$ a month<span class="hint">people, storage, monitoring; zero counts the rent only</span></label>
+        <input type="number" id="calc-fixed" min="0" step="50" value="0" inputmode="decimal">
+      </div>
+      <div class="control wide">
+        <span class="label-text" id="presets-label">Price the API at what a reader cost on these forms</span>
+        <div class="button-row" id="calc-api-presets" role="group" aria-labelledby="presets-label"></div>
+      </div>
+      <div class="control">
+        <label for="calc-util">How busy the card is: <output id="calc-util-out" for="calc-util">50%</output><span class="hint">your traffic and latency target decide this, not the test</span></label>
+        <input type="range" id="calc-util" min="10" max="90" step="5" value="50">
+      </div>
+      <div class="control">
+        <label for="calc-volume">Your volume: <output id="calc-volume-out" for="calc-volume">-</output><span class="hint">pages a month</span></label>
+        <input type="range" id="calc-volume" min="3" max="7.5" step="0.05" value="5">
+      </div>
+    </div>
+
+    <div class="answer" aria-live="polite">
+      <div class="stat lead-stat"><span class="figure" id="out-even">-</span><span class="caption" id="out-even-note">pages a month and the card is the cheaper</span></div>
+      <div class="stat"><span class="figure" id="out-own">-</span><span class="caption" id="out-own-note">per 1,000 pages on the card, at this load</span></div>
+      <div class="stat"><span class="figure" id="out-month-api">-</span><span class="caption" id="out-month-api-note">a month paying by the page</span></div>
+      <div class="stat"><span class="figure" id="out-month-own">-</span><span class="caption" id="out-month-own-note">a month on rented cards</span></div>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <span class="legend-item"><span class="swatch solid sw-api"></span>Paid by the page</span>
+      <span class="legend-item"><span class="swatch solid sw-own"></span>Rented cards, by the month</span>
+      <span class="legend-item"><span class="swatch solid sw-you"></span>Your volume</span>
+    </div>
+    <figure class="chart-figure">
+      <div class="chart" id="month"></div>
+      <figcaption>
+        The monthly bill on each against the volume, both on log scales. The cards' bill is a
+        staircase: a whole card's month is paid as soon as the volume needs one more. The break-even
+        is where the by-the-page line first meets it.
+      </figcaption>
+    </figure>
+    <div class="assumption">
+      <p><strong>What this leaves to you.</strong> The rent is the only cost counted unless you add one.
+        The throughput is what the card was measured serving on these forms with 32 requests in flight;
+        longer documents or another card will serve a different number. Training is a one-off, minutes
+        to a few hours of rented time here, and labelled examples are the real cost if you have none.
+        And the calculator says nothing about accuracy: the charts above do.</p>
+    </div>
+  </section>
+
+  <section class="section" id="scans">
+    <h2>What a bad scan does</h2>
+    <p class="section-lead">
+      The same pages, degraded in four reproducible steps of noise, blur, skew and lost contrast,
+      calibrated to what they do to OCR's word accuracy. Level 0 is the clean page. The vision models
+      read the pixels and barely notice; the pipelines that read OCR's text lose almost everything.
+    </p>
+    <div class="button-row" id="scans-corpus" role="group" aria-label="Pages"></div>
+    <div class="legend" id="scans-legend"></div>
+    <figure class="chart-figure" data-table="scans">
+      <div class="chart wide-chart" id="scans-chart"></div>
+      <p class="readout" id="scans-readout" aria-live="polite">Point at the chart for each reader's figures at that level.</p>
+      <figcaption id="scans-caption"></figcaption>
+    </figure>
+  </section>
+
+  <section class="section" id="viewer">
+    <h2>Watch them read a page</h2>
+    <p class="section-lead">
+      Real test pages, with every field a reader wrote drawn where the form prints it: green when the
+      grader marked it right, red and dashed when wrong. Pick a reader and slide the scan quality.
+      Registration forms name individuals, so they are never shown here; they appear as numbers only.
+    </p>
+    <div class="controls viewer-controls">
+      <div class="control wide">
+        <span class="label-text">Form type</span>
+        <div class="button-row" role="group" aria-label="Form type" id="corpora"></div>
+      </div>
+      <div class="control">
+        <label for="page">Page</label>
+        <select id="page"></select>
+      </div>
+      <div class="control">
+        <label for="arm">Reader</label>
+        <select id="arm"></select>
+      </div>
+      <div class="control">
+        <label for="level">Scan quality: <output id="level-name">level 0</output><span class="hint" id="level-note"></span></label>
+        <input type="range" id="level" min="0" max="4" step="1" value="0">
+      </div>
+      <div class="control checks">
+        <label class="check"><input type="checkbox" id="labels" checked> Label wrong fields on the page</label>
+        <label class="check"><input type="checkbox" id="wrong-only"> List wrong fields only</label>
+      </div>
     </div>
 
     <div class="viewer">
       <figure class="page-figure">
         <div id="sheets"></div>
-        <figcaption id="caption" class="muted"></figcaption>
+        <figcaption id="caption"></figcaption>
       </figure>
       <aside class="fields" aria-labelledby="fields-h">
         <h3 id="fields-h">Fields</h3>
-        <p id="summary"></p>
-        <p class="legend"><span class="key ok">right</span> <span class="key bad">wrong</span>
-          Truth is the corpus label; grading is the project's grader, run before the site was built.</p>
-        <label class="check"><input type="checkbox" id="wrong-only"> Wrong fields only</label>
+        <p id="summary" class="summary"></p>
+        <p class="keys"><span class="key ok">right</span> <span class="key bad">wrong</span></p>
         <ol id="field-list" class="field-list"></ol>
-        <h4 id="unplaced-h">Not on the page image</h4>
-        <p class="muted" id="unplaced-note">Fields the corpus gives no location for, values the truth does not carry, and fields on pages not shown.</p>
+        <h4 id="unplaced-h">Not drawn on the page</h4>
+        <p class="note" id="unplaced-note">Fields the dataset gives no location for, values the truth does not carry, and fields on pages not shown.</p>
         <ol id="unplaced" class="field-list"></ol>
       </aside>
     </div>
 
-    <section class="arms" aria-labelledby="arms-h">
-      <h3 id="arms-h">Every reader, this scan quality</h3>
-      <p class="muted" id="arms-note"></p>
-      <table class="data">
-        <thead><tr><th scope="col">Reader</th><th scope="col">This page</th><th scope="col" id="curve-col">Fields correct over the curve pages (95% CI)</th><th scope="col" class="bar-col" aria-hidden="true"></th></tr></thead>
-        <tbody id="arms-body"></tbody>
-      </table>
-    </section>
+    <h3 class="subhead">Every reader on these pages, at this scan quality</h3>
+    <p class="note" id="arms-note"></p>
+    <figure class="chart-figure" data-table="arms">
+      <div class="chart" id="arms-chart"></div>
+      <figcaption>Each reader's share of fields right over all the pages of this set at this level, with its 95% interval, and its score on the page above. Select a reader to draw its read.</figcaption>
+    </figure>
   </section>
 
-  <section id="tables" aria-labelledby="tables-h" hidden>
-    <h2 id="tables-h">Cost and review tables</h2>
-    <p class="muted">The same numbers as the repository's README, from the same function. Intervals are 95% bootstrap over documents; each cost carries the date of the price it was computed at. FARA's registration forms name individuals, so they appear here as numbers and never as images.</p>
-    <div id="tables-body"></div>
+  <section class="section" id="surprises">
+    <h2>Surprises</h2>
+    <p class="section-lead">Things the measurements said that we did not expect, each with its evidence.</p>
+
+    <h3 class="subhead">The dearest model buys accuracy only on some forms</h3>
+    <p>Claude Opus 5.5, Anthropic's largest model, against Claude Sonnet 5.5 on the same subset of
+      test documents. <span data-fill="s-opus">-</span></p>
+    <div class="legend" aria-hidden="true">
+      <span class="legend-item"><span class="swatch solid sw-opus"></span>Claude Opus 5.5</span>
+      <span class="legend-item"><span class="swatch solid sw-frontier"></span>Claude Sonnet 5.5</span>
+    </div>
+    <figure class="chart-figure" data-table="ceiling">
+      <div class="chart wide-chart" id="ceiling"></div>
+    </figure>
+
+    <h3 class="subhead">A new form design hurts the fine-tune, not the frontier model</h3>
+    <p><span data-fill="s-gap">-</span> A fine-tune learns the layouts it was shown; a frontier
+      model reads the words. Test on designs it has never seen, or the number flatters it.</p>
+    <div class="legend" aria-hidden="true">
+      <span class="legend-item"><span class="swatch solid sw-untuned"></span>Designs seen in training</span>
+      <span class="legend-item"><span class="swatch solid sw-finetuned"></span><span class="swatch solid sw-frontier"></span>Designs never seen</span>
+    </div>
+    <figure class="chart-figure" data-table="gap">
+      <div class="chart wide-chart" id="gap"></div>
+    </figure>
+
+    <div class="cards-2">
+      <article class="card">
+        <h3>Reading twice is not reading the same</h3>
+        <p><span data-fill="s-noise">-</span> A gap of a point or two between two readers on one
+          form type is inside that noise.</p>
+        <div class="chart" id="noise"></div>
+      </article>
+      <article class="card">
+        <h3>One seed learned the wrong format</h3>
+        <p>Two of the extra training runs, same data and recipe but a different random seed,
+          learned to wrap their answers in the prompt's schema instead of answering. Inside, the values
+          were often right; graded as written, they scored under 10%. Serve one model without a held-out
+          check and you would not see it.</p>
+      </article>
+      <article class="card">
+        <h3>The untuned 4B already reads registration forms</h3>
+        <p><span data-fill="s-untuned">-</span> Fine-tuning helped everywhere else, by up to
+          <span data-fill="s-untuned-max">-</span> points: measure the base before training it.</p>
+      </article>
+      <article class="card">
+        <h3>Azure is careful, not accurate</h3>
+        <p><span data-fill="s-azure-careful">-</span> It leaves a field blank rather than guess, which
+          keeps its invented values among the lowest of any reader, and costs it the fields it could
+          have read.</p>
+      </article>
+    </div>
   </section>
+
+  <section class="section" id="limits">
+    <h2>What this does not show</h2>
+    <div class="verdict">
+      <p><strong>Nothing reached 99% unattended.</strong> To let a field through without a person, a
+        reader has to know when it is right. Two signals were tried: whether a frontier model's read of
+        the image agrees with its read of the OCR text, and the fine-tune's own token probability. Set on
+        the development pages to keep accepted fields 99% right, both sent
+        <span data-fill="review-rate">-</span> of test fields to a person. The models save the typing; a
+        person still checks.</p>
+    </div>
+    <ul class="limits">
+      <li><strong>Old, public, printed forms.</strong> FARA registrations from the 1960s on, FCC ad-buy
+        orders, Indonesian receipts and NIST's synthesised 1988 tax forms. No handwriting, no long
+        documents, no form whose type is unknown.</li>
+      <li><strong>Small test sets on two form types.</strong> CORD's 100 test receipts and NIST's 500 pages over
+        twenty form faces are too few for the release gate to decide field by field at three points, so
+        its verdict there is "not decided", not "pass".</li>
+      <li><strong>The release gate blocks the fine-tunes</strong> on registration and ad-buy forms
+        against the frontier models: <span data-fill="gate-blocks">-</span>. They are cheaper, not
+        equivalent.</li>
+      <li><strong>Prices move.</strong> Every price here carries the day it was read. The calculator is
+        there so you can put in today's.</li>
+      <li><strong>Training is not in the cost per page.</strong> Neither the fine-tune's rented hours nor
+        Azure's <span data-fill="azure-hours">-</span> training hours
+        (<span data-fill="azure-train-usd">-</span> past its free hours) are in the per-page figures; both
+        are one-off costs to spread over the months you run.</li>
+    </ul>
+  </section>
+
 </main>
-
-<footer class="wrap muted">
-  <p>Pages shown: NIST Special Database 2 (synthesised 1988 tax forms), CORD v2 receipts (CC BY 4.0), and DeepForm ad-buy forms from Google's VRDU benchmark (FCC public files). Eight test pages per corpus, drawn by a fixed seed from sorted ids, never by how a reader did. <span id="built"></span></p>
+<footer class="foot">
+  <div class="foot-inner">
+    <p>
+      Source, method, every run and the tables these numbers are read from:
+      <a href="https://github.com/Peter-A-P/scanned-form-extraction">github.com/Peter-A-P/scanned-form-extraction</a>
+    </p>
+    <ul>
+      <li>Models: <a href="https://huggingface.co/Peter-A-P">huggingface.co/Peter-A-P</a> (the FARA adapters stay private)</li>
+      <li>Pages shown: NIST Special Database 2, CORD v2 (CC BY 4.0), DeepForm from Google's VRDU benchmark (FCC public files)</li>
+      <li id="foot-built">Built from the runs</li>
+      <li>Type: Newsreader and Inter, SIL Open Font License, served from this host</li>
+    </ul>
+  </div>
 </footer>
 </body>
 </html>
