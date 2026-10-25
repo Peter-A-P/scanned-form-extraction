@@ -434,17 +434,6 @@ function drawLandscape() {
   }
   s.append(svg("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title" }, "US$ per 1,000 pages, log scale"));
   s.append(svg("text", { x: 14, y: (T + H - B) / 2, transform: `rotate(-90 14 ${(T + H - B) / 2})`, "text-anchor": "middle", class: "axis-title" }, "Fields correct"));
-  // The readers nothing beats on both counts, cheapest first.
-  const sorted = [...rows].sort((a, b) => a.per_thousand.point - b.per_thousand.point);
-  const front = [];
-  let best = -1;
-  for (const r of sorted) if (r.accuracy.point > best) { front.push(r); best = r.accuracy.point; }
-  let d = "";
-  front.forEach((r, i) => {
-    const px = x(r.per_thousand.point), py = y(r.accuracy.point);
-    d += i === 0 ? `M${px},${py}` : `H${px}V${py}`;
-  });
-  s.append(svg("path", { d, class: "pareto-line" }));
   const readout = document.getElementById("landscape-readout");
   // Each label takes the first spot beside its mark that clears every mark and every label
   // already placed: right, left, above, below, then further out.
@@ -479,7 +468,7 @@ function drawLandscape() {
   const kinds = [...new Set(rows.map((r) => kind(r.arm)))];
   legend("landscape-legend", ["finetuned", "frontier", "managed", "ocr-llm", "ocr-rules", "untuned"].filter((k) => kinds.includes(k)));
   const docs = t.rows[0].documents;
-  document.getElementById("landscape-caption").textContent = `${t.title}: ${docs} documents, each read once by each reader. Whiskers are 95% bootstrap intervals over documents. The dashed line joins the readers no other reader beats on both accuracy and cost.`;
+  document.getElementById("landscape-caption").textContent = `${t.title}: ${docs} documents, each read once by each reader. Whiskers are 95% bootstrap intervals over documents.`;
   register("landscape", ["Reader", "Fields correct (95% CI)", "Every field right", "Invented fields", "US$ per 1,000 pages (95% CI)", "Price dated"],
     t.rows.map((r) => [short(r.arm), r.accuracy_text, r.all_right_text, r.invented_text, r.per_thousand_text, r.price_date]), t.title);
 }

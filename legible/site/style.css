@@ -1021,7 +1021,6 @@ body { overflow-x: clip; }
 .dim { opacity: 0.22; }
 .mark-label { fill: var(--ink-soft); font-size: 11px; }
 .mark-label.strong { fill: var(--ink); font-weight: 600; }
-.pareto-line { fill: none; stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 4 3; }
 .ci-line { stroke-width: 1.25; stroke-linecap: round; }
 .panel-title { fill: var(--ink-faint); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
 .corpus-label { fill: var(--ink); font-size: 13px; font-weight: 600; }

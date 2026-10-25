@@ -29,7 +29,7 @@ a table; no table is shown by default.
   log scale. Then where it is strong and where it falls short (the gate's blocking fields), and
   why the Azure comparison is fair.
 - **Accuracy against cost.** Every reader on each headline table as a scatter, both intervals
-  as whiskers, with the line through the readers no other beats on both.
+  as whiskers.
 - **How it was fine-tuned.** Untuned against fine-tuned for both sizes on each form type, the
   recipe, and each headline adapter's training time from its `run.json`.
 - **Serving it.** The load test (pages a second and read latency at 1, 8 and 32 in flight) and
