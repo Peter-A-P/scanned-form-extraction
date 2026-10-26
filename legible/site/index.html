@@ -19,16 +19,11 @@
 <nav class="tabs" aria-label="This site">
   <div class="tabs-inner">
     <a href="index.html" aria-current="page">Overview</a>
-    <a href="#findings">What we found</a>
     <a href="#model">The fine-tuned model</a>
-    <a href="#landscape">Accuracy against cost</a>
+    <a href="#landscape">Accuracy vs. cost</a>
     <a href="#training">How it was trained</a>
-    <a href="#serving">Serving it</a>
     <a href="#calculator">Your break-even</a>
-    <a href="#scans">Bad scans</a>
     <a href="#viewer">Watch it read</a>
-    <a href="#surprises">Surprises</a>
-    <a href="#limits">Limits</a>
     <a href="architecture.html">How it's built</a>
   </div>
 </nav>
@@ -47,11 +42,10 @@
       Every organisation that still takes paper has someone typing forms in. There are three ways to
       hand that to a machine: pay a frontier AI model by the page, buy a managed document service, or
       fine-tune a small open model and run it yourself. They are rarely measured on the same pages.
-      <strong>This project measured them.</strong> Twelve readers, from Claude, GPT and Gemini to Azure
+      <strong>This project measured them, with <span data-fill="pages-read">-</span> page reads.</strong> Twelve readers, from Claude, GPT and Gemini to Azure
       Document Intelligence, classic OCR pipelines, and a 2B and a 4B Gemma model fine-tuned here,
       read the same <span data-fill="corpus-pages">-</span> public pages, many of them again and again: clean and
-      degraded, development and test, three training seeds, second reads. Every field they wrote, on
-      every one of those <span data-fill="pages-read">-</span> page reads, was graded by code against the
+      degraded, development and test, three training seeds, second reads. Every field they wrote was graded by code against the
       answer the dataset records.
     </p>
     <div class="hero-points">
