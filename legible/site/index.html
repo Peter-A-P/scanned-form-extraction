@@ -19,11 +19,12 @@
 <nav class="tabs" aria-label="This site">
   <div class="tabs-inner">
     <a href="index.html" aria-current="page">Overview</a>
-    <a href="#model">The fine-tuned model</a>
-    <a href="#landscape">Accuracy vs. cost</a>
-    <a href="#training">How it was trained</a>
-    <a href="#calculator">Your break-even</a>
     <a href="#viewer">Watch it read</a>
+    <a href="#findings">Results</a>
+    <a href="#model">The fine-tune</a>
+    <a href="#landscape">Accuracy vs. cost</a>
+    <a href="#training">Training</a>
+    <a href="#calculator">Break-even</a>
     <a href="architecture.html">How it's built</a>
   </div>
 </nav>
@@ -77,6 +78,60 @@
     </p>
     <noscript><p class="noscript">The figures and charts on this page need JavaScript. Every number is also in the repository's README, as tables.</p></noscript>
   </header>
+
+  <section class="section" id="viewer">
+    <h2>Watch them read a page</h2>
+    <p class="section-lead">
+      Real test pages, with every field a reader wrote drawn where the form prints it: green when the
+      grader marked it right, red and dashed when wrong. Pick a reader and slide the scan quality.
+      Registration forms name individuals, so they are never shown here; they appear as numbers only.
+    </p>
+    <div class="controls viewer-controls">
+      <div class="control wide">
+        <span class="label-text">Form type</span>
+        <div class="button-row" role="group" aria-label="Form type" id="corpora"></div>
+      </div>
+      <div class="control">
+        <label for="page">Page</label>
+        <select id="page"></select>
+      </div>
+      <div class="control">
+        <label for="arm">Reader</label>
+        <select id="arm"></select>
+      </div>
+      <div class="control">
+        <label for="level">Scan quality: <output id="level-name">level 0</output><span class="hint" id="level-note"></span></label>
+        <input type="range" id="level" min="0" max="4" step="1" value="0">
+      </div>
+      <div class="control checks">
+        <label class="check"><input type="checkbox" id="labels" checked> Label wrong fields on the page</label>
+        <label class="check"><input type="checkbox" id="wrong-only"> List wrong fields only</label>
+      </div>
+    </div>
+
+    <div class="viewer">
+      <figure class="page-figure">
+        <div id="sheets"></div>
+        <figcaption id="caption"></figcaption>
+      </figure>
+      <aside class="fields" aria-labelledby="fields-h">
+        <h3 id="fields-h">Fields</h3>
+        <p id="summary" class="summary"></p>
+        <p class="keys"><span class="key ok">right</span> <span class="key bad">wrong</span></p>
+        <ol id="field-list" class="field-list"></ol>
+        <h4 id="unplaced-h">Not drawn on the page</h4>
+        <p class="note" id="unplaced-note">Fields the dataset gives no location for, values the truth does not carry, and fields on pages not shown.</p>
+        <ol id="unplaced" class="field-list"></ol>
+      </aside>
+    </div>
+
+    <h3 class="subhead">Every reader on these pages, at this scan quality</h3>
+    <p class="note" id="arms-note"></p>
+    <figure class="chart-figure" data-table="arms">
+      <div class="chart" id="arms-chart"></div>
+      <figcaption>Each reader's share of fields right over all the pages of this set at this level, with its 95% interval, and its score on the page above. Select a reader to draw its read.</figcaption>
+    </figure>
+  </section>
 
   <section class="section" id="findings">
     <h2>What we found</h2>
@@ -330,60 +385,6 @@
       <div class="chart wide-chart" id="scans-chart"></div>
       <p class="readout" id="scans-readout" aria-live="polite">Point at the chart for each reader's figures at that level.</p>
       <figcaption id="scans-caption"></figcaption>
-    </figure>
-  </section>
-
-  <section class="section" id="viewer">
-    <h2>Watch them read a page</h2>
-    <p class="section-lead">
-      Real test pages, with every field a reader wrote drawn where the form prints it: green when the
-      grader marked it right, red and dashed when wrong. Pick a reader and slide the scan quality.
-      Registration forms name individuals, so they are never shown here; they appear as numbers only.
-    </p>
-    <div class="controls viewer-controls">
-      <div class="control wide">
-        <span class="label-text">Form type</span>
-        <div class="button-row" role="group" aria-label="Form type" id="corpora"></div>
-      </div>
-      <div class="control">
-        <label for="page">Page</label>
-        <select id="page"></select>
-      </div>
-      <div class="control">
-        <label for="arm">Reader</label>
-        <select id="arm"></select>
-      </div>
-      <div class="control">
-        <label for="level">Scan quality: <output id="level-name">level 0</output><span class="hint" id="level-note"></span></label>
-        <input type="range" id="level" min="0" max="4" step="1" value="0">
-      </div>
-      <div class="control checks">
-        <label class="check"><input type="checkbox" id="labels" checked> Label wrong fields on the page</label>
-        <label class="check"><input type="checkbox" id="wrong-only"> List wrong fields only</label>
-      </div>
-    </div>
-
-    <div class="viewer">
-      <figure class="page-figure">
-        <div id="sheets"></div>
-        <figcaption id="caption"></figcaption>
-      </figure>
-      <aside class="fields" aria-labelledby="fields-h">
-        <h3 id="fields-h">Fields</h3>
-        <p id="summary" class="summary"></p>
-        <p class="keys"><span class="key ok">right</span> <span class="key bad">wrong</span></p>
-        <ol id="field-list" class="field-list"></ol>
-        <h4 id="unplaced-h">Not drawn on the page</h4>
-        <p class="note" id="unplaced-note">Fields the dataset gives no location for, values the truth does not carry, and fields on pages not shown.</p>
-        <ol id="unplaced" class="field-list"></ol>
-      </aside>
-    </div>
-
-    <h3 class="subhead">Every reader on these pages, at this scan quality</h3>
-    <p class="note" id="arms-note"></p>
-    <figure class="chart-figure" data-table="arms">
-      <div class="chart" id="arms-chart"></div>
-      <figcaption>Each reader's share of fields right over all the pages of this set at this level, with its 95% interval, and its score on the page above. Select a reader to draw its read.</figcaption>
     </figure>
   </section>
 
