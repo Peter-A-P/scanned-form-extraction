@@ -24,7 +24,7 @@ a table; no table is shown by default.
   is, the best frontier model's accuracy, and the pages processed with the distinct pages and
   readers behind them. The headline's "half the forms tested" is filled from the same count.
 - **Watch them read a page.** The page viewer (below), straight after the opening.
-- **What we found** ("Results" in the menu). Six findings with their numbers, each linking to its chart.
+- **Main takeaways** ("Results" in the menu). Six findings with their numbers, each linking to its chart.
 - **The head-to-head.** Per form type, the gated fine-tune beside Azure, the cheapest and the
   most accurate frontier model: fields correct with intervals, and cost per 1,000 pages on a
   log scale. Then where it is strong and where it falls short (the gate's blocking fields), and
