@@ -40,7 +40,7 @@ const RULES = "E, OCR plus rules";
 
 const state = {
   results: null, story: null, index: null,
-  landscape: "fara", serving: "fara", scans: "nist", scansOff: new Set(),
+  landscape: "cord", serving: "fara", scans: "nist", scansOff: new Set(),
   corpus: "nist", page: null, record: null, arm: null, level: 0,
 };
 const cache = new Map();
