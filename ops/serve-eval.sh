@@ -44,7 +44,7 @@ else
   dataset=$(python -c "import json; print(json.load(open('$dir/run.json'))['config']['dataset'])")
   budget=$(python -c "import json; print(json.load(open('$dir/run.json'))['config']['visual_tokens'])")
   args=$(legible serve argv "$model" --visual-tokens "$budget")
-  reads=$(legible serve reads "$dataset")
+  reads=$(legible serve reads "$dataset" --run-id "$model")
 fi
 
 logprobs=()

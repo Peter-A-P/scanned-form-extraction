@@ -66,3 +66,22 @@ loosened to unwrap them: the answers are graded as written, as every arm's are, 
 stand as part of the training variance the seeds measure. They are the evidence that one seed
 of a fine-tune can learn the wrong output format from the same data and recipe, which a
 buyer serving one model without a held-out check would not see.
+
+## The ablations (planned 2026-10-26)
+
+`legible/train/ablate.py` lists them, `legible train ablations` prints them, and
+`ops/ablate-queue.sh` trains them as `ops/train-queue.sh` trains the headline, skipping a run
+whose adapter is on the volume. Each is E2B at seed 0 with one change, compared with the
+seed-0 E2B whose recipe it changes, and each is read by `ops/eval-queue.sh` on an RTX 3090 like
+every other fine-tune, so its cost per page is measured the same way.
+
+| Ablation | Runs | Read on |
+|---|---|---|
+| Visual tokens: 560 a page instead of 1,120, at training and at serving | One per headline training set: FARA's three held-out templates, DeepForm's unseen split, CORD, NIST | Everything the headline model reads: dev, test, the NIST curve and the VRDU curve subset |
+| Data volume: half and a quarter of the training documents | NIST at 400 and 200 faces (the first of the headline's interleaved 800), CORD at 400 and 200 receipts (the first in the set's order) | Dev and test, level 0 |
+| One model for every corpus | FARA's and DeepForm's mixed-template sets (seed 0), CORD and NIST's 800 faces, interleaved by document, at NIST's 16,384-token limit | Each set's dev and test, level 0, against the mixed-template specialists and the CORD and NIST models |
+
+The multi-corpus model learns the mixed-template sets because one model cannot hold out each
+FARA template in turn, as the three unseen-template models do; its comparison is on templates
+it has seen. `legible report` writes the three tables, with each change's paired difference
+over the documents both models read.

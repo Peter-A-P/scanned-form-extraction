@@ -768,6 +768,7 @@ def report_command(readme: Path = typer.Option(Path("README.md"))) -> None:
     for rv in results.reviews:
         body += [f"**{rv.title}** {rv.note}", "", *review_table(rv.rows, rv.miss)]
     body += _subsets_section(root, truth)
+    body += _ablations_section(_ablations(root, truth))
     headline_keys = ("fara-unseen", "deepform-unseen", "cord", "nist")
     body += _serving_section(
         root, {t.key.split("-")[0]: t.rows for t in results.tables if t.key in headline_keys}
@@ -906,6 +907,168 @@ _BENCH_CORPORA = {
     "cord": "CORD",
     "nist": "NIST",
 }
+
+
+#: Where an ablation is read: name, documents, corpora, part, level and table.
+_Where = tuple[str, list[str], list[str], str, int, str]
+
+
+@dataclass(frozen=True)
+class _AblationSet:
+    """One set of documents an ablation is read on: the recipe it changes first, then each
+    change with its paired difference from it."""
+
+    name: str
+    documents: int
+    rows: list[Row]
+    deltas: list[Interval | None]
+
+
+@dataclass(frozen=True)
+class _Ablation:
+    key: str
+    title: str
+    columns: list[str]
+    sets: list[_AblationSet]
+
+
+def _ablations(root: Path, truth: Mapping[str, Truth]) -> list[_Ablation]:
+    """The three ablations (legible/train/ablate.py) on the documents each answers about,
+    every change against the seed-0 E2B whose recipe it changes."""
+    from legible.report import ARMS, Arm, answers_for, delta, row
+    from legible.schema.corpora import NIST_SCHEMAS
+    from legible.train.ablate import MULTI
+
+    e2b = next(a for a in ARMS if a.arm == "b" and a.size == "2b")
+    faces = sorted(NIST_SCHEMAS)
+    fara_u, deep_u = _vrdu_ids("fara", "unseen", "test"), _vrdu_ids("deepform", "unseen", "test")
+    cord = sorted(part_docs("cord", "test"))
+    nist = sorted(part_docs("nist", "test"))
+    nist_curve = sorted(part_docs("nist", "curve"))
+    tokens: list[_Where] = [
+        ("FARA, unseen templates", fara_u, ["fara"], "test", 0, "fara-unseen"),
+        ("DeepForm, unseen templates", deep_u, ["deepform"], "test", 0, "deepform-unseen"),
+        ("CORD", cord, ["cord"], "test", 0, "cord"),
+        ("NIST", nist, faces, "test", 0, "nist"),
+        *((f"NIST curve, level {lv}", nist_curve, faces, "curve", lv, "nist") for lv in (2, 3, 4)),
+        *(
+            (
+                f"{name}, VRDU curve subset, level 4",
+                sorted(part_docs(c, "vrdu_curve")),
+                [c],
+                "vrdu_curve",
+                4,
+                f"{c}-unseen",
+            )
+            for c, name in (("fara", "FARA"), ("deepform", "DeepForm"))
+        ),
+    ]
+    clean: list[_Where] = [
+        ("CORD", cord, ["cord"], "test", 0, "cord"),
+        ("NIST", nist, faces, "test", 0, "nist"),
+    ]
+    multi: list[_Where] = [
+        (
+            "FARA, mixed templates",
+            _vrdu_ids("fara", "mixed", "test"),
+            ["fara"],
+            "test",
+            0,
+            "fara-mixed",
+        ),
+        (
+            "DeepForm, mixed templates",
+            _vrdu_ids("deepform", "mixed", "test"),
+            ["deepform"],
+            "test",
+            0,
+            "deepform-mixed",
+        ),
+        *clean,
+    ]
+
+    def variant(label: str, **kw: Any) -> Arm:
+        changes = tuple(kw.pop("changes", {}).items())
+        return Arm(label, "b", None, size="2b", changes=changes, **kw)
+
+    specs = [
+        (
+            "visual-tokens",
+            "Visual tokens: E2B at 560 a page against the headline's 1,120",
+            [variant("E2B, 560 visual tokens", changes={"visual_tokens": 560})],
+            tokens,
+            "E2B, 1,120 visual tokens",
+        ),
+        (
+            "volume",
+            "Data volume: E2B on half and a quarter of the training documents",
+            [variant(f"E2B, {n} documents", changes={"volume": n}) for n in (400, 200)],
+            clean,
+            "E2B, 800 documents",
+        ),
+        (
+            "multi-corpus",
+            "One model for every corpus against one per corpus, E2B",
+            [variant("E2B, one model for every corpus", dataset=MULTI)],
+            multi,
+            "E2B, one model per corpus",
+        ),
+    ]
+    out: list[_Ablation] = []
+    for key, title, variants, wheres, ref_label in specs:
+        sets: list[_AblationSet] = []
+        for name, docs, cs, part, lv, tbl in wheres:
+            ref = answers_for(root, e2b, cs, part, lv, [], tbl)
+            rows = [row(ref_label, docs, truth, ref)]
+            deltas: list[Interval | None] = [None]
+            for v in variants:
+                got = answers_for(root, v, cs, part, lv, [], tbl)
+                rows.append(row(v.label, docs, truth, got))
+                deltas.append(delta(docs, truth, got, ref))
+            sets.append(_AblationSet(name, len(docs), rows, deltas))
+        out.append(_Ablation(key, title, [ref_label, *(v.label for v in variants)], sets))
+    return out
+
+
+def _ablations_section(ablations: Sequence[_Ablation]) -> list[str]:
+    """The ablation tables: fields correct for the recipe and each change, the change's paired
+    difference with its interval, and the cost a page where the change is about cost."""
+    from legible.report import pct, usd
+
+    def signed(i: Interval | None) -> str:
+        if i is None:
+            return ""
+        return f"{100 * i.point:+.1f} ({100 * i.low:+.1f} to {100 * i.high:+.1f})"
+
+    out = [
+        "**The ablations** (legible/train/ablate.py, PLAN.md 2.3): each change to the recipe "
+        "trained on E2B at seed 0 and read like the headline models, against the seed-0 E2B "
+        "it changes; the difference is paired over the documents both read, in points of "
+        "fields correct, with its 95% interval.",
+        "",
+    ]
+    for a in ablations:
+        head = ["Documents", a.columns[0]]
+        for c in a.columns[1:]:
+            head += [c, "Difference"]
+        costs = a.key == "visual-tokens"
+        if costs:
+            head += [f"Cost per 1,000 pages, {c.split(', ')[-1]}" for c in a.columns]
+        out += [
+            f"*{a.title}*",
+            "",
+            "| Set | " + " | ".join(head) + " |",
+            "|---|---:|" + "---|" * (len(head) - 1),
+        ]
+        for s in a.sets:
+            cells = [str(s.documents), pct(s.rows[0].accuracy)]
+            for r, d in zip(s.rows[1:], s.deltas[1:], strict=True):
+                cells += [pct(r.accuracy), signed(d)]
+            if costs:
+                cells += [usd(r.per_thousand) for r in s.rows]
+            out.append(f"| {s.name} | " + " | ".join(cells) + " |")
+        out.append("")
+    return out
 
 
 def _serving_section(root: Path, headline: Mapping[str, Sequence[Row]]) -> list[str]:
@@ -1871,29 +2034,43 @@ def train_run(
 ) -> None:
     """One fine-tune on the rented card, resuming from its newest checkpoint."""
     from legible.schema.corpora import SCHEMAS
+    from legible.train.ablate import MULTI, MULTI_SETS
     from legible.train.checkpoint import CheckpointStore, runpod_s3
     from legible.train.dataset import TrainingHeader, read_training_set
-    from legible.train.recipe import chosen
-    from legible.train.vision import describe, train
+    from legible.train.recipe import VOLUME_FOR, chosen
+    from legible.train.vision import Example, describe, train
 
-    # "nist" is the twenty faces' sets read as one: one model for the form family, each face
-    # asked with its own prompt.
-    names = [k for k in _nist_keys()] if dataset == "nist" else [dataset]
+    def interleaved(es: list[Example]) -> list[Example]:
+        # A fixed order by document, so a step sees every form and a volume cut takes some
+        # of each.
+        import hashlib
+
+        return sorted(es, key=lambda e: hashlib.sha256(e[1].doc_id.encode()).hexdigest())
+
     headers: list[TrainingHeader] = []
-    examples = []
-    for name in names:
+
+    def load(name: str) -> list[Example]:
+        # "nist" is the twenty faces' sets read as one: one model for the form family, each
+        # face asked with its own prompt.
+        if name == "nist":
+            return interleaved([e for face in _nist_keys() for e in load(face)])
         path = data_root() / "train" / f"{name}.jsonl"
         with path.open(encoding="utf-8") as f:
             key = TrainingHeader.model_validate_json(f.readline()).corpus
         header, rows = read_training_set(path, SCHEMAS[key])
         headers.append(header)
-        examples += [(header.instruction, r) for r in rows]
-    if dataset == "nist":
-        # Faces interleaved in a fixed order, so a step sees every form and a volume cut
-        # takes some of each.
-        import hashlib
+        return [(header.instruction, r) for r in rows]
 
-        examples.sort(key=lambda e: hashlib.sha256(e[1].doc_id.encode()).hexdigest())
+    if dataset == MULTI:
+        # Every corpus in one run, each as its specialist saw it (NIST cut to the same 800
+        # faces), then interleaved.
+        examples: list[Example] = []
+        for name in MULTI_SETS:
+            got = load(name)
+            examples += got[: VOLUME_FOR[name]] if name in VOLUME_FOR else got
+        examples = interleaved(examples)
+    else:
+        examples = load(dataset)
     config = chosen(
         size,  # type: ignore[arg-type]
         dataset,
@@ -1917,6 +2094,17 @@ def train_run(
         store=CheckpointStore(out, syncer, keep=2),
     )
     typer.echo(describe(record))
+
+
+@train_app.command("ablations")
+def train_ablations() -> None:
+    """The ablation runs (legible/train/ablate.py), one a line: run id, kind, training set,
+    visual tokens and volume ("-" for all), as `ops/ablate-queue.sh` reads them."""
+    from legible.train.ablate import ablations
+
+    for a in ablations():
+        c = a.config
+        typer.echo(f"{c.run_id} {a.kind} {c.dataset} {c.visual_tokens} {c.volume or '-'}")
 
 
 serve_app = typer.Typer(no_args_is_help=True, help="Arms B and C behind vLLM.")
@@ -2005,19 +2193,30 @@ def serve_headline() -> None:
 @serve_app.command("reads")
 def serve_reads(
     dataset: str = typer.Argument(..., help="The training set a model learned."),
+    run_id: str | None = typer.Option(None, help="The model; an ablation may owe fewer reads."),
 ) -> None:
     """The reads a model trained on this set owes: one `corpus split part level` a line
     ("-" for no split file), dev before test. A VRDU model reads its own split file's dev
     and test documents, and the seed-0 unseen-template model its test documents in the VRDU
     curve subset at levels 2 and 4; CORD's its test set; NIST's the twenty faces' dev, test
-    and curve."""
-    typer.echo("\n".join(_owed_reads(dataset)))
+    and curve. The multi-corpus model reads each of its sets' dev and test; an ablation that
+    asks about clean pages reads level 0 only (legible/train/ablate.py)."""
+    from legible.train.ablate import find
+
+    lines = _owed_reads(dataset)
+    run = find(run_id) if run_id else None
+    if run is not None and run.level0_only:
+        lines = [x for x in lines if x.split()[2] in {"dev", "test"} and x.split()[3] == "0"]
+    typer.echo("\n".join(lines))
 
 
 def _owed_reads(dataset: str) -> list[str]:
     """`serve reads`, as a list."""
     from legible.data.vrdu import headline_split_files, read_split
+    from legible.train.ablate import MULTI, MULTI_SETS
 
+    if dataset == MULTI:
+        return [x for name in MULTI_SETS for x in _owed_reads(name)]
     lines: list[str] = []
     if dataset.startswith(("fara-", "deepform-")):
         corpus = dataset.split("-")[0]

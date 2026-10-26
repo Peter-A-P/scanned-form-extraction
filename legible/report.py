@@ -30,7 +30,7 @@ from legible.arms.frontier import Read, RunDir
 from legible.arms.read_run import outputs
 from legible.arms.rules_run import answer, read_run
 from legible.bench.cost import Costed, GpuPrice, PriceKind, ledger_cost, ocr_usd_per_page
-from legible.grade import DocGrade, grade_document, parse_output, summarise
+from legible.grade import DocGrade, accuracy_delta, grade_document, parse_output, summarise
 from legible.schema import CorpusSchema, Record
 from legible.stats import Interval
 
@@ -63,12 +63,16 @@ class Truth:
 @dataclass(frozen=True)
 class Arm:
     """One reader as the tables name it. A fine-tune (arm B) has a model per training set,
-    so its route depends on the table: `size` names which of the two it is."""
+    so its route depends on the table: `size` names which of the two it is. An ablation's
+    fine-tune (legible/train/ablate.py) is the same recipe with `changes`, or one model
+    trained on `dataset` for every table."""
 
     label: str
     arm: str
     route: str | None
     size: str | None = None
+    changes: tuple[tuple[str, Any], ...] = ()
+    dataset: str | None = None
 
 
 ARMS: tuple[Arm, ...] = (
@@ -249,6 +253,33 @@ def row(
         s.hallucination,
         cost,
     )
+
+
+def delta(
+    doc_ids: Sequence[str], truth: Mapping[str, Truth], a: Answers | None, b: Answers | None
+) -> Interval | None:
+    """The paired difference in fields correct, `a - b`, over the documents both answered:
+    an ablation's change against the recipe it changes, resampled by document."""
+    if a is None or b is None:
+        return None
+    both = [d for d in doc_ids if d in a.outputs and d in b.outputs]
+    if not both:
+        return None
+
+    def grades(ans: Answers) -> list[DocGrade]:
+        return [
+            grade_document(
+                truth[d].schema,
+                d,
+                truth[d].record,
+                ans.outputs[d],
+                page_text=truth[d].text,
+                alternatives=truth[d].alternatives,
+            )
+            for d in both
+        ]
+
+    return accuracy_delta(grades(a), grades(b))
 
 
 @dataclass(frozen=True)
@@ -488,8 +519,9 @@ def arm_dirs(
     if arm.arm in {"b", "c"}:
         from legible.train.recipe import chosen
 
+        sets = (arm.dataset,) if arm.dataset else TABLE_SETS.get(table, ())
         routes = (
-            [chosen(arm.size, ds).run_id for ds in TABLE_SETS.get(table, ())]  # type: ignore[arg-type]
+            [chosen(arm.size, ds, **dict(arm.changes)).run_id for ds in sets]  # type: ignore[arg-type]
             if arm.arm == "b"
             else [str(arm.route)]
         )
