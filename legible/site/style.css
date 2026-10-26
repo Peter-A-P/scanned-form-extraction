@@ -875,7 +875,8 @@ body { overflow-x: clip; }
 
 /* One colour per kind of reader, used for its marks, its lines and its legend on every
    chart. The fine-tune is the accent, because it is this project's; the frontier models
-   the shared violet; Azure an amber, apart from both; the OCR pipelines and the untuned
+   the shared violet; Azure an amber, apart from both; Opus, beside Sonnet on the ceiling
+   chart only, a rose that cannot be taken for the violet; the OCR pipelines and the untuned
    bases recede in greys and a pale accent. */
 :root {
   --k-finetuned: var(--accent);
@@ -884,7 +885,7 @@ body { overflow-x: clip; }
   --k-ocr-llm: #7a7f88;
   --k-ocr-rules: #a8acb3;
   --k-untuned: #7bb3c0;
-  --k-opus: #3f1f66;
+  --k-opus: #d81b60;
   --box-ok: #1e7a4c;
   --box-bad: #c0392b;
   --box-hot: #d99a00;
@@ -896,7 +897,7 @@ body { overflow-x: clip; }
     --k-ocr-llm: #8d929b;
     --k-ocr-rules: #5d626b;
     --k-untuned: #3d8ea1;
-    --k-opus: #dccbf5;
+    --k-opus: #f06292;
     --box-ok: #58c286;
     --box-bad: #f0736a;
   }
