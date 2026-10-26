@@ -297,10 +297,12 @@ function fills() {
     const fr = frontierRows(c.table).map((r) => r.invented.point);
     return { c, f: inv(c.table, ftLabel(gatedSize(k))), lo: Math.min(...fr), hi: Math.max(...fr) };
   });
-  fill("f-invent-figure", `${pct(invented[0].f)} against ${pct(invented[0].lo)} to ${pct(invented[0].hi)}`);
+  // The four frontier models' mean beside the fine-tune: one number reads better than a range.
+  for (const v of invented) v.mean = frontierRows(v.c.table).reduce((a, r) => a + r.invented.point, 0) / frontierRows(v.c.table).length;
+  fill("f-invent-figure", `${pct(invented[0].f)} against ${pct(invented[0].mean)}`);
   const nistFt = inv("nist", ftLabel(gatedSize("nist")));
   const nistFr = frontierRows("nist").map((r) => r.invented.point);
-  fill("f-invent-detail", `On ${invented[0].c.noun} it writes a value the page does not hold for ${pct(invented[0].f)} of fields, against ${pct(invented[0].lo)} to ${pct(invented[0].hi)} for the four frontier models; on ${invented[1].c.noun}, ${pct(invented[1].f)} against ${pct(invented[1].lo)} to ${pct(invented[1].hi)}. Not on every form: on the tax forms it is ${pct(nistFt)} against ${pct(Math.min(...nistFr))} to ${pct(Math.max(...nistFr))}`);
+  fill("f-invent-detail", `On ${invented[0].c.noun} it writes a value the page does not hold for ${pct(invented[0].f)} of fields, against ${pct(invented[0].mean)} on average for the four frontier models (${pct(invented[0].lo)} to ${pct(invented[0].hi)}); on ${invented[1].c.noun}, ${pct(invented[1].f)} against ${pct(invented[1].lo)} to ${pct(invented[1].hi)}. Not on every form: on the tax forms it is ${pct(nistFt)} against ${pct(Math.min(...nistFr))} to ${pct(Math.max(...nistFr))}`);
 
   const hk = row("nist", HAIKU), sn = row("nist", SONNET);
   fill("f-cheap-figure", `1/${Math.round(sn.per_thousand.point / hk.per_thousand.point)} the price`);
