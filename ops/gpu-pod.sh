@@ -9,8 +9,8 @@
 #
 # The pages come from the volume (legible/data/pages.tar, rendered once and checked against the
 # committed manifests) rather than rendered again. Training needs nothing else; reading a VRDU
-# corpus needs its split files, so the evaluation pod fetches fara (VRDU, with its
-# checksums). Then ops/train-queue.sh, ops/ablate-queue.sh or ops/eval-queue.sh.
+# corpus needs its split files, so the evaluation pod fetches fara and deepform (VRDU, with
+# its checksums). Then ops/train-queue.sh, ops/ablate-queue.sh or ops/eval-queue.sh.
 set -euo pipefail
 : "${VOLUME_ID:?}" "${DATACENTER:?}"
 export LEGIBLE_DATA="${LEGIBLE_DATA:-/root/legible-data}" UV_LINK_MODE=copy
