@@ -12,6 +12,9 @@ Every machine this project rented, at the rate RunPod's API returned when the po
 | RTX A6000, 48 GB | Arm B's 4B on DeepForm, which ran out of memory on 24 GB at its first step | Secure | 0.59 | 2026-10-18 |
 | RTX 3090, 24 GB (EU-CZ-1) | The load test of both sizes (docs/serving.md), then the 4B NIST seed 1's reads | Secure | 0.50 | 2026-10-23 |
 | CPU pod, 16 vCPU, 32 GB (US-CA-2) | Tesseract on the VRDU curve subset at levels 2 and 4 | Secure | 0.48 | 2026-10-23 |
+| RTX A5000, 24 GB (CA) | The ablations: the 560-token and data-volume E2B runs | Secure | 0.27 | 2026-10-27 |
+| RTX A6000, 48 GB (SE) | The ablations: the multi-corpus E2B run (no A5000 or 3090 free) | Secure | 0.59 | 2026-10-27 |
+| RTX 3090, 24 GB (CZ) | The ablations served by vLLM and read through the gateway | Secure | 0.50 | 2026-10-27 |
 
 **The provider rule** is 06's (`docs/gpu-prices.md` there): a hyperscaler's spot GPU if it is
 within 20% of the rental marketplaces, otherwise the marketplace. 06 found GCP's L4 spot 24%
