@@ -34,5 +34,6 @@ there were moved across.
 
 The volume was deleted on 2026-10-28, once every run was read: the six headline adapters are on
 Hugging Face, and every read, timing file and run record was copied off it first, so every
-number here can be graded again. The other adapters (seeds 1 and 2, the ablations, FARA's) went
-with it; any of them can be retrained from the recipe and its seed.
+number here can be graded again. FARA's six seed-0 adapters are on Hugging Face too, private
+(docs/models.md). The others (seeds 1 and 2 and the ablations) went with it; any of them can be
+retrained from the recipe and its seed.
