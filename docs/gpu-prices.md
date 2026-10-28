@@ -31,3 +31,8 @@ checkpoints are removed once its adapter is stored. The first runs used 06's vol
 merged formats nearly fill: an upload of the rendered pages (6.2 GB, to give the other pods the
 pages rather than render them again) was refused for quota, and the three adapters already
 there were moved across.
+
+The volume was deleted on 2026-10-28, once every run was read: the six headline adapters are on
+Hugging Face, and every read, timing file and run record was copied off it first, so every
+number here can be graded again. The other adapters (seeds 1 and 2, the ablations, FARA's) went
+with it; any of them can be retrained from the recipe and its seed.
