@@ -291,31 +291,31 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 
 | Set | Documents | E2B, 1,120 visual tokens | E2B, 560 visual tokens | Difference | Cost per 1,000 pages, 1,120 visual tokens | Cost per 1,000 pages, 560 visual tokens |
 |---|---:|---|---|---|---|---|
-| FARA, unseen templates | 900 | 69.0% (67.2 to 70.7) | not yet measured |  | US$0.06 (0.06 to 0.06) |  |
-| DeepForm, unseen templates | 159 | 55.3% (48.5 to 62.0) | not yet measured |  | US$0.19 (0.17 to 0.21) |  |
-| CORD | 100 | 75.2% (67.9 to 82.0) | not yet measured |  | US$0.11 (0.11 to 0.11) |  |
+| FARA, unseen templates | 900 | 69.0% (67.2 to 70.7) | 65.4% (63.8 to 66.9) | -3.6 (-4.9 to -2.3) | US$0.06 (0.06 to 0.06) | US$0.03 (0.03 to 0.03) |
+| DeepForm, unseen templates | 159 | 55.3% (48.5 to 62.0) | 45.3% (39.3 to 51.5) | -10.0 (-17.0 to -3.2) | US$0.19 (0.17 to 0.21) | US$0.18 (0.16 to 0.20) |
+| CORD | 100 | 75.2% (67.9 to 82.0) | 70.8% (65.0 to 76.5) | -4.4 (-8.2 to -0.5) | US$0.11 (0.11 to 0.11) | US$0.08 (0.08 to 0.08) |
 | NIST | 500 | 73.6% (70.4 to 76.7) | not yet measured |  | US$0.40 (0.38 to 0.42) |  |
 | NIST curve, level 2 | 300 | 73.9% (69.9 to 77.8) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
 | NIST curve, level 3 | 300 | 72.1% (68.4 to 75.6) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
 | NIST curve, level 4 | 300 | 68.7% (64.9 to 72.4) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
-| FARA, VRDU curve subset, level 4 | 39 | 56.9% (47.9 to 65.7) | not yet measured |  | US$0.07 (0.06 to 0.07) |  |
-| DeepForm, VRDU curve subset, level 4 | 30 | 57.1% (43.1 to 69.1) | not yet measured |  | US$0.32 (0.25 to 0.41) |  |
+| FARA, VRDU curve subset, level 4 | 39 | 56.9% (47.9 to 65.7) | 54.5% (46.4 to 62.8) | -2.4 (-7.9 to +2.9) | US$0.07 (0.06 to 0.07) | US$0.04 (0.04 to 0.05) |
+| DeepForm, VRDU curve subset, level 4 | 30 | 57.1% (43.1 to 69.1) | 46.4% (29.2 to 64.6) | -10.7 (-27.2 to +1.9) | US$0.32 (0.25 to 0.41) | US$0.22 (0.17 to 0.28) |
 
 *Data volume: E2B on half and a quarter of the training documents*
 
 | Set | Documents | E2B, 800 documents | E2B, 400 documents | Difference | E2B, 200 documents | Difference |
 |---|---:|---|---|---|---|---|
-| CORD | 100 | 75.2% (67.9 to 82.0) | not yet measured |  | not yet measured |  |
+| CORD | 100 | 75.2% (67.9 to 82.0) | 63.5% (57.7 to 69.4) | -11.7 (-15.8 to -7.9) | 57.5% (52.5 to 62.5) | -17.7 (-22.6 to -12.3) |
 | NIST | 500 | 73.6% (70.4 to 76.7) | not yet measured |  | not yet measured |  |
 
 *One model for every corpus against one per corpus, E2B*
 
 | Set | Documents | E2B, one model per corpus | E2B, one model for every corpus | Difference |
 |---|---:|---|---|---|
-| FARA, mixed templates | 300 | 75.7% (73.0 to 78.3) | not yet measured |  |
-| DeepForm, mixed templates | 300 | 60.2% (55.5 to 64.7) | not yet measured |  |
-| CORD | 100 | 75.2% (67.9 to 82.0) | not yet measured |  |
-| NIST | 500 | 73.6% (70.4 to 76.7) | not yet measured |  |
+| FARA, mixed templates | 300 | 75.7% (73.0 to 78.3) | 82.5% (80.0 to 85.0) | +6.9 (+5.0 to +8.8) |
+| DeepForm, mixed templates | 300 | 60.2% (55.5 to 64.7) | 55.1% (50.0 to 60.0) | -5.1 (-9.0 to -1.5) |
+| CORD | 100 | 75.2% (67.9 to 82.0) | 74.7% (68.3 to 80.8) | -0.5 (-3.8 to +2.4) |
+| NIST | 500 | 73.6% (70.4 to 76.7) | 65.8% (62.8 to 68.7) | -7.8 (-9.9 to -5.8) |
 
 **Latency and throughput of the fine-tunes**, one served at a time on one RTX 3090 (US$0.50 an hour, RunPod Secure Cloud, 2026-10-23), read through the gateway by 06's closed-loop client on the model's own test documents at level 0, the accuracy runs' requests cycled in order (docs/serving.md). A read is one document, every page of it; latency is per read, intervals are 95% bootstrap over reads, and the first 30 seconds of each level are discarded. The throughput interval resamples reads with the window fixed, as 06's does, so it has no width where every read is one page and none failed.
 
