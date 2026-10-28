@@ -7,7 +7,7 @@ whatever `tesseract --version` says, and every run records it.
 Arm D's language model is given the page as positioned text: each OCR line on its own line,
 each word at the column its left edge sits at, so that a value printed beside its label stays
 beside it. That is the layout most OCR pipelines already produce, and it is where the plan's
-first Rule C candidate is tested: whether that text carries what the image does.
+first candidate for a rejected approach is tested: whether that text carries what the image does.
 
 Word accuracy, the unit the degradation levels are calibrated in, is one minus the word error
 rate: word-level edit distance against the reference text over the reference's length.
