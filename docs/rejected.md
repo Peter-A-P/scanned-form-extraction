@@ -1,8 +1,8 @@
 # Tried and rejected
 
-Two approaches the plan relied on were measured and did not survive. The first has the
-stronger evidence; the second was caught on a handful of pages and is reported with that
-caveat.
+Three approaches the plan relied on or hoped for were measured and did not survive. The first
+and the third have the stronger evidence; the second was caught on a handful of pages and is
+reported with that caveat.
 
 ## The fine-tune's own token probability as the review signal
 
@@ -54,3 +54,24 @@ spaces to the token limit instead. Six pages is thin evidence for a number, and 
 verdict: a constraint that turns a model's answers into nulls costs more than the parse
 failures it removes. The fine-tunes are read freely, and an answer that does not parse is
 counted as malformed ([training.md](training.md)).
+
+## Half the visual tokens a page
+
+**The idea.** Gemma 4 takes a page at a token budget the caller chooses. At 560 tokens instead
+of the headline's 1,120 a page costs less to train on and to serve, and the plan hoped the
+smaller budget would hold accuracy and become the cheaper recipe (PLAN.md 2.3).
+
+**The test.** One E2B fine-tune per headline training set at 560 tokens, at training and at
+serving, seed 0, otherwise the headline recipe (`legible/train/ablate.py`), read through the
+gateway on the same RTX 3090 and graded like every other reader. The difference is paired over
+the documents both models read, with its 95% interval (the README's ablation tables).
+
+**The result.** It lost accuracy on every test set it was read on, each interval wholly below
+zero: 3.6 points on FARA's unseen templates (-4.9 to -2.3), 10.0 on DeepForm's (-17.0 to
+-3.2), 4.4 on CORD (-8.2 to -0.5). The saving is small: the cost a thousand pages fell from
+US$0.06 to US$0.03 on FARA, US$0.11 to US$0.08 on CORD and US$0.19 to US$0.18 on DeepForm
+(RTX 3090 at US$0.50 an hour, 2026-10-18). NIST's 560-token model was trained and not read
+before the rented time ran out, so the tax forms say nothing either way.
+
+**What it changes.** The headline recipe keeps 1,120 tokens. A few cents a thousand pages is
+not worth three to ten points of fields right.

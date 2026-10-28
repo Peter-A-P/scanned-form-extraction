@@ -67,7 +67,7 @@ stand as part of the training variance the seeds measure. They are the evidence 
 of a fine-tune can learn the wrong output format from the same data and recipe, which a
 buyer serving one model without a held-out check would not see.
 
-## The ablations (planned 2026-10-26)
+## The ablations (planned 2026-10-26, measured 2026-10-27 and 28)
 
 `legible/train/ablate.py` lists them, `legible train ablations` prints them, and
 `ops/ablate-queue.sh` trains them as `ops/train-queue.sh` trains the headline, skipping a run
@@ -85,3 +85,21 @@ The multi-corpus model learns the mixed-template sets because one model cannot h
 FARA template in turn, as the three unseen-template models do; its comparison is on templates
 it has seen. `legible report` writes the three tables, with each change's paired difference
 over the documents both models read.
+
+**What they found.** Ten of the eleven were read; the README's tables have every number with
+its interval.
+
+- **Visual tokens.** 560 a page lost 3.6 points on FARA's unseen templates, 10.0 on DeepForm's
+  and 4.4 on CORD, each interval below zero, for a saving of a few cents a thousand pages. The
+  headline keeps 1,120 ([rejected.md](rejected.md)). NIST's 560-token model ran out of memory
+  on a 24 GB A5000 at its second step, was trained on a 48 GB A6000 instead, and was not read:
+  the RunPod balance ran out during its read and the pod was deleted with the read unfinished.
+  Its adapter is on the volume; reading it is one pass of `ops/eval-queue.sh`.
+- **Data volume.** Accuracy falls with the training set on both corpora: CORD 11.7 points down
+  at 400 receipts and 17.7 at 200; NIST 10.6 down at 400 faces and 37.0 at 200, where twenty
+  faces share ten examples each. Neither curve has flattened at 800, so more labelled pages
+  would likely still pay.
+- **One model for every corpus.** Against the specialists on templates both have seen: 6.9
+  points better on FARA, 5.1 worse on DeepForm, 7.8 worse on NIST, level on CORD (-0.5, -3.8 to
+  +2.4). FARA's 200 training forms gain from the other corpora; the others lose to sharing.
+  One model per corpus stays the headline.

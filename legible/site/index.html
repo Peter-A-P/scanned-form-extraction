@@ -270,6 +270,17 @@
       <figcaption id="minutes-caption"></figcaption>
     </figure>
 
+    <h3 class="subhead">What the recipe's choices were worth</h3>
+    <p>Three changes to the recipe, each trained once and read like the headline models. Halving
+      the visual tokens and cutting the training documents cost accuracy on every form type
+      measured; one model for every form type gained on registration forms and lost on ad-buy
+      and tax forms. The headline recipe stands: 1,120 visual tokens a page, the whole
+      training set, one model per form type.</p>
+    <figure class="chart-figure" data-table="ablations">
+      <div class="chart wide-chart" id="ablations"></div>
+      <figcaption id="ablations-caption"></figcaption>
+    </figure>
+
     <h3 class="subhead">From scanned page to served model</h3>
     <ol class="steps">
       <li><span class="step-n">1</span><span><strong>Pair each page with its answer.</strong> The page image, and the fields the dataset records for it as the exact JSON the grader marks. Form designs held out for testing never reach training, and a held-out document refuses the training set.</span></li>

@@ -1313,8 +1313,8 @@ TRAINING_RECORDS = Path("models")
 
 def _story(root: Path, truth: Mapping[str, Truth]) -> dict[str, object]:
     """What the front page tells around the tables (legible/site/build.py): the load test, the
-    training records, the gate, the ceiling and noise floor, arm F's training and the pages
-    read in all."""
+    training records, the gate, the ceiling and noise floor, the ablations, arm F's training
+    and the pages read in all."""
     from legible.bench.run import read as read_load
     from legible.data.render import read_manifest
     from legible.report import DOCINTEL_PRICE_DATE, PRICE_LIST_DATE, SERVE_PRICE, read_gate
@@ -1368,6 +1368,7 @@ def _story(root: Path, truth: Mapping[str, Truth]) -> dict[str, object]:
         "gate": build.gate_json(decisions),
         "ceiling": build.subset_json(ceiling),
         "noise": build.subset_json(noise),
+        "ablations": build.ablation_json(_ablations(root, truth)),
         "docintel_training": {
             "models": len(builds),
             "hours": hours,

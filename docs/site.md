@@ -32,7 +32,8 @@ a table; no table is shown by default.
 - **Accuracy against cost.** Every reader on each headline table as a scatter, both intervals
   as whiskers.
 - **How it was fine-tuned.** Untuned against fine-tuned for both sizes on each form type, the
-  recipe, and each headline adapter's training time from its `run.json`.
+  recipe, each headline adapter's training time from its `run.json`, and the three
+  ablations' paired differences (the README's ablation tables, test sets at level 0).
 - **Serving it.** The load test (pages a second and read latency at 1, 8 and 32 in flight) and
   what one card does in a month.
 - **Your break-even.** 06's calculator: `breakeven.js` is 06's file, tested under Node against
@@ -50,7 +51,7 @@ number changes the sentence; the wording around them was written for the results
 
 The data files are `data/results.json` (`legible.report.Results`, the object the README's
 tables are formatted from, with the report's own cell text), `data/story.json` (the load test,
-the training records, the gate's decisions, the ceiling and noise floor, arm F's training
+the training records, the gate's decisions, the ceiling and noise floor, the ablations, arm F's training
 hours and the pages read: `legible.cli._story`), and `data/index.json` with `data/pages/` for
 the viewer.
 

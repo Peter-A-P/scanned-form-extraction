@@ -306,7 +306,7 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | Set | Documents | E2B, 800 documents | E2B, 400 documents | Difference | E2B, 200 documents | Difference |
 |---|---:|---|---|---|---|---|
 | CORD | 100 | 75.2% (67.9 to 82.0) | 63.5% (57.7 to 69.4) | -11.7 (-15.8 to -7.9) | 57.5% (52.5 to 62.5) | -17.7 (-22.6 to -12.3) |
-| NIST | 500 | 73.6% (70.4 to 76.7) | not yet measured |  | not yet measured |  |
+| NIST | 500 | 73.6% (70.4 to 76.7) | 63.1% (59.7 to 66.4) | -10.6 (-13.1 to -8.2) | 36.7% (34.4 to 39.1) | -37.0 (-39.9 to -34.0) |
 
 *One model for every corpus against one per corpus, E2B*
 
@@ -399,9 +399,10 @@ Arms B and C read through vLLM on an RTX 3090 at temperature 0, unconstrained (h
 
 ## Tried and rejected
 
-Two approaches the plan relied on were measured and dropped: the fine-tune's own token
-probability as the signal for what a person must check, and holding the fine-tunes to the
-schema's grammar. The evidence is in [docs/rejected.md](docs/rejected.md).
+Three approaches were measured and dropped: the fine-tune's own token probability as the
+signal for what a person must check, holding the fine-tunes to the schema's grammar, and
+halving the visual tokens a page, which saved a few cents a thousand pages and cost 3.6 to
+10.0 points of fields right. The evidence is in [docs/rejected.md](docs/rejected.md).
 
 ## What this does not do
 

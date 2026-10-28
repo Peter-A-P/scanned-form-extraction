@@ -578,6 +578,54 @@ function drawMinutes() {
   register("minutes", ["Adapter", "Training time", "Documents", "Optimiser steps", "Final train loss"], out);
 }
 
+// The three ablations, each change's paired difference from the E2B it changes, in points.
+const ABLATION_SETS = { "visual-tokens": ["FARA, unseen templates", "DeepForm, unseen templates", "CORD", "NIST"] };
+const ABLATION_NAMES = { "FARA, unseen templates": "Registration, unseen designs", "DeepForm, unseen templates": "Ad-buy, unseen designs", "FARA, mixed templates": "Registration, designs seen", "DeepForm, mixed templates": "Ad-buy, designs seen", CORD: "Receipts", NIST: "Tax forms" };
+const ABLATION_HEADS = { "visual-tokens": "Half the visual tokens (560 a page, not 1,120)", volume: "Fewer training documents (of 800)", "multi-corpus": "One model for every form type" };
+
+function drawAblations() {
+  const abl = state.story.ablations || [];
+  const rows = [];
+  for (const a of abl) {
+    rows.push({ head: ABLATION_HEADS[a.key] || a.title });
+    const keep = ABLATION_SETS[a.key];
+    for (const set of a.sets.filter((x) => !keep || keep.includes(x.name))) {
+      set.rows.slice(1).forEach((r, j) => {
+        const n = a.key === "volume" ? `, ${r.label.match(/(\d+) documents/)[1]}` : "";
+        rows.push({ label: `${ABLATION_NAMES[set.name] || set.name}${n}`, d: set.deltas[j + 1], ref: set.rows[0], r });
+      });
+    }
+  }
+  const W = 900, labelW = 280, x0 = labelW, x1 = W - 150, rowH = 22, top = 28;
+  const H = top + rows.length * rowH + 8;
+  const lo = -0.4, hi = 0.1;
+  const x = linScale(lo, hi, x0, x1);
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Each recipe change's difference in fields correct from the recipe it changes" });
+  for (let v = lo; v <= hi + 1e-9; v += 0.1) {
+    s.append(svg("line", { x1: x(v), x2: x(v), y1: top - 6, y2: H - 6, class: Math.abs(v) < 1e-9 ? "zero" : "gridline" }));
+    s.append(svg("text", { x: x(v), y: 16, "text-anchor": "middle", class: "tick" }, `${v > 1e-9 ? "+" : ""}${Math.round(100 * v)}`));
+  }
+  const out = [];
+  rows.forEach((r, i) => {
+    const mid = top + i * rowH + rowH / 2;
+    if (r.head) { s.append(svg("text", { x: 10, y: mid + 4, class: "mark-label strong" }, r.head)); return; }
+    s.append(svg("text", { x: labelW - 10, y: mid + 4, "text-anchor": "end", class: "mark-label" }, r.label));
+    if (!r.d) {
+      s.append(svg("text", { x: x(0) + 8, y: mid + 4, class: "value-label" }, "not measured"));
+      out.push([r.label, r.ref.accuracy_text, "not measured", ""]);
+      return;
+    }
+    s.append(svg("line", { x1: x(Math.max(lo, r.d.low)), x2: x(Math.min(hi, r.d.high)), y1: mid, y2: mid, class: "ci-line k-stroke-finetuned" }));
+    s.append(mark("finetuned", x(r.d.point), mid, 5));
+    const text = `${r.d.point >= 0 ? "+" : "-"}${pts(r.d.point)} points`;
+    s.append(svg("text", { x: x1 + 14, y: mid + 4, class: r.d.high < 0 ? "lift-loss" : r.d.low > 0 ? "lift-gain" : "value-label" }, text));
+    out.push([r.label, r.ref.accuracy_text, r.r.accuracy_text, `${text} (${r.d.low >= 0 ? "+" : "-"}${pts(r.d.low)} to ${r.d.high >= 0 ? "+" : "-"}${pts(r.d.high)})`]);
+  });
+  document.getElementById("ablations").replaceChildren(s);
+  document.getElementById("ablations-caption").textContent = "Each change trained on Gemma 4 E2B at seed 0 and read like the headline models, against the seed-0 E2B whose recipe it changes. The difference is in points of fields correct, paired over the documents both read, with its 95% interval. Test sets, level 0; the tax forms at 560 tokens were trained but not read before the rented time ran out.";
+  register("ablations", ["Change and form type", "Headline recipe", "Changed", "Difference (95% CI)"], out);
+}
+
 // --- Serving ------------------------------------------------------------------------------
 
 function drawServing() {
@@ -1104,6 +1152,7 @@ async function main() {
   drawLift();
   drawRecipes();
   drawMinutes();
+  drawAblations();
   chips("serving-corpus", CORPORA.map((c) => [c.key, c.name]), state.serving, (k) => { state.serving = k; drawServing(); });
   drawServing();
   setupCalculator();

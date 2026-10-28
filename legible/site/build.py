@@ -566,6 +566,36 @@ def subset_json(rows: Sequence[Any]) -> list[dict[str, Any]]:
     ]
 
 
+def ablation_json(ablations: Sequence[Any]) -> list[dict[str, Any]]:
+    """The three ablations (`legible.cli._Ablation`): per set, the recipe it changes and each
+    change, with the change's paired difference in points of fields correct."""
+    return [
+        {
+            "key": a.key,
+            "title": a.title,
+            "columns": list(a.columns),
+            "sets": [
+                {
+                    "name": s.name,
+                    "documents": s.documents,
+                    "rows": [
+                        {
+                            "label": r.label,
+                            "accuracy": interval(r.accuracy),
+                            "accuracy_text": pct(r.accuracy),
+                            "per_thousand": interval(r.per_thousand),
+                        }
+                        for r in s.rows
+                    ],
+                    "deltas": [interval(d) for d in s.deltas],
+                }
+                for s in a.sets
+            ],
+        }
+        for a in ablations
+    ]
+
+
 def pages_read(runs: Path, pages: Mapping[tuple[str, str], int]) -> dict[str, Any]:
     """Every page a reader was sent and answered, over every stored run: dev and test, every
     seed, every degradation level, the subsets and the second reads. A read that failed is
