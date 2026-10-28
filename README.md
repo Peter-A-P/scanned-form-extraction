@@ -1,10 +1,9 @@
 # Forms That Read Themselves
 
-A vision-language model you own, fine-tuned to type your scanned forms in: a 2B and a 4B open
-model trained here to read fields off the scan, measured against the frontier multimodal APIs
-and the classic OCR pipelines on more than 9,000 public pages with known answers. Every field
-right or wrong with its interval, cost per thousand pages, what breaks on a new form design or
-a bad scan, and how many fields a person still checks at 99 percent.
+A vision-language model you own, fine-tuned to type your scanned forms in, measured against the
+frontier multimodal APIs and the classic OCR pipelines on more than 9,000 public pages with known
+answers. Every field right or wrong with its interval, cost per thousand pages, what breaks on a
+new form design or a bad scan, and how many fields a person still checks at 99 percent.
 
 Every organisation that still receives paper has a backlog of forms and someone typing them in.
 This project puts vision-language models to work on that backlog: a frontier multimodal model
