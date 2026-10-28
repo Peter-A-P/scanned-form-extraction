@@ -622,7 +622,7 @@ function drawAblations() {
     out.push([r.label, r.ref.accuracy_text, r.r.accuracy_text, `${text} (${r.d.low >= 0 ? "+" : "-"}${pts(r.d.low)} to ${r.d.high >= 0 ? "+" : "-"}${pts(r.d.high)})`]);
   });
   document.getElementById("ablations").replaceChildren(s);
-  document.getElementById("ablations-caption").textContent = "Each change trained on Gemma 4 E2B at seed 0 and read like the headline models, against the seed-0 E2B whose recipe it changes. The difference is in points of fields correct, paired over the documents both read, with its 95% interval. Test sets, level 0; the tax forms at 560 tokens were trained but not read before the rented time ran out.";
+  document.getElementById("ablations-caption").textContent = "Each change trained on Gemma 4 E2B at seed 0 and read like the headline models, against the seed-0 E2B whose recipe it changes. The difference is in points of fields correct, paired over the documents both read, with its 95% interval. Test sets, level 0.";
   register("ablations", ["Change and form type", "Headline recipe", "Changed", "Difference (95% CI)"], out);
 }
 

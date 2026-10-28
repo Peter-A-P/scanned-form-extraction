@@ -293,10 +293,10 @@ Test sets, read once per arm, level 0 unless stated. Field accuracy is VRDU's ow
 | FARA, unseen templates | 900 | 69.0% (67.2 to 70.7) | 65.4% (63.8 to 66.9) | -3.6 (-4.9 to -2.3) | US$0.06 (0.06 to 0.06) | US$0.03 (0.03 to 0.03) |
 | DeepForm, unseen templates | 159 | 55.3% (48.5 to 62.0) | 45.3% (39.3 to 51.5) | -10.0 (-17.0 to -3.2) | US$0.19 (0.17 to 0.21) | US$0.18 (0.16 to 0.20) |
 | CORD | 100 | 75.2% (67.9 to 82.0) | 70.8% (65.0 to 76.5) | -4.4 (-8.2 to -0.5) | US$0.11 (0.11 to 0.11) | US$0.08 (0.08 to 0.08) |
-| NIST | 500 | 73.6% (70.4 to 76.7) | not yet measured |  | US$0.40 (0.38 to 0.42) |  |
-| NIST curve, level 2 | 300 | 73.9% (69.9 to 77.8) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
-| NIST curve, level 3 | 300 | 72.1% (68.4 to 75.6) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
-| NIST curve, level 4 | 300 | 68.7% (64.9 to 72.4) | not yet measured |  | US$0.42 (0.39 to 0.45) |  |
+| NIST | 500 | 73.6% (70.4 to 76.7) | 64.2% (60.8 to 67.7) | -9.4 (-12.0 to -6.9) | US$0.40 (0.38 to 0.42) | US$0.35 (0.34 to 0.38) |
+| NIST curve, level 2 | 300 | 73.9% (69.9 to 77.8) | 63.0% (58.9 to 67.2) | -10.9 (-14.9 to -6.8) | US$0.42 (0.39 to 0.45) | US$0.37 (0.35 to 0.40) |
+| NIST curve, level 3 | 300 | 72.1% (68.4 to 75.6) | 61.5% (57.0 to 65.8) | -10.6 (-14.5 to -6.8) | US$0.42 (0.39 to 0.45) | US$0.38 (0.35 to 0.41) |
+| NIST curve, level 4 | 300 | 68.7% (64.9 to 72.4) | 60.1% (56.2 to 64.0) | -8.6 (-11.7 to -5.5) | US$0.42 (0.39 to 0.45) | US$0.38 (0.36 to 0.42) |
 | FARA, VRDU curve subset, level 4 | 39 | 56.9% (47.9 to 65.7) | 54.5% (46.4 to 62.8) | -2.4 (-7.9 to +2.9) | US$0.07 (0.06 to 0.07) | US$0.04 (0.04 to 0.05) |
 | DeepForm, VRDU curve subset, level 4 | 30 | 57.1% (43.1 to 69.1) | 46.4% (29.2 to 64.6) | -10.7 (-27.2 to +1.9) | US$0.32 (0.25 to 0.41) | US$0.22 (0.17 to 0.28) |
 

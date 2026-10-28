@@ -86,15 +86,15 @@ FARA template in turn, as the three unseen-template models do; its comparison is
 it has seen. `legible report` writes the three tables, with each change's paired difference
 over the documents both models read.
 
-**What they found.** Ten of the eleven were read; the README's tables have every number with
+**What they found.** All eleven were read; the README's tables have every number with
 its interval.
 
-- **Visual tokens.** 560 a page lost 3.6 points on FARA's unseen templates, 10.0 on DeepForm's
-  and 4.4 on CORD, each interval below zero, for a saving of a few cents a thousand pages. The
-  headline keeps 1,120 ([rejected.md](rejected.md)). NIST's 560-token model ran out of memory
-  on a 24 GB A5000 at its second step, was trained on a 48 GB A6000 instead, and was not read:
-  the RunPod balance ran out during its read and the pod was deleted with the read unfinished.
-  Its adapter is on the volume; reading it is one pass of `ops/eval-queue.sh`.
+- **Visual tokens.** 560 a page lost 3.6 points on FARA's unseen templates, 10.0 on DeepForm's,
+  4.4 on CORD and 9.4 on NIST, each interval below zero, for a saving of a few cents a thousand
+  pages. The headline keeps 1,120 ([rejected.md](rejected.md)). NIST's 560-token model ran out
+  of memory on a 24 GB A5000 at its second step and was trained on a 48 GB A6000 instead; its
+  first read was lost when the RunPod balance ran out mid-pass, and it was read again whole on
+  an RTX 3090 on 2026-10-28.
 - **Data volume.** Accuracy falls with the training set on both corpora: CORD 11.7 points down
   at 400 receipts and 17.7 at 200; NIST 10.6 down at 400 faces and 37.0 at 200, where twenty
   faces share ten examples each. Neither curve has flattened at 800, so more labelled pages

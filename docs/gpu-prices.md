@@ -16,7 +16,7 @@ Every machine this project rented, at the rate RunPod's API returned when the po
 | RTX A6000, 48 GB (SE) | The ablations: the multi-corpus E2B run (no A5000 or 3090 free) | Secure | 0.59 | 2026-10-27 |
 | RTX 3090, 24 GB (CZ) | The ablations served by vLLM and read through the gateway | Secure | 0.50 | 2026-10-27 |
 | RTX A6000, 48 GB, two pods | The ablations: NIST's 560-token run, and NIST's data-volume runs | Secure | 0.59 | 2026-10-27 |
-| RTX 3090, 24 GB | NIST's data-volume ablations read through the gateway | Secure | 0.50 | 2026-10-28 |
+| RTX 3090, 24 GB | NIST's data-volume ablations and its 560-token run read through the gateway | Secure | 0.50 | 2026-10-28 |
 
 **The provider rule** is 06's (`docs/gpu-prices.md` there): a hyperscaler's spot GPU if it is
 within 20% of the rental marketplaces, otherwise the marketplace. 06 found GCP's L4 spot 24%

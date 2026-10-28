@@ -68,10 +68,10 @@ the documents both models read, with its 95% interval (the README's ablation tab
 
 **The result.** It lost accuracy on every test set it was read on, each interval wholly below
 zero: 3.6 points on FARA's unseen templates (-4.9 to -2.3), 10.0 on DeepForm's (-17.0 to
--3.2), 4.4 on CORD (-8.2 to -0.5). The saving is small: the cost a thousand pages fell from
-US$0.06 to US$0.03 on FARA, US$0.11 to US$0.08 on CORD and US$0.19 to US$0.18 on DeepForm
-(RTX 3090 at US$0.50 an hour, 2026-10-18). NIST's 560-token model was trained and not read
-before the rented time ran out, so the tax forms say nothing either way.
+-3.2), 4.4 on CORD (-8.2 to -0.5), 9.4 on NIST (-12.0 to -6.9), and 8.6 to 10.9 on NIST's
+scans at levels 2 to 4. The saving is small: the cost a thousand pages fell from
+US$0.06 to US$0.03 on FARA, US$0.11 to US$0.08 on CORD, US$0.19 to US$0.18 on DeepForm and
+US$0.40 to US$0.35 on NIST (RTX 3090 at US$0.50 an hour, 2026-10-18).
 
 **What it changes.** The headline recipe keeps 1,120 tokens. A few cents a thousand pages is
 not worth three to ten points of fields right.

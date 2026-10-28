@@ -3,8 +3,8 @@
 **Written:** 2026-10-16. **Status (2026-10-28):** every arm measured on every test set, arm F
 added 2026-10-24, every subset read, the README's tables filled by `legible report`,
 forms.peterparker.ca live, the six non-FARA adapters public on Hugging Face, the three
-ablations measured (ten of eleven runs read; 1,120 tokens, the whole training set and one model
-per corpus stay the recipe). Still to do: `v0.1.0` and the repository public. The checklist is section 11.
+ablations measured (all eleven runs read; 1,120 tokens, the whole training set and one model
+per corpus stay the recipe), `v0.1.0` tagged and the repository public (2026-10-28). The checklist is section 11.
 **Build:** three weeks of evenings and weekends, starting when this plan is approved; the
 weeks in section 6 are relative, not dated. **Package:** `legible`. **Repository:**
 `scanned-form-extraction`.
@@ -120,10 +120,10 @@ unseen-template specialists do, so it is compared with the mixed-template specia
 mixed-template tables, and with the specialists on CORD and NIST.
 
 Measured 2026-10-28 (the README's ablation tables, `docs/training.md`): 560 tokens did not
-hold, 3.6 to 10.0 points down on FARA, DeepForm and CORD for a few cents a thousand pages
+hold, 3.6 to 10.0 points down on FARA, DeepForm, CORD and NIST for a few cents a thousand pages
 (`docs/rejected.md`), so 1,120 stays; accuracy falls at half and a quarter of the training set
 on CORD and NIST; the multi-corpus model gains 6.9 points on FARA and loses on DeepForm and
-NIST, so one model per corpus stays. NIST at 560 tokens was trained and not read.
+NIST, so one model per corpus stays.
 
 Corrected 2026-10-16, once the split files were read: "one fine-tune per corpus per size" is
 not enough for FARA. Its unseen-template level is three split files per seed, each holding out
@@ -412,7 +412,8 @@ it pods left running idle. A training pod's crash went unnoticed for fourteen ho
 monitoring script's process check matched its own command, and two finished pods ran five hours
 because the script exited, on finding no RTX 3090 free, before deleting them. NIST's runs also
 needed the 48 GB A6000 (US$0.59 an hour), not the 24 GB class. The balance ran out with one
-read left, NIST at 560 tokens; its adapter is on the volume.
+read left, NIST at 560 tokens; after a top-up it was read again whole on an RTX 3090, about
+US$1.10 more (2026-10-28).
 
 The plan as first written:
 
@@ -484,7 +485,7 @@ Whichever produces the clearest evidence becomes `docs/rejected.md`.
 - [x] Five arms measured on identical held-out pages per corpus, intervals over documents, paired deltas, miss taxonomy and hallucination rates (six, with arm F)
 - [x] Unseen-template against mixed-template accuracy per arm on both VRDU corpora
 - [x] Degradation curve per arm on NIST, and on the VRDU subset
-- [x] Two fine-tuned sizes per corpus, three seeds on the final configuration, token-budget and data-volume ablations; adapters published with cards including failure modes (ablations measured 2026-10-28, ten of eleven read, NIST at 560 tokens trained and not read; FARA's adapters private, since its forms name individuals)
+- [x] Two fine-tuned sizes per corpus, three seeds on the final configuration, token-budget and data-volume ablations; adapters published with cards including failure modes (ablations measured 2026-10-28, all eleven read; FARA's adapters private, since its forms name individuals)
 - [x] Non-inferiority of the best fine-tune against the best frontier arm per corpus through the 03 gate, delta stated, interval shown
 - [x] Review rate at 99 percent accepted-field accuracy per arm, thresholds from dev, measured on test
 - [x] Verifier catch rate per corpus
@@ -492,7 +493,7 @@ Whichever produces the clearest evidence becomes `docs/rejected.md`.
 - [x] Break-even curve over utilisation with the inputs table
 - [x] forms.peterparker.ca live with the viewer, the slider and the tables
 - [x] One rejected approach documented with evidence (`docs/rejected.md`)
-- [ ] Repository public, `v0.1.0` tagged, the status flip logged on peterparker.ca
+- [x] Repository public, `v0.1.0` tagged, the status flip logged on peterparker.ca (2026-10-28)
 
 ## 12. Deferred
 

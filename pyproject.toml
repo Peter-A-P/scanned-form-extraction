@@ -1,6 +1,6 @@
 [project]
 name = "legible"
-version = "0.0.1"
+version = "0.1.0"
 description = "Forms That Read Themselves: frontier vision models, fine-tuned small vision models and OCR pipelines measured on scanned forms with known answers, with cost per thousand pages."
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
