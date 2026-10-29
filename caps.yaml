@@ -17,10 +17,13 @@
 # approved by Peter: arm F, Azure Document Intelligence, on the headline test sets and the NIST
 # curve, about US$140 at US$30 a 1,000 custom pages (PLAN.md section 7). The per-run cap stays
 # at US$25; no arm F run is over US$20.
+# Closed 2026-10-28, at Peter's request, with 04's line: the project shipped (v0.1.0) and makes
+# no more calls. A cap must be above zero, so every cap is one cent, which no page read fits
+# under. Reopen here and in 04 together, deliberately, in a commit.
 version: 1
 portfolio_monthly_usd: 925
 projects:
   legible:
-    monthly_usd: 365
-    per_run_usd: 25
-    daily_usd: 80
+    monthly_usd: 0.01
+    per_run_usd: 0.01
+    daily_usd: 0.01
