@@ -77,6 +77,7 @@ ASSETS: Final = (
     "style.css",
     "staticwebapp.config.json",
     "robots.txt",
+    "og.png",
     "fonts/LICENSE.txt",
     "fonts/inter-latin.woff2",
     "fonts/newsreader-latin.woff2",
@@ -651,12 +652,15 @@ def copy_assets(out: Path) -> None:
 
 def check_output(out: Path) -> None:
     """The finished site holds no image of a corpus it may not show, and no page record of
-    one: every image is named for a shown corpus and every page record is of one. The one
-    exception is the architecture page's diagrams, by name and place, which hold no page."""
+    one: every image is named for a shown corpus and every page record is of one. The two
+    exceptions, by name and place, hold no page: the architecture page's diagrams, and the
+    link-preview card og.png at the root, which is lettering only."""
     for f in out.rglob("*"):
         if not f.is_file() or f.suffix.lower() not in IMAGE_SUFFIXES:
             continue
         if f.parent == out / "architecture" and f.name in DIAGRAMS:
+            continue
+        if f.parent == out and f.name == "og.png":
             continue
         if not f.name.startswith(tuple(f"{c}-" for c in SHOWN)) or "fara" in f.name.lower():
             raise RegistrationImage(f"{f} is not an image of {', '.join(SHOWN)}")
