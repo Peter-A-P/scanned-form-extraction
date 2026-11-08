@@ -279,13 +279,18 @@ def test_the_architecture_diagrams_are_the_one_exception_to_the_image_check(tmp_
     for name in build.DIAGRAMS:
         assert (tmp_path / "architecture" / name).is_file()
     build.check_output(tmp_path)
-    # The link-preview card is the other exception, at the root only.
+    # The link-preview card and the tab icon are the other exceptions, at the root only.
     assert (tmp_path / "og.png").is_file()
+    assert (tmp_path / "favicon.svg").is_file()
     (tmp_path / "data").mkdir(exist_ok=True)
     (tmp_path / "data" / "og.png").write_bytes((tmp_path / "og.png").read_bytes())
     with pytest.raises(build.RegistrationImage):
         build.check_output(tmp_path)
     (tmp_path / "data" / "og.png").unlink()
+    (tmp_path / "data" / "favicon.svg").write_text("<svg/>", encoding="utf-8")
+    with pytest.raises(build.RegistrationImage):
+        build.check_output(tmp_path)
+    (tmp_path / "data" / "favicon.svg").unlink()
     # The exception is by name and place: the same file anywhere else is refused.
     (tmp_path / "img").mkdir()
     (tmp_path / "img" / "system.svg").write_text("<svg/>", encoding="utf-8")

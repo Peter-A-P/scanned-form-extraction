@@ -15,7 +15,8 @@
     ".jpg": "image/jpeg",
     ".txt": "text/plain",
     ".woff2": "font/woff2",
-    ".svg": "image/svg+xml"
+    ".svg": "image/svg+xml",
+    ".png": "image/png"
   },
   "routes": [
     {
@@ -39,7 +40,9 @@
       "/*.css",
       "/*.js",
       "/fonts/*",
-      "/architecture/*"
+      "/architecture/*",
+      "/favicon.svg",
+      "/og.png"
     ]
   },
   "responseOverrides": {

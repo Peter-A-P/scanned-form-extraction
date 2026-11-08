@@ -310,15 +310,15 @@ function fills() {
 
   const cordFt = ft("cord"), cordHaiku = row("cord", HAIKU);
   const faraInv = invented[0];
-  fill("m-strong", `It beats Azure's models on ${list(beat.map((p) => `${p.c.noun} by ${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))} percentage points`))} and matches them on ${list(level.map((p) => p.c.noun))}, at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
+  fill("m-strong", `It beats Azure's models by ${list(beat.map((p, i) => `${Math.round(100 * (p.f.accuracy.point - p.z.accuracy.point))}${i === 0 ? " percentage points" : ""} on ${p.c.noun}`))}, and matches them on ${list(level.map((p) => p.c.noun))}, at ${times(Math.min(...ratios))} to ${times(Math.max(...ratios))} times less a page. On receipts it gets ${pct(cordFt.accuracy.point)} of fields right against Claude Haiku 5.5's ${pct(cordHaiku.accuracy.point)}, for ${usd(cordFt.per_thousand.point)} a thousand pages against ${usd(cordHaiku.per_thousand.point)}. It invents fewer values than any frontier model on ${faraInv.c.noun} and receipts. And it runs on one consumer card you control, so no page has to leave your network.`);
   const vsBest = s.gate.filter((g) => g.name.endsWith("-vs-best") && g.verdict === "block" && !g.name.includes("mixed"));
   const worst = vsBest.map((g) => {
     const corpus = CORPORA.find((c) => g.name.includes(`-${c.key}-`));
     const b = g.blocks[0];
-    return `${b.field.replaceAll("_", " ").replaceAll("-", " ")} on ${corpus.noun}, ${b.difference.split(" ")[0].replace("-", "")} behind`;
+    return `${b.field.replaceAll("_", " ").replaceAll("-", " ")} on ${corpus.noun}, ${b.difference.split(" ")[0].replace("-", "").replace("%", "")} points behind`;
   });
   const widest = pairs.reduce((a, b) => (b.best.accuracy.point - b.f.accuracy.point > a.best.accuracy.point - a.f.accuracy.point ? b : a));
-  fill("m-weak", `It trails the most accurate frontier model by ${Math.round(100 * Math.min(...gaps))} to ${Math.round(100 * Math.max(...gaps))} points, most on ${widest.c.noun} (${pts(widest.best.accuracy.point - widest.f.accuracy.point)} behind ${short(widest.best.arm)}). The release gate blocks it against the best frontier model on registration and ad-buy forms; the worst fields: ${list(worst)}. Train it for one form type and use it for that.`);
+  fill("m-weak", `It trails the most accurate frontier model by ${Math.round(100 * Math.min(...gaps))} to ${Math.round(100 * Math.max(...gaps))} points, most on ${widest.c.noun} (${pts(widest.best.accuracy.point - widest.f.accuracy.point)} behind ${short(widest.best.arm)}). The release gate blocks it against the best frontier model on registration and ad-buy forms, worst on ${worst.join(" and ")}. Train it for one form type and use it for that.`);
   fill("gate-blocks", list(worst));
 
   fill("azure-receipt-price", usd(row("cord", AZURE).per_thousand.point));
@@ -442,6 +442,9 @@ function drawLandscape() {
   const placed = [];
   const marks = rows.map((r) => ({ x: x(r.per_thousand.point), y: y(r.accuracy.point) }));
   const order = [...rows].sort((a, b) => b.accuracy.point - a.accuracy.point);
+  // Labels go on a layer above every mark and whisker, so a later reader's whisker never runs
+  // through an earlier reader's name.
+  const labels = svg("g", { "aria-hidden": "true" });
   for (const r of order) {
     const k = kind(r.arm);
     const px = x(r.per_thousand.point), py = y(r.accuracy.point);
@@ -451,7 +454,7 @@ function drawLandscape() {
     const m = mark(k, px, py, k === "finetuned" ? 7 : 6);
     g.append(m);
     const spot = placeLabel(placed, marks, px, py, short(r.arm).length * 6.3, W - 4);
-    g.append(svg("text", { x: spot.x, y: spot.y, "text-anchor": spot.anchor, class: `mark-label halo${k === "finetuned" ? " strong" : ""}` }, short(r.arm)));
+    labels.append(svg("text", { x: spot.x, y: spot.y, "text-anchor": spot.anchor, class: `mark-label halo${k === "finetuned" ? " strong" : ""}` }, short(r.arm)));
     const show = () => {
       m.classList.add("on");
       readout.replaceChildren(el("span", { class: "when", text: short(r.arm) }),
@@ -466,6 +469,7 @@ function drawLandscape() {
     g.addEventListener("blur", () => m.classList.remove("on"));
     s.append(g);
   }
+  s.append(labels);
   document.getElementById("landscape-chart").replaceChildren(s);
   const kinds = [...new Set(rows.map((r) => kind(r.arm)))];
   legend("landscape-legend", ["finetuned", "frontier", "managed", "ocr-llm", "ocr-rules", "untuned"].filter((k) => kinds.includes(k)));
@@ -766,7 +770,7 @@ function updateCalculator() {
   } else {
     evenEl.textContent = big(p.volumePerMonth);
     evenEl.classList.remove("never");
-    document.getElementById("out-even-note").textContent = `pages a month and the card is the cheaper${p.gpus > 1 ? `, on ${p.gpus} cards` : ""}`;
+    document.getElementById("out-even-note").textContent = `pages a month, above which the rented card is cheaper${p.gpus > 1 ? `, on ${p.gpus} cards` : ""}`;
   }
   document.getElementById("out-own").textContent = usd(1000 * p.selfHostedUsdPerCall);
   document.getElementById("out-own-note").textContent = `per 1,000 pages on the card at ${Math.round(u * 100)}% busy`;

@@ -78,6 +78,7 @@ ASSETS: Final = (
     "staticwebapp.config.json",
     "robots.txt",
     "og.png",
+    "favicon.svg",
     "fonts/LICENSE.txt",
     "fonts/inter-latin.woff2",
     "fonts/newsreader-latin.woff2",
@@ -87,6 +88,8 @@ ASSETS: Final = (
 DIAGRAMS: Final = ("system.svg", "five-arms.svg", "train-serve.svg", "evaluation.svg")
 SOURCE: Final = Path(__file__).parent
 DIAGRAM_SOURCE: Final = SOURCE.parents[1] / "docs" / "architecture"
+#: The images allowed at the site's root, lettering only: the link-preview card and the tab icon.
+ROOT_IMAGES: Final = frozenset({"og.png", "favicon.svg"})
 IMAGE_SUFFIXES: Final = frozenset({".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg", ".bmp"})
 
 #: (page, x1, y1, x2, y2), corners as shares of the page's width and height.
@@ -652,15 +655,15 @@ def copy_assets(out: Path) -> None:
 
 def check_output(out: Path) -> None:
     """The finished site holds no image of a corpus it may not show, and no page record of
-    one: every image is named for a shown corpus and every page record is of one. The two
-    exceptions, by name and place, hold no page: the architecture page's diagrams, and the
-    link-preview card og.png at the root, which is lettering only."""
+    one: every image is named for a shown corpus and every page record is of one. The
+    exceptions, by name and place, hold no page: the architecture page's diagrams, and at the
+    root the link-preview card og.png and the favicon.svg mark, which are lettering only."""
     for f in out.rglob("*"):
         if not f.is_file() or f.suffix.lower() not in IMAGE_SUFFIXES:
             continue
         if f.parent == out / "architecture" and f.name in DIAGRAMS:
             continue
-        if f.parent == out and f.name == "og.png":
+        if f.parent == out and f.name in ROOT_IMAGES:
             continue
         if not f.name.startswith(tuple(f"{c}-" for c in SHOWN)) or "fara" in f.name.lower():
             raise RegistrationImage(f"{f} is not an image of {', '.join(SHOWN)}")

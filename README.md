@@ -434,7 +434,11 @@ fine-tuning recipe from [Frontier Quality at a Fraction of the Bill](https://git
 
 ## How this was built
 
-The design, the methodology and the judgement calls are Peter Parker's. AI coding assistants
-were used for implementation. Every number in this repository is reproducible with one command,
-and the plan was written before the first line of code so that the result could not be shaped
-to fit.
+I designed this project and made the calls in it: which readers to put side by side, which
+pages carry which claim, and what to do when a result came back wrong. I tested the fine-tunes on
+form designs they never saw in training, added Azure Document Intelligence as a sixth reader
+because it is the product a buyer is quoted first, and had the test sets read a second time with
+token probabilities rather than drop the review rate. I used an AI coding assistant (Claude Code)
+for implementation and drafting. Every number in this repository is reproducible with one
+command, and the plan was written before the first line of code so that the result could not be
+shaped to fit.

@@ -16,15 +16,17 @@ The front page leads with what the measurements mean for someone choosing a pipe
 shows the evidence. Every chart has a "See as a table" switch that draws the same numbers as
 a table; no table is shown by default.
 
-- **The opening.** The pages read in all (every answered read over every stored run: dev and
+- **The opening.** The headline, the lead and two buttons (the break-even calculator and the
+  repository), then the pages read in all (every answered read over every stored run: dev and
   test, every seed and level, the subsets and second reads, `build.pages_read`), and four
   figures: by how many points the fine-tune the gate compared beats Azure Document Intelligence
   where it beats it (its whole 95% interval above Azure's score; it is called level where its
   score is inside Azure's interval or above it, short of that), how many times cheaper a page it
   is, the best frontier model's accuracy, and the pages processed with the distinct pages and
   readers behind them. The headline's "half the forms tested" is filled from the same count.
+- **On this page.** A numbered list of every section, after the opening.
 - **Watch them read a page.** The page viewer (below), straight after the opening.
-- **Main takeaways** ("Results" in the menu). Six findings with their numbers, each linking to its chart.
+- **What the measurements found** ("Results" in the menu). Six findings with their numbers, each linking to its chart. A part header ("How it works") follows it.
 - **The head-to-head.** Per form type, the gated fine-tune beside Azure, the cheapest and the
   most accurate frontier model: fields correct with intervals, and cost per 1,000 pages on a
   log scale. Then where it is strong and where it falls short (the gate's blocking fields), and
@@ -40,10 +42,15 @@ a table; no table is shown by default.
   `legible/bench/breakeven.py` over a grid that reaches the never, one-card and many-card cases
   (`tests/test_site.py`). Its presets are each reader's measured cost on the chosen form type.
 - **Bad scans.** The degradation curves, NIST's and the two VRDU subsets, with interval bands.
-- **Surprises.** Opus against Sonnet (the ceiling), seen against unseen form designs, the
+- **What the measurements did not predict.** Opus against Sonnet (the ceiling), seen against unseen form designs, the
   noise floor, the seeds that learned the schema's shape, the untuned 4B on registration forms,
   and Azure's low invention rate.
+- **What did not work.** Four designs that were measured and dropped, with a link to
+  `docs/rejected.md`.
 - **Limits**, the 99% review rate first.
+- **How it is engineered.** The one grader, the one ledger, the one command, and the tools.
+- **How this was built.** Peter's first-person account of the decisions, the AI-assistant
+  sentence, what came from earlier projects, and the glossary.
 
 The prose's numbers are filled by `app.js` from the data files, so a re-run that changes a
 number changes the sentence; the wording around them was written for the results of
